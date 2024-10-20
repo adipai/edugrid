@@ -22,19 +22,21 @@ app = Flask(__name__)
 app.secret_key = "secret key"
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
+connection = get_db_connection()
+if not connection:
+    raise Exception("Db not connected")
 
 @app.route('/signup', methods=['POST'])
 def signup():
+    global connection
     data = request.json
     username = data.get('username')
     password = data.get('password')
     role = data.get('role')
-    
 
     if not username or not password or not role:
         return jsonify({'error': 'Missing fields'}), 400
 
-    connection = get_db_connection()
     result = add_user(connection, username, password, role)
     connection.close()
 
@@ -44,6 +46,7 @@ def signup():
 
 @app.route('/login', methods=['POST'])
 def login():
+    global connection
     data = request.json
     username = data.get('username')
     password = data.get('password')
@@ -52,7 +55,6 @@ def login():
     if not username or not password or not role:
         return jsonify({'error': 'Missing fields'}), 400
 
-    connection = get_db_connection()
     user = check_user(connection, username, password, role)
     connection.close()
 
