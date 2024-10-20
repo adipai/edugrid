@@ -1,25 +1,24 @@
-from flask import request, jsonify
+from flask import request, Blueprint, jsonify
 from app import app, get_db_connection
 from app.utils import add_user, check_user
+from datetime import datetime
+
+routes = Blueprint('routes', __name__)
 
 # Signup route
-@app.route('/signup', methods=['POST'])
+@routes.route('/signup', methods=['POST'])
 def signup():
-    print("Hello world")
     data = request.json
-    username = data.get('username')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
     password = data.get('password')
+    current_date = datetime.now()
+    user_id = (first_name[:2] + last_name[:2] + current_date.strftime('%m%y')).capitalize()
     role = data.get('role')
     
-    print(username, password, role)
-
-    if not username or not password or not role:
-        return jsonify({'error': 'Missing fields'}), 400
-
     connection = get_db_connection()
-    
-    print(connection)
-    result = add_user(connection, username, password, role)
+    result = add_user(connection, first_name, last_name, email, password, current_date, user_id, role)
     connection.close()
 
     if result == 'user_exists':
@@ -27,16 +26,12 @@ def signup():
     return jsonify({'message': 'User created successfully'}), 201
 
 # Login route
-@app.route('/login', methods=['POST'])
+@routes.route('/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
     role = data.get('role')
-
-    if not username or not password or not role:
-        return jsonify({'error': 'Missing fields'}), 400
-
     connection = get_db_connection()
     
     
