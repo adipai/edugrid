@@ -1,6 +1,6 @@
 from flask import request, Blueprint, jsonify
 from app import app, get_db_connection
-from app.utils import add_user, check_user
+from app.utils import add_user, check_user, create_active_course, create_etextbook, create_evaluation_course
 from datetime import datetime
 
 routes = Blueprint('routes', __name__)
@@ -19,7 +19,6 @@ def signup():
     
     connection = get_db_connection()
     result = add_user(connection, first_name, last_name, email, password, current_date, user_id, role)
-    connection.close()
 
     if result == 'user_exists':
         return jsonify({'error': 'User already exists'}), 400
@@ -35,8 +34,58 @@ def login():
     
     connection = get_db_connection()
     user = check_user(connection, email, password, role)
-    connection.close()
 
     if user:
         return jsonify({'message': 'Login successful'}), 200
     return jsonify({'error': 'Invalid credentials'}), 401
+
+@routes.route('/add_etextbook', methods=['POST'])
+def add_etextbook():
+    data = request.json
+    tb_id = data.get('tb_id')
+    title = data.get('title')
+    
+    connection = get_db_connection()
+    result = create_etextbook(connection, tb_id, title)
+
+    if result:
+        return jsonify({'message': 'E-textbook added successfully'}), 201
+    return jsonify({'error': 'E-textbook already exists'}), 400
+
+@routes.route('/add_evaluation_course', methods=['POST'])
+def add_evaluation_course():
+    data = request.json
+    # course_id, course_name, e_textbook_id, faculty_id, start_date, end_date are the input fields
+    course_id = data.get('course_id')
+    course_name = data.get('course_name')
+    e_textbook_id = data.get('e_textbook_id')
+    faculty_id = data.get('faculty_id')
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    
+    connection = get_db_connection()
+    result = create_evaluation_course(connection, course_id, course_name, e_textbook_id, faculty_id, start_date, end_date)
+
+    if result:
+        return jsonify({'message': 'Evaluation course added successfully'}), 201
+    return jsonify({'error': 'Evaluation course already exists'}), 400
+
+@routes.route('/add_active_course', methods=['POST'])
+def add_active_course():
+    data = request.json
+    # course_id, course_name, e_textbook_id, faculty_id, start_date, end_date are the input fields
+    course_id = data.get('course_id')
+    course_name = data.get('course_name')
+    e_textbook_id = data.get('e_textbook_id')
+    faculty_id = data.get('faculty_id')
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    unique_token = data.get('unique_token')
+    course_capacity = data.get('course_capacity')
+    
+    connection = get_db_connection()
+    result = create_active_course(connection, course_id, course_name, e_textbook_id, faculty_id, start_date, end_date, unique_token, course_capacity)
+
+    if result:
+        return jsonify({'message': 'Evaluation course added successfully'}), 201
+    return jsonify({'error': 'Evaluation course already exists'}), 400

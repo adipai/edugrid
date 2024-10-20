@@ -19,12 +19,15 @@ def add_user(connection, first_name, last_name, email, password, current_date, u
     except Exception as e:
         print(f"Error: {e}")
         return 'error'
+    finally:
+        connection.close()
 
 def check_user(connection, email, password, role):
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM user WHERE email = %s AND password = %s AND role = %s",
                    (email, password, role))
     user = cursor.fetchone()
+    connection.close()
     return user
 
 def generate_user_id(length=8):
@@ -64,6 +67,7 @@ def create_account_faculty(connection, first_name, last_name, email, password):
         
         # Commit the transaction
         connection.commit()
+        return 'Success'
 
     finally:
         # Close the connection
@@ -91,6 +95,7 @@ def create_etextbook(connection, tb_id, title):
         # Commit the transaction
         connection.commit()
         print(f"Textbook with tb_id: {tb_id} and title: '{title}' successfully added.")
+        return 'Success'
 
     finally:
         # Close the connection
@@ -118,7 +123,7 @@ def create_evaluation_course(connection, course_id, course_name, e_textbook_id, 
         # Commit the transaction
         connection.commit()
         print(f"Evaluation Course '{course_name}' with course_id: {course_id} successfully added.")
-
+        return 'Success'
     finally:
         # Close the connection
         connection.close()
@@ -157,6 +162,7 @@ def create_active_course(connection, course_id, course_name, e_textbook_id, facu
         # Commit the transaction
         connection.commit()
         print(f"Active course '{course_name}' with course_id: {course_id} successfully added.")
+        return 'Success'
 
     finally:
         # Close the connection
