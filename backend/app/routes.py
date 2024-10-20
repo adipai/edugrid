@@ -29,13 +29,12 @@ def signup():
 @routes.route('/login', methods=['POST'])
 def login():
     data = request.json
-    username = data.get('username')
+    email = data.get('email')
     password = data.get('password')
     role = data.get('role')
+    
     connection = get_db_connection()
-    
-    
-    user = check_user(connection, username, password, role)
+    user = check_user(connection, email, password, role)
     connection.close()
 
     if user:

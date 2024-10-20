@@ -15,9 +15,9 @@ def add_user(connection, first_name, last_name, email, password, current_date, u
         print(f"Error: {e}")
         return 'error'
 
-def check_user(connection, username, password, role):
+def check_user(connection, email, password, role):
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s AND role = %s",
-                   (username, password, role))
+    cursor.execute("SELECT * FROM user WHERE email = %s AND password = %s AND role = %s",
+                   (email, password, role))
     user = cursor.fetchone()
     return user
