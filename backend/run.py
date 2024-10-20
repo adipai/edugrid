@@ -6,7 +6,9 @@ from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 import pymysql
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def get_db_connection():
     connection = pymysql.connect(
