@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user");
 
   const handleSubmit = (e: any) => {
     e.preventDefault();

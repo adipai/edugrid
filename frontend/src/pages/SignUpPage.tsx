@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
 const SignUpPage = () => {
-  const [firstName, setFirstName]       = useState('');
-  const [lastName, setLastName]         = useState('');
-  const [email, setEmail]               = useState('');
-  const [password, setPassword]         = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole]                 = useState('user');
-  const [error, setError]               = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("user");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
 
     // Clear any existing errors
-    setError('');
+    setError("");
 
     // Add your sign-up logic here
     console.log({ firstName, lastName, email, password, role });
@@ -81,7 +81,7 @@ const SignUpPage = () => {
         />
       </div>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div>
         <label htmlFor="role">Role:</label>
