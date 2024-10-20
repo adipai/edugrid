@@ -1,0 +1,64 @@
+import json
+import sys
+
+from app.utils import add_user, check_user
+from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
+import pymysql
+import os
+
+
+def get_db_connection():
+    connection = pymysql.connect(
+        host= os.getenv('DB_HOST', 'localhost'),
+        user= os.getenv('DB_USER', 'root'),
+        password= os.getenv('DB_PASSWORD', 'password'),
+        database= os.getenv('DB_NAME', 'flaskdb')
+    )
+    return connection
+
+
+app = Flask(__name__)
+app.secret_key = "secret key"
+
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role')
+    
+
+    if not username or not password or not role:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    connection = get_db_connection()
+    result = add_user(connection, username, password, role)
+    connection.close()
+
+    if result == 'user_exists':
+        return jsonify({'error': 'User already exists'}), 400
+    return jsonify({'message': 'User created successfully'}), 201
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role')
+    
+    if not username or not password or not role:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    connection = get_db_connection()
+    user = check_user(connection, username, password, role)
+    connection.close()
+
+    if user:
+        return jsonify({'message': 'Login successful'}), 200
+    return jsonify({'error': 'Invalid credentials'}), 401
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
