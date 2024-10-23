@@ -27,8 +27,8 @@ CREATE TABLE student (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
-    user_id INT,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    user_id VARCHAR(8),
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 ALTER TABLE activity DROP question;

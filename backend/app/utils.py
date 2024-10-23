@@ -167,3 +167,47 @@ def create_active_course(connection, course_id, course_name, e_textbook_id, facu
     finally:
         # Close the connection
         connection.close()
+
+
+def create_text_content(connection, sequence_no, sec_no, chap_no, tb_id, hidden, content):
+
+    """ add text content to the section"""
+
+    try:
+        with connection.cursor() as cursor:
+            # Check if course_id already exists to avoid duplication
+            cursor.execute("SELECT * FROM courses WHERE course_id = %s", (course_id,))
+            if cursor.fetchone():
+                raise ValueError(f"Error: course_id {course_id} already exists in the database.")
+            # Check if course_id already exists to avoid duplication
+            cursor.execute("SELECT * FROM active_courses WHERE course_id = %s", (course_id,))
+            if cursor.fetchone():
+                raise ValueError(f"Error: course_id {course_id} already exists in the database.")
+
+            # SQL insert statement for courses table
+            insert_course_query = """
+            INSERT INTO courses (course_id, course_title, faculty_id, start_date, end_date)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+            # Execute the insert query for courses
+            cursor.execute(insert_course_query, (course_id, course_name, faculty_id, start_date, end_date))
+
+            # SQL insert statement for active_courses table
+            insert_active_course_query = """
+            INSERT INTO active_courses (active_course_id, course_id, unique_token, capacity)
+            VALUES (%s, %s, %s, %s)
+            """
+            # Insert into active_courses table using active_course_id as '0'
+            cursor.execute(insert_active_course_query, ('0', course_id, unique_token, course_capacity))
+        
+        # Commit the transaction
+        connection.commit()
+        print(f"Active course '{course_name}' with course_id: {course_id} successfully added.")
+
+    finally:
+        # Close the connection
+        connection.close()
+        
+
+def create_picture_content():
+    
