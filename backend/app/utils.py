@@ -19,12 +19,15 @@ def add_user(connection, first_name, last_name, email, password, current_date, u
     except Exception as e:
         print(f"Error: {e}")
         return 'error'
+    finally:
+        connection.close()
 
-def check_user(connection, username, password, role):
+def check_user(connection, email, password, role):
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s AND role = %s",
-                   (username, password, role))
+    cursor.execute("SELECT * FROM user WHERE email = %s AND password = %s AND role = %s",
+                   (email, password, role))
     user = cursor.fetchone()
+    connection.close()
     return user
 
 def generate_user_id(length=8):
@@ -64,6 +67,7 @@ def create_account_faculty(connection, first_name, last_name, email, password):
         
         # Commit the transaction
         connection.commit()
+        return 'Success'
 
     finally:
         # Close the connection
@@ -91,6 +95,7 @@ def create_etextbook(connection, tb_id, title):
         # Commit the transaction
         connection.commit()
         print(f"Textbook with tb_id: {tb_id} and title: '{title}' successfully added.")
+        return 'Success'
 
     finally:
         # Close the connection
@@ -118,7 +123,7 @@ def create_evaluation_course(connection, course_id, course_name, e_textbook_id, 
         # Commit the transaction
         connection.commit()
         print(f"Evaluation Course '{course_name}' with course_id: {course_id} successfully added.")
-
+        return 'Success'
     finally:
         # Close the connection
         connection.close()
@@ -157,7 +162,52 @@ def create_active_course(connection, course_id, course_name, e_textbook_id, facu
         # Commit the transaction
         connection.commit()
         print(f"Active course '{course_name}' with course_id: {course_id} successfully added.")
+        return 'Success'
 
     finally:
         # Close the connection
         connection.close()
+
+
+def create_text_content(connection, sequence_no, sec_no, chap_no, tb_id, hidden, content):
+
+    """ add text content to the section"""
+
+    try:
+        with connection.cursor() as cursor:
+            # Check if course_id already exists to avoid duplication
+            cursor.execute("SELECT * FROM courses WHERE course_id = %s", (course_id,))
+            if cursor.fetchone():
+                raise ValueError(f"Error: course_id {course_id} already exists in the database.")
+            # Check if course_id already exists to avoid duplication
+            cursor.execute("SELECT * FROM active_courses WHERE course_id = %s", (course_id,))
+            if cursor.fetchone():
+                raise ValueError(f"Error: course_id {course_id} already exists in the database.")
+
+            # SQL insert statement for courses table
+            insert_course_query = """
+            INSERT INTO courses (course_id, course_title, faculty_id, start_date, end_date)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+            # Execute the insert query for courses
+            cursor.execute(insert_course_query, (course_id, course_name, faculty_id, start_date, end_date))
+
+            # SQL insert statement for active_courses table
+            insert_active_course_query = """
+            INSERT INTO active_courses (active_course_id, course_id, unique_token, capacity)
+            VALUES (%s, %s, %s, %s)
+            """
+            # Insert into active_courses table using active_course_id as '0'
+            cursor.execute(insert_active_course_query, ('0', course_id, unique_token, course_capacity))
+        
+        # Commit the transaction
+        connection.commit()
+        print(f"Active course '{course_name}' with course_id: {course_id} successfully added.")
+
+    finally:
+        # Close the connection
+        connection.close()
+        
+
+def create_picture_content():
+    
