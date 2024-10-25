@@ -39,6 +39,17 @@ def login():
         return jsonify({'message': 'Login successful'}), 200
     return jsonify({'error': 'Invalid credentials'}), 401
 
+@routes.route('/add_etextbook', methods=['POST'])
+def add_etextbook():
+    data = request.json
+    tb_id = data.get('tb_id')
+    title = data.get('title')
+    connection = get_db_connection()
+    result = create_textbook(connection, tb_id, title)
+
+    if result == 'user_exists':
+        return jsonify({'error': 'Texbook already exists'}), 400
+    return jsonify({'message': 'Textbook created successfully'}), 201
 
 @routes.route('/add_evaluation_course', methods=['POST'])
 def add_evaluation_course():
