@@ -1,11 +1,13 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const role = "admin";
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -25,6 +27,8 @@ const AdminLoginPage = () => {
       localStorage.setItem('user_last_name', user.last_name);
       localStorage.setItem('user_role', user.role);
       localStorage.setItem('user_id', user.user_id);
+
+      navigate('/admin/landing');
 
       // Handle success
     } catch (error: any) {

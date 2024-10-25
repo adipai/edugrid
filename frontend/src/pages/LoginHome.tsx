@@ -11,7 +11,7 @@ const LoginHome = () => {
                     <li><Link to="/admin/login">1. Admin Login</Link></li>
                     <li><Link to="/faculty/login">2. Faculty Login</Link></li>
                     <li><Link to="/ta/login">3. Teaching Assitant Login</Link></li>
-                    <li><Link to="/student/login">4. Student Login</Link></li>
+                    <li><Link to="/student/prelogin">4. Student Login</Link></li>
                 </ul>
             </nav>
         </div>
