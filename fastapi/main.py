@@ -3,14 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import database
 from app.routes import router
 
-# DATABASE_URL = "mysql://drajend2:200537951@classdb2.csc.ncsu.edu:3306/drajend2"
-# database = databases.Database(DATABASE_URL)
-
 app = FastAPI()
 
-origins = [
-    '*',
-]
+origins = ['*']
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,9 +28,3 @@ async def shutdown():
     await database.disconnect() 
     
 app.include_router(router)
-
-
-# @app.get("/")
-# async def hello():
-#     return "Hello, World!"
- 
