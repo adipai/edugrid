@@ -22,3 +22,7 @@ ADD CONSTRAINT fk_block_created_by FOREIGN KEY (created_by) REFERENCES user(user
 ALTER TABLE question 
 ADD COLUMN IF NOT EXISTS created_by VARCHAR(8) DEFAULT NULL AFTER answer,
 ADD CONSTRAINT fk_question_created_by FOREIGN KEY (created_by) REFERENCES user(user_id);
+
+ALTER TABLE activity 
+ADD COLUMN IF NOT EXISTS created_by VARCHAR(8) DEFAULT NULL AFTER hidden_status,
+ADD CONSTRAINT fk_activity_created_by FOREIGN KEY (created_by) REFERENCES user(user_id);

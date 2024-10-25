@@ -144,7 +144,7 @@ def create_active_course(connection, course_id, course_name, e_textbook_id, facu
         # Close the connection
         connection.close()
 
-def create_textbook(connection, tb_id, tb_name):
+def create_textbook(connection, tb_id, tb_name, created_by):
     """Create a new textbook in the database."""
     
     try:
@@ -156,9 +156,9 @@ def create_textbook(connection, tb_id, tb_name):
 
             # If all checks pass, insert into textbook
             cursor.execute("""
-                INSERT INTO textbook (textbook_id, title)
-                VALUES (%s, %s)
-            """, (tb_id, tb_name))  # Use tb_name here
+                INSERT INTO textbook (textbook_id, title, created_by)
+                VALUES (%s, %s, %s)
+            """, (tb_id, tb_name, created_by))  # Use tb_name here
 
             # Commit the changes
             connection.commit()
@@ -170,7 +170,7 @@ def create_textbook(connection, tb_id, tb_name):
 
 
 
-def create_chapter(connection, tb_id, chap_id, chap_title):
+def create_chapter(connection, tb_id, chap_id, chap_title, created_by):
     """Create a new chapter in the specified textbook."""
     
     try:
@@ -184,7 +184,7 @@ def create_chapter(connection, tb_id, chap_id, chap_title):
             cursor.execute("""
                 INSERT INTO chapter (textbook_id, chapter_id, title, hidden_status, created_by)
                 VALUES (%s, %s, %s, %s, %s)
-            """, (tb_id, chap_id, chap_title, "no", "admin"))
+            """, (tb_id, chap_id, chap_title, "no", created_by))
 
             # Commit the changes
             connection.commit()
@@ -195,7 +195,7 @@ def create_chapter(connection, tb_id, chap_id, chap_title):
         connection.rollback()  # Rollback in case of error
 
 
-def create_section(connection, tb_id, chap_id, sec_id, sec_name):
+def create_section(connection, tb_id, chap_id, sec_id, sec_name, created_by):
     """Create a new section in the specified chapter of a textbook."""
     
     try:
@@ -210,7 +210,7 @@ def create_section(connection, tb_id, chap_id, sec_id, sec_name):
             cursor.execute("""
                 INSERT INTO section (textbook_id, chapter_id, section_id, title, hidden_status, created_by)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (tb_id, chap_id, sec_id, sec_name, "no", "admin")) 
+            """, (tb_id, chap_id, sec_id, sec_name, "no", created_by)) 
 
             # Commit the changes
             connection.commit()
@@ -221,7 +221,7 @@ def create_section(connection, tb_id, chap_id, sec_id, sec_name):
         connection.rollback()  # Rollback in case of error
 
 
-def create_block(connection, tb_id, chap_id, sec_id, block_id):
+def create_block(connection, tb_id, chap_id, sec_id, block_id, created_by):
     """Create a new content block in the specified section of a textbook."""
 
     try:
@@ -234,9 +234,9 @@ def create_block(connection, tb_id, chap_id, sec_id, block_id):
 
             # If all checks pass, insert into block
             cursor.execute("""
-                INSERT INTO block (textbook_id, chapter_id, section_id, block_id, block_type, hidden_status, content)
+                INSERT INTO block (textbook_id, chapter_id, section_id, block_id, block_type, content, hidden_status, content, created_by)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (tb_id, chap_id, sec_id, block_id, None, "no", None)) 
+            """, (tb_id, chap_id, sec_id, block_id, None, None, "no", created_by)) 
 
             # Commit the changes
             connection.commit()
@@ -447,67 +447,67 @@ def add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, ques
 
 
 
-# # Testing textbook creation
-# def textbook_creation_flow(connection):
-#     try:
-#         # Step 1: Create Textbook
-#         tb_id = input("Enter textbook ID: ")
-#         textbook_title = input("Enter textbook name: ")
-#         create_textbook(connection, tb_id, textbook_title)
+# Testing textbook creation
+def textbook_creation_flow(connection):
+    try:
+        # Step 1: Create Textbook
+        tb_id = input("Enter textbook ID: ")
+        textbook_title = input("Enter textbook name: ")
+        create_textbook(connection, tb_id, textbook_title)
 
-#         while True:
-#             # Prompt for next action after textbook creation
-#             action = input("Choose an action: (1) Create Chapter, (2) Back to Main Menu: ")
+        while True:
+            # Prompt for next action after textbook creation
+            action = input("Choose an action: (1) Create Chapter, (2) Back to Main Menu: ")
             
-#             if action == "1":
-#                 # Step 2: Create Chapter
-#                 chap_no = int(input("Enter chapter ID: "))
-#                 chap_title = input("Enter chapter name: ")
-#                 create_chapter(connection, tb_id, chap_no, chap_title)
+            if action == "1":
+                # Step 2: Create Chapter
+                chap_no = int(input("Enter chapter ID: "))
+                chap_title = input("Enter chapter name: ")
+                create_chapter(connection, tb_id, chap_no, chap_title)
 
-#                 # Step 3: Create Section
-#                 sec_no = int(input("Enter section ID: "))
-#                 section_title = input("Enter section name: ")
-#                 create_section(connection, tb_id, chap_no, sec_no, section_title)
+                # Step 3: Create Section
+                sec_no = int(input("Enter section ID: "))
+                section_title = input("Enter section name: ")
+                create_section(connection, tb_id, chap_no, sec_no, section_title)
 
-#                 # Step 4: Create Content Block
-#                 block_no = int(input("Enter block ID: "))
-#                 create_block(connection, tb_id, chap_no, sec_no, block_no)
+                # Step 4: Create Content Block
+                block_no = int(input("Enter block ID: "))
+                create_block(connection, tb_id, chap_no, sec_no, block_no)
 
-#                 # Step 5: Add text
-#                 content = input("Enter content text: ")
-#                 add_content(connection, tb_id, chap_no, sec_no, content, block_no)
+                # Step 5: Add text
+                content = input("Enter content text: ")
+                add_content(connection, tb_id, chap_no, sec_no, content, block_no)
 
-#                 print("Text Content successfully added.")
-#                 break  # Go back to main menu after successful operation
+                print("Text Content successfully added.")
+                break  # Go back to main menu after successful operation
 
-#             elif action == "2":
-#                 break  # Return to main menu
+            elif action == "2":
+                break  # Return to main menu
 
-#             else:
-#                 print("Invalid choice, please try again.")
-#                 continue
+            else:
+                print("Invalid choice, please try again.")
+                continue
 
-#     except ValueError as e:
-#         print(e)
-#         textbook_creation_flow(connection)  # Restart if error occurs
+    except ValueError as e:
+        print(e)
+        textbook_creation_flow(connection)  # Restart if error occurs
 
-# def modify_textbook():
-#     # Placeholder for modifying textbook functionality
-#     print("Modify textbook functionality not yet implemented.")
+def modify_textbook():
+    # Placeholder for modifying textbook functionality
+    print("Modify textbook functionality not yet implemented.")
 
-# def main():
-#     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-#     parser.add_argument("--action", choices=["1", "2"], help="1: Create Textbook, 2: Modify Textbook")
+def main():
+    parser = argparse.ArgumentParser(description="Textbook CLI Tool")
+    parser.add_argument("--action", choices=["1", "2"], help="1: Create Textbook, 2: Modify Textbook")
     
-#     # Parse the arguments
-#     args = parser.parse_args()
+    # Parse the arguments
+    args = parser.parse_args()
     
-#     # Handle the actions
-#     if args.action == "1":
-#         textbook_creation_flow(connection)
-#     elif args.action == "2":
-#         modify_textbook()
+    # Handle the actions
+    if args.action == "1":
+        textbook_creation_flow(connection)
+    elif args.action == "2":
+        modify_textbook()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
