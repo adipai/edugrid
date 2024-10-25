@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 
 const LoginHome = () => {
+    localStorage.clear()
+
     return (
         <div>
             <h1>Login Home</h1>

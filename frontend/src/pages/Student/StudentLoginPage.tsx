@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const StudentLoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,7 +18,13 @@ const StudentLoginPage = () => {
         'Content-Type': 'application/json',
       }, withCredentials: false});
       console.log('Login successful:', response.data);
-      window.alert('Login successful');
+
+      const user = response.data.user;
+      localStorage.setItem('user_email', user.email);
+      localStorage.setItem('user_first_name', user.first_name);
+      localStorage.setItem('user_last_name', user.last_name);
+      localStorage.setItem('user_role', user.role);
+      localStorage.setItem('user_id', user.user_id);
       // Handle success
     } catch (error: any) {
       if (error.response) {
@@ -54,6 +61,8 @@ const StudentLoginPage = () => {
       </div>
 
       <button type="submit">Login</button>
+      <br />
+      <Link to="/">Go Back</Link>
     </form>
   );
 };
