@@ -226,14 +226,9 @@ def create_block(connection, tb_id, chap_id, sec_id, block_id):
 
     try:
         with connection.cursor() as cursor:
-<<<<<<< HEAD
-            # Check if course_id already exists to avoid duplication
-            cursor.execute("SELECT * FROM course WHERE id = %s", (course_id,))
-=======
             # Check if tb_id, chap_id, sec_id, and block_id already exist in the content table
             cursor.execute("SELECT * FROM block WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s", 
                            (tb_id, chap_id, sec_id, block_id))
->>>>>>> dad77241c4a6ddb8131762a6f57da5fbf5e98eb3
             if cursor.fetchone():
                 raise ValueError("Content block already exists in the section.")
 
@@ -410,10 +405,6 @@ def add_content(connection, tb_id, chap_id, sec_id, content, block_id, block_typ
             # Commit the changes to the database
             connection.commit()
 
-<<<<<<< HEAD
-def create_picture_content():
-    pass
-=======
 
 
     except Exception as e:
@@ -520,4 +511,3 @@ def add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, ques
 
 # if __name__ == "__main__":
 #     main()
->>>>>>> dad77241c4a6ddb8131762a6f57da5fbf5e98eb3
