@@ -87,5 +87,5 @@ def add_active_course():
     result = create_active_course(connection, course_id, course_name, e_textbook_id, faculty_id, start_date, end_date, unique_token, course_capacity)
 
     if result:
-        return jsonify({'message': 'Evaluation course added successfully'}), 201
-    return jsonify({'error': 'Evaluation course already exists'}), 400
+        return jsonify({'message': 'Active course added successfully'}), 201
+    return jsonify({'error': 'Active course already exists'}), 400
