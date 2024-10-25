@@ -15,7 +15,7 @@ class LoginRequest(BaseModel):
     password: str
     role: str
 
-@router.post("/login")
+@router.post("/login", status_code=201)
 async def login(login_request: LoginRequest):
     email = login_request.email
     password = login_request.password
@@ -28,20 +28,20 @@ async def login(login_request: LoginRequest):
     else:
         raise HTTPException(status_code=404, detail="User not found")
 
-class SignupRequest(BaseModel):
+class AddUserRequest(BaseModel):
     first_name: str
     last_name: str
     email: str
     password: str
     role: str
 
-@router.post('/signup')
-async def signup(signup_request: SignupRequest):
-    first_name = signup_request.first_name
-    last_name = signup_request.last_name
-    email = signup_request.email
-    password = signup_request.password
-    role = signup_request.role
+@router.post('/add_user', status_code=201)
+async def addUser(add_user_request: AddUserRequest):
+    first_name = add_user_request.first_name
+    last_name = add_user_request.last_name
+    email = add_user_request.email
+    password = add_user_request.password
+    role = add_user_request.role
     
     # Get current date
     current_date = datetime.now()
@@ -54,11 +54,34 @@ async def signup(signup_request: SignupRequest):
     print(result)
     
     if result == 'user_exists':
-        return {'error': 'User already exists'}, 400
+        raise HTTPException(status_code=409, detail="User already exists")
     elif result == 'error':
-        return {'error': 'Error creating user'}, 500
-    return {'message': 'User created successfully'}, 201
+        raise HTTPException(status_code=500, detail="Error creating user")
+    return {'message': 'User created successfully'}
 
+@router.post('/add_faculty',status_code=201)
+async def addFaculty(add_user_request: AddUserRequest):
+    first_name = add_user_request.first_name
+    last_name = add_user_request.last_name
+    email = add_user_request.email
+    password = add_user_request.password
+    role = add_user_request.role
+    
+    # Get current date
+    current_date = datetime.now()
+    
+    # Calculate user_id
+    user_id = (first_name[:2] + last_name[:2] + current_date.strftime('%m%y')).capitalize()
+    
+    result = await add_faculty(first_name, last_name, email, password, current_date, user_id, role)
+    
+    print(result)
+    
+    if result == 'user_exists':
+        raise HTTPException(status_code=409, detail="User already exists")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error creating user")
+    return {'message': 'User created successfully'}
 
 class CreateTextbookRequest(BaseModel):
     tb_id: int
