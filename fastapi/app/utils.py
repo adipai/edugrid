@@ -1,15 +1,15 @@
 import traceback
 from app.database import database
 
-async def get_user(userid: str, password: str, role: str):
+async def get_user(email: str, password: str, role: str):
     query = """
         SELECT * 
         FROM user 
-        WHERE user_id = :userid 
+        WHERE email = :email 
         AND password = :password 
         AND role = :role
     """
-    values = {"userid": userid, "password": password, "role": role}
+    values = {"email": email, "password": password, "role": role}
     return await database.fetch_one(query=query, values=values)
 
 async def add_user(first_name, last_name, email, password, current_date, user_id, role):
@@ -88,4 +88,37 @@ async def create_textbook(tb_id, tb_name):
         # Rollback the transaction
         await transaction.rollback()
         print(f"Error creating textbook: {e}")
+        return 'error'
+
+async def create_course(course_id, course_name, textbook_id, course_type, faculty_id, ta_id, start_date, end_date, unique_token, capacity):
+    # Query to check if course exists
+    check_query = """SELECT * FROM course WHERE course_id = :course_id"""
+    
+    # Query to insert textbook
+    insert_query = """
+    INSERT INTO course (course_id, course_name, textbook_id, course_type, faculty_id, ta_id, start_date, end_date, unique_token, capacity) VALUES (:course_id, :course_name, :textbook_id, :course_type, :faculty_id, :ta_id, :start_date, :end_date, :unique_token, :capacity)
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if textbook exists
+        existing_course = await database.fetch_one(query=check_query, values={"course_id": course_id})
+        if existing_course:
+            return "course_exists"
+        
+        # Insert textbook
+        await database.execute(query=insert_query, values={"course_id": course_id, "course_name": course_name, "textbook_id": textbook_id, "course_type": course_type, "faculty_id": faculty_id, "ta_id": ta_id, "start_date": start_date, "end_date": end_date, "unique_token": unique_token, "capacity": capacity})
+        
+        # Commit the transaction
+        await transaction.commit()
+        print(f"Course '{course_name}' created with ID '{course_id}'.")
+        
+        return {"message": f"Course '{course_name}' created with ID '{course_id}'."}
+    
+    except Exception as e:
+        # Rollback the transaction
+        await transaction.rollback()
+        print(f"Error creating course: {e}")
         return 'error'
