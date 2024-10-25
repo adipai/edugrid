@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const role = "admin";
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const AdminLoginPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:8000/login', {
-        email,
+        userId,
         password,
         role,
       }, {headers: {
@@ -44,12 +44,12 @@ const AdminLoginPage = () => {
     <form onSubmit={handleSubmit}>
       <h3>Admin Login</h3>
       <div>
-        <label htmlFor="email">Email:</label>
+        <label htmlFor="userId">User ID:</label>
         <input
           type="text"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          id="userId"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
           required
         />
       </div>

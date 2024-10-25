@@ -1,15 +1,15 @@
 import traceback
 from app.database import database
 
-async def get_user(email: str, password: str, role: str):
+async def get_user(user_id: str, password: str, role: str):
     query = """
         SELECT * 
         FROM user 
-        WHERE email = :email 
+        WHERE user_id = :user_id 
         AND password = :password 
         AND role = :role
     """
-    values = {"email": email, "password": password, "role": role}
+    values = {"user_id": user_id, "password": password, "role": role}
     return await database.fetch_one(query=query, values=values)
 
 async def add_user(first_name, last_name, email, password, current_date, user_id, role):

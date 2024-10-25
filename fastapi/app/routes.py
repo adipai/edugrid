@@ -17,11 +17,11 @@ class LoginRequest(BaseModel):
 
 @router.post("/login", status_code=201)
 async def login(login_request: LoginRequest):
-    email = login_request.email
+    user_id = login_request.email
     password = login_request.password
     role = login_request.role
     
-    user = await get_user(email, password, role)
+    user = await get_user(user_id, password, role)
     
     if user:
         return {"status": "success", "user": user}
