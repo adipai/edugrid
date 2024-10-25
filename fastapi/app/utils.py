@@ -18,7 +18,7 @@ async def add_user(first_name, last_name, email, password, current_date, user_id
     
     # query to insert user
     query = """
-    INSERT INTO user (user_id, first_name, last_name, email, password, role, score)  VALUES (:user_id, :first_name, :last_name, :email, :password, :role, :score)
+    INSERT INTO user (user_id, first_name, last_name, email, password, role)  VALUES (:user_id, :first_name, :last_name, :email, :password, :role)
     """
     
     # Start a transaction
@@ -33,8 +33,7 @@ async def add_user(first_name, last_name, email, password, current_date, user_id
                     "last_name": last_name, 
                     "email": email, 
                     "password": password,
-                    "role": role, 
-                    "score": 0
+                    "role": role,
                    }
         
         # Check if user exists
@@ -55,4 +54,38 @@ async def add_user(first_name, last_name, email, password, current_date, user_id
         
         traceback.print_exc()
         # Return error
+        return 'error'
+
+
+async def create_textbook(tb_id, tb_name):
+    # Query to check if textbook exists
+    check_query = """SELECT * FROM textbook WHERE textbook_id = :tb_id"""
+    
+    # Query to insert textbook
+    insert_query = """
+    INSERT INTO textbook (textbook_id, title) VALUES (:tb_id, :tb_name)
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if textbook exists
+        existing_textbook = await database.fetch_one(query=check_query, values={"tb_id": tb_id})
+        if existing_textbook:
+            return "textbook_exists"
+        
+        # Insert textbook
+        await database.execute(query=insert_query, values={"tb_id": tb_id, "tb_name": tb_name})
+        
+        # Commit the transaction
+        await transaction.commit()
+        print(f"Textbook '{tb_name}' created with ID '{tb_id}'.")
+        
+        return {"message": f"Textbook '{tb_name}' created with ID '{tb_id}'."}
+    
+    except Exception as e:
+        # Rollback the transaction
+        await transaction.rollback()
+        print(f"Error creating textbook: {e}")
         return 'error'

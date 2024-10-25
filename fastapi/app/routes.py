@@ -62,3 +62,21 @@ async def signup(signup_request: SignupRequest):
         return {'error': 'Error creating user'}, 500
     return {'message': 'User created successfully'}, 201
 
+
+class CreateTextbookRequest(BaseModel):
+    tb_id: int
+    tb_name: str
+
+
+@router.post('/create_textbook')
+async def create_textbook_request(create_textbook_request: CreateTextbookRequest):
+    tb_id = create_textbook_request.tb_id
+    tb_name = create_textbook_request.tb_name
+    
+    result = await create_textbook(tb_id, tb_name)
+    
+    if result == 'textbook_exists':
+        return {'error': 'Textbook already exists'}, 400
+    elif result == 'error':
+        return {'error': 'Error creating textbook'}, 500
+    return {'message': 'Textbook created successfully'}, 201
