@@ -1,6 +1,6 @@
 from flask import request, Blueprint, jsonify
 from app import app, get_db_connection
-from app.utils import add_user, check_user, create_active_course, create_etextbook, create_evaluation_course
+from app.utils import *
 from datetime import datetime
 
 routes = Blueprint('routes', __name__)
@@ -39,18 +39,6 @@ def login():
         return jsonify({'message': 'Login successful'}), 200
     return jsonify({'error': 'Invalid credentials'}), 401
 
-@routes.route('/add_etextbook', methods=['POST'])
-def add_etextbook():
-    data = request.json
-    tb_id = data.get('tb_id')
-    title = data.get('title')
-    
-    connection = get_db_connection()
-    result = create_etextbook(connection, tb_id, title)
-
-    if result:
-        return jsonify({'message': 'E-textbook added successfully'}), 201
-    return jsonify({'error': 'E-textbook already exists'}), 400
 
 @routes.route('/add_evaluation_course', methods=['POST'])
 def add_evaluation_course():
@@ -85,7 +73,21 @@ def add_active_course():
     
     connection = get_db_connection()
     result = create_active_course(connection, course_id, course_name, e_textbook_id, faculty_id, start_date, end_date, unique_token, course_capacity)
+    connection.close()
 
     if result:
-        return jsonify({'message': 'Active course added successfully'}), 201
-    return jsonify({'error': 'Active course already exists'}), 400
+        return jsonify({'message': 'Evaluation course added successfully'}), 201
+    return jsonify({'error': 'Evaluation course already exists'}), 400
+
+@routes.route('/content/create_text_context', methods=['POST'])
+def create_text_context():
+    data = request.json
+
+    # Extract data, clean data
+
+    # Connect to db
+    connection = get_db_connection()
+    
+    # Run action function
+
+    connection.close()
