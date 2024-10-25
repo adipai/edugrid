@@ -12,19 +12,17 @@ async def hello():
     return {"message": result}
 
 class LoginRequest(BaseModel):
-    user_id: str
+    email: str
     password: str
     role: str
 
 @router.post("/login")
 async def login(login_request: LoginRequest):
-    user_id = login_request.user_id
+    email = login_request.email
     password = login_request.password
     role = login_request.role
     
-    print(user_id, password, role)
-    user = await get_user(user_id, password, role)
-    print(user)
+    user = await get_user(email, password, role)
     
     if user:
         return {"status": "success", "user": user}
@@ -80,3 +78,37 @@ async def create_textbook_request(create_textbook_request: CreateTextbookRequest
     elif result == 'error':
         return {'error': 'Error creating textbook'}, 500
     return {'message': 'Textbook created successfully'}, 201
+
+class CreateCourseRequest(BaseModel):
+    course_id: str
+    course_name: str
+    textbook_id: int
+    course_type: str
+    faculty_id: str
+    ta_id: str 
+    start_date: datetime
+    end_date: datetime
+    unique_token: str
+    capacity: int
+
+
+@router.post('/create_course')
+async def create_course_request(create_course_request: CreateCourseRequest):
+    course_id = create_course_request.course_id
+    course_name = create_course_request.course_name
+    textbook_id = create_course_request.textbook_id
+    course_type = create_course_request.course_type
+    faculty_id = create_course_request.faculty_id
+    ta_id = create_course_request.ta_id
+    start_date = create_course_request.start_date
+    end_date = create_course_request.end_date
+    unique_token = create_course_request.unique_token
+    capacity = create_course_request.capacity
+
+    result = await create_course(course_id, course_name, textbook_id, course_type, faculty_id, ta_id, start_date, end_date, unique_token, capacity)
+    
+    if result == 'course_exists':
+        return {'error': 'Course already exists'}, 400
+    elif result == 'error':
+        return {'error': 'Error creating course'}, 500
+    return {'message': 'Course created successfully'}, 201
