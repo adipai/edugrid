@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 
 const LoginPage = () => {
@@ -5,10 +6,24 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    // Add your login logic here
-    console.log({ email, password, role });
+    try {
+      const response = await axios.post('http://localhost:5000/login', {
+        email,
+        password,
+        role,
+      });
+      console.log('Login successful:', response.data);
+      window.alert('Login successful');
+      // Handle success
+    } catch (error: any) {
+      if (error.response) {
+        console.error('Login failed:', error.response.data.message);
+      } else {
+        console.error('An error occurred:', error.message);
+      }
+    }
   };
 
   return (
