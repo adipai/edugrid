@@ -11,13 +11,13 @@ async def hello():
     return {"message": result}
 
 class LoginRequest(BaseModel):
-    email: str
+    user_id: str
     password: str
     role: str
 
 @router.post("/login", status_code=201)
 async def login(login_request: LoginRequest):
-    user_id = login_request.email
+    user_id = login_request.user_id
     password = login_request.password
     role = login_request.role
     
