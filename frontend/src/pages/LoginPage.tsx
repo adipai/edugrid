@@ -13,7 +13,9 @@ const LoginPage = () => {
         email,
         password,
         role,
-      });
+      }, {headers: {
+        'Content-Type': 'application/json',
+      }, withCredentials: false});
       console.log('Login successful:', response.data);
       window.alert('Login successful');
       // Handle success
