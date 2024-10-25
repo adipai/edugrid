@@ -1,6 +1,5 @@
 from datetime import datetime
-from http.client import HTTPException
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.utils import *
 from pydantic import BaseModel
 
