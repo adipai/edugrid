@@ -210,7 +210,7 @@ def create_section(connection, tb_id, chap_id, sec_id, sec_name):
             cursor.execute("""
                 INSERT INTO section (textbook_id, chapter_id, section_id, title, hidden_status, created_by)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (tb_id, chap_id, sec_id, sec_name, "no", "admin"))  # Use sec_name instead of section_title
+            """, (tb_id, chap_id, sec_id, sec_name, "no", "admin")) 
 
             # Commit the changes
             connection.commit()
@@ -236,7 +236,7 @@ def create_block(connection, tb_id, chap_id, sec_id, block_id):
             cursor.execute("""
                 INSERT INTO block (textbook_id, chapter_id, section_id, block_id, block_type, hidden_status, content)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (tb_id, chap_id, sec_id, block_id, None, "no", None))  # Use chap_id and sec_id correctly
+            """, (tb_id, chap_id, sec_id, block_id, None, "no", None)) 
 
             # Commit the changes
             connection.commit()
@@ -245,6 +245,49 @@ def create_block(connection, tb_id, chap_id, sec_id, block_id):
     except Exception as e:
         print(f"Error creating block: {e}")
         connection.rollback()  # Rollback in case of error
+
+def create_activity(connection, tb_id, chap_id, sec_id, block_id, activity_id):
+    try:
+        with connection.cursor() as cursor:
+            # Check if tb_id, chap_id, sec_id, block_id and activity_id already exist in the activity table
+            cursor.execute("SELECT * FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s", 
+                           (tb_id, chap_id, sec_id, block_id, activity_id))
+            if cursor.fetchone():
+                raise ValueError("Activity block already exists in the section.")
+
+            # If all checks pass, insert into block
+            cursor.execute("""
+                INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (tb_id, chap_id, sec_id, block_id, activity_id)) 
+
+            # Commit the changes
+            connection.commit()
+            print(f"Activity block '{block_id}' created in section ID '{sec_id}' of chapter ID '{chap_id}' in textbook ID '{tb_id}'.")
+
+    except Exception as e:
+        print(f"Error creating block: {e}")
+        connection.rollback()  # Rollback in case of error
+
+    try:
+        with connection.cursor() as cursor:
+            # SQL query to update the content and block type in the block table
+            update_query = """
+                UPDATE block
+                SET content = %s, block_type = %s
+                WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s
+            """
+            
+            # Execute the update query with the provided parameters
+            cursor.execute(update_query, (activity_id, "activity", tb_id, chap_id, sec_id, block_id))
+
+            # Commit the changes to the database
+            connection.commit()
+
+    except Exception as e:
+        connection.rollback()  # Rollback in case of an error
+        print(f"Error: {e}")
+        print(traceback.format_exc())
 
 
 
@@ -266,6 +309,7 @@ def modify_textbook(connection, tb_id):
         connection.rollback()
 
 
+
 def modify_chapter(connection, tb_id, chap_id):
     """Check if the chapter exists for modification."""
 
@@ -284,6 +328,7 @@ def modify_chapter(connection, tb_id, chap_id):
         connection.rollback()
 
 
+
 def modify_section(connection, tb_id, chap_id, sec_id):
     """Check if the section exists for modification."""
 
@@ -300,6 +345,7 @@ def modify_section(connection, tb_id, chap_id, sec_id):
     except Exception as e:
         print(f"Error modifying section: {e}")
         connection.rollback()
+
 
 
 def modify_block(connection, tb_id, chap_id, sec_id, block_id):
@@ -321,7 +367,26 @@ def modify_block(connection, tb_id, chap_id, sec_id, block_id):
 
 
 
-def add_content(connection, tb_id, chap_id, sec_id, content, textbook_title, chap_title, section_title, block_id, block_type="text"):
+def modify_activity(connection, tb_id, chap_id, sec_id, block_id, activity_id):
+    """Check if the activity exists for modification."""
+
+    try:
+        with connection.cursor() as cursor:
+            # Check if activity_id exists in the activity table
+            cursor.execute("SELECT COUNT(*) FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s", (tb_id, chap_id, sec_id, block_id, activity_id))
+            count = cursor.fetchone()[0]
+
+            # If activity_id does not exist, raise an error
+            if count == 0:
+                raise ValueError("Activity doesn't exist, so can't modify.")
+
+    except Exception as e:
+        print(f"Error modifying activity: {e}")
+        connection.rollback()
+
+
+
+def add_content(connection, tb_id, chap_id, sec_id, content, block_id, block_type="text"):
 
     """ Add text/picture content to the block """
 
@@ -348,22 +413,37 @@ def add_content(connection, tb_id, chap_id, sec_id, content, textbook_title, cha
         print(traceback.format_exc())
 
 
-# def add_activity_content(connection, tb_id, chap_id, sec_id, content, textbook_title, chap_title, section_title, block_id, block_type="activity"):
+def add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text, \
+                option_1, option_1_explanation, option_2, option_2_explanation, \
+                option_3, option_3_explanation, option_4, option_4_explanation, answer):
 
-#     """ Add activity to the block """
+    """ Add question and other corresponding things to the question table """
 
-#     try:
-#         with connection.cursor() as cursor:
+    try:
+        with connection.cursor() as cursor:
+            # Check if tb_id, chap_id, sec_id, and block_id already exist in the content table
+            cursor.execute("SELECT * FROM question WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id= %s AND question_id =%s", 
+                           (tb_id, chap_id, sec_id, block_id, activity_id, question_id))
+            if cursor.fetchone():
+                raise ValueError("Question ID already exists for the activity")
 
-            
+            # If all checks pass, insert into block
+            cursor.execute("""
+                INSERT INTO question (textbook_id, chapter_id, section_id, block_id, unique_activity_id, question_id, \
+                question_text, option_1, option_1_explanation, option_2, option_2_explanation, \
+                option_3, option_3_explanation, option_4, option_4_explanation, answer)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text, \
+                option_1, option_1_explanation, option_2, option_2_explanation, \
+                option_3, option_3_explanation, option_4, option_4_explanation, answer)) 
 
+            # Commit the changes
+            connection.commit()
+            print(f"Question id '{question_id}' created for Activity id {activity_id}.")
 
-
-#     except Exception as e:
-#         connection.rollback()  # Rollback in case of an error
-#         print(f"Error: {e}")
-#         print(traceback.format_exc())
-        
+    except Exception as e:
+        print(f"Error creating question: {e}")
+        connection.rollback()  # Rollback in case of error
 
 
 
@@ -396,7 +476,7 @@ def add_content(connection, tb_id, chap_id, sec_id, content, textbook_title, cha
 
 #                 # Step 5: Add text
 #                 content = input("Enter content text: ")
-#                 add_content(connection, tb_id, chap_no, sec_no, content, textbook_title, chap_title, section_title, block_no)
+#                 add_content(connection, tb_id, chap_no, sec_no, content, block_no)
 
 #                 print("Text Content successfully added.")
 #                 break  # Go back to main menu after successful operation
