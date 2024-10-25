@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const StudentLoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const role = "student";
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -26,6 +27,8 @@ const StudentLoginPage = () => {
       localStorage.setItem('user_role', user.role);
       localStorage.setItem('user_id', user.user_id);
       // Handle success
+
+      navigate('/student/landing');
     } catch (error: any) {
       if (error.response) {
         console.error('Login failed:', error.response.data.message);

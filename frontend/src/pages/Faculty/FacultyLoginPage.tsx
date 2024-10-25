@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const FacultyLoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const role = "faculty";
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -18,6 +19,7 @@ const FacultyLoginPage = () => {
         'Content-Type': 'application/json',
       }, withCredentials: false});
       console.log('Login successful:', response.data);
+      // Handle success
       const user = response.data.user;
       
       localStorage.setItem('user_email', user.email);
@@ -25,7 +27,8 @@ const FacultyLoginPage = () => {
       localStorage.setItem('user_last_name', user.last_name);
       localStorage.setItem('user_role', user.role);
       localStorage.setItem('user_id', user.user_id);
-      // Handle success
+      
+      navigate('/faculty/landing');
     } catch (error: any) {
       if (error.response) {
         console.error('Login failed:', error.response.data.message);

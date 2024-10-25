@@ -28,7 +28,6 @@ const AdminLoginPage = () => {
       localStorage.setItem('user_role', user.role);
       localStorage.setItem('user_id', user.user_id);
 
-
       navigate('/admin/landing');
 
       // Handle success
