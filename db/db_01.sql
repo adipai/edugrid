@@ -1,52 +1,132 @@
 
-ALTER TABLE active_courses CHANGE active_course_id id varchar(20);
 
-ALTER TABLE user CHANGE user_id id varchar(8);
-
-ALTER TABLE courses CHANGE course_id id varchar(20);
-
-ALTER TABLE courses ADD COLUMN tb_id int(11);
-
-RENAME TABLE courses TO course;
-
-ALTER TABLE e_textbook CHANGE tb_id id int(11);
-
-ALTER TABLE options CHANGE option_id id int(11);
-
-RENAME TABLE options TO option;
-
-ALTER TABLE teaching_assistants CHANGE ta_id id varchar(8);
-
-RENAME TABLE teaching_assistants TO teaching_assistant;
-
-ALTER TABLE user DROP score;
-
-ALTER TABLE user MODIFY COLUMN password VARCHAR(255) DEFAULT 'abc123';
-
-CREATE TABLE student (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    user_id VARCHAR(8),
-    FOREIGN KEY (user_id) REFERENCES user(id)
+CREATE TABLE IF NOT EXISTS textbook (
+  textbook_id int(11) NOT NULL,
+  title varchar(255) NOT NULL,
+  PRIMARY KEY (textbook_id)
 );
 
-ALTER TABLE activity DROP question;
-
-CREATE TABLE question (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    text VARCHAR(255),
-    activity_id INT(11),
-    FOREIGN KEY(activity_id) REFERENCES activity(activity_id)
+CREATE TABLE IF NOT EXISTS chapter (
+  textbook_id int(11) NOT NULL,
+  chapter_id varchar(20) NOT NULL,
+  title varchar(255) NOT NULL,
+  hidden_status varchar(3) DEFAULT 'no',
+  created_by varchar(100) DEFAULT NULL,
+  PRIMARY KEY (textbook_id, chapter_id),
+  FOREIGN KEY (textbook_id) REFERENCES textbook(textbook_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT chk_hidden CHECK (hidden_status IN ('yes', 'no'))
 );
 
-DROP TABLE option;
+CREATE TABLE IF NOT EXISTS section (
+    textbook_id int(11) NOT NULL,
+    chapter_id varchar(20) NOT NULL,
+    section_id varchar(20) NOT NULL,
+    title varchar(255) NOT NULL,
+    hidden_status varchar(3) DEFAULT 'no',
+    created_by varchar(100) DEFAULT NULL,
+    PRIMARY KEY (textbook_id, chapter_id, section_id),
+    FOREIGN KEY (textbook_id, chapter_id) REFERENCES chapter (textbook_id, chapter_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT chk_hidden CHECK (hidden_status IN ('yes', 'no'))
+);
 
-CREATE TABLE option (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  question_id INT DEFAULT NULL,
-  is_correct tinyint(1) NOT NULL,
-  text varchar(255) NOT NULL,
-  explanation varchar(255) NOT NULL,
-  FOREIGN KEY (question_id) REFERENCES question(id)
-  );
+CREATE TABLE IF NOT EXISTS block (
+  textbook_id int(11) NOT NULL,
+  chapter_id varchar(20) NOT NULL,
+  section_id varchar(20) NOT NULL,
+  block_id varchar(20) NOT NULL,
+  block_type varchar(255),
+  content TEXT,
+  hidden_status varchar(3) DEFAULT 'no',
+  PRIMARY KEY (textbook_id, chapter_id, section_id, block_id),
+  FOREIGN KEY (textbook_id, chapter_id, section_id) REFERENCES section (textbook_id, chapter_id, section_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT chk_hidden CHECK (hidden_status IN ('yes', 'no'))
+);
+
+CREATE TABLE IF NOT EXISTS activity (
+  textbook_id int(11) NOT NULL,
+  chapter_id varchar(20) NOT NULL,
+  section_id varchar(20) NOT NULL,
+  block_id varchar(20) NOT NULL,
+  unique_activity_id varchar(20) NOT NULL,
+  hidden_status varchar(3) DEFAULT 'no',
+  PRIMARY KEY (textbook_id, chapter_id, section_id, block_id, unique_activity_id),
+  FOREIGN KEY (textbook_id, chapter_id, section_id, block_id) REFERENCES block (textbook_id, chapter_id, section_id, block_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT chk_hidden CHECK (hidden_status IN ('yes', 'no'))
+);
+
+CREATE TABLE IF NOT EXISTS question (
+    textbook_id int(11) NOT NULL,
+    chapter_id varchar(20) NOT NULL,
+    section_id varchar(20) NOT NULL,
+    block_id varchar(20) NOT NULL,
+    unique_activity_id varchar(20) NOT NULL,
+    question_id varchar(20) NOT NULL,
+    question_text TEXT NOT NULL,
+    option_1 TEXT NOT NULL,
+    opt_1_explanation TEXT NOT NULL,
+    option_2 TEXT NOT NULL,
+    opt_2_explanation TEXT NOT NULL,
+    option_3 TEXT NOT NULL,
+    opt_3_explanation TEXT NOT NULL,
+    option_4 TEXT NOT NULL,
+    opt_4_explanation TEXT NOT NULL,
+    answer TINYINT NOT NULL,
+    PRIMARY KEY (textbook_id, chapter_id, section_id, block_id, unique_activity_id, question_id),
+    FOREIGN KEY (textbook_id, chapter_id, section_id, block_id, unique_activity_id) REFERENCES activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user (
+    user_id VARCHAR(8) PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,    
+    last_name VARCHAR(50) NOT NULL,     
+    email VARCHAR(100) NOT NULL UNIQUE,  
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    CHECK (LENGTH(user_id) = 8),
+    CHECK (role IN ('admin', 'faculty', 'student', 'teaching assistant'))
+);
+
+CREATE TABLE IF NOT EXISTS student (
+    student_id VARCHAR(8) PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES user(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS faculty (
+    faculty_id VARCHAR(8) PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    FOREIGN KEY (faculty_id) REFERENCES user(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS teaching_assistant (
+    ta_id VARCHAR(8) PRIMARY KEY,  
+    first_name VARCHAR(50) NOT NULL,  
+    last_name VARCHAR(50) NOT NULL,  
+    email VARCHAR(100) NOT NULL, 
+    password VARCHAR(255) NOT NULL, 
+    course_id VARCHAR(10), 
+    FOREIGN KEY (ta_id) REFERENCES user(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS course (
+    course_id VARCHAR(30) PRIMARY KEY, 
+    course_name VARCHAR(100) NOT NULL, 
+    textbook_id INT(11), 
+    course_type VARCHAR(15), 
+    faculty_id VARCHAR(8), 
+    ta_id VARCHAR(8),
+    start_date DATE, 
+    end_date DATE, 
+    unique_token VARCHAR(7) UNIQUE, 
+    capacity INT,
+    FOREIGN KEY (ta_id) REFERENCES user(user_id),
+    FOREIGN KEY (faculty_id) REFERENCES user(user_id),
+    FOREIGN KEY (textbook_id) REFERENCES textbook(textbook_id),
+    CHECK (course_type IN ('Active', 'Evaluation'))
+);
