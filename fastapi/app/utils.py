@@ -39,7 +39,7 @@ async def add_user(first_name, last_name, email, password, current_date, user_id
         # Check if user exists
         existing_user = await database.fetch_one(query=check_query, values=check_values)
         if existing_user:
-            return existing_user
+            return 'user_exists'
 
         # Insert user
         user = await database.execute(query=query, values=values)
@@ -93,7 +93,7 @@ async def add_faculty(first_name, last_name, email, password, current_date, user
         # Check if user exists
         existing_user = await database.fetch_one(query=check_query, values=check_values)
         if existing_user:
-            return existing_user
+            return 'user_exists'
 
         # Insert user
         user = await database.execute(query=insert_user_query, values=user_values)

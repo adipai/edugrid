@@ -15,7 +15,7 @@ class LoginRequest(BaseModel):
     password: str
     role: str
 
-@router.post("/login")
+@router.post("/login", status_code=201)
 async def login(login_request: LoginRequest):
     email = login_request.email
     password = login_request.password
@@ -35,7 +35,7 @@ class AddUserRequest(BaseModel):
     password: str
     role: str
 
-@router.post('/add_user')
+@router.post('/add_user', status_code=201)
 async def addUser(add_user_request: AddUserRequest):
     first_name = add_user_request.first_name
     last_name = add_user_request.last_name
@@ -54,12 +54,12 @@ async def addUser(add_user_request: AddUserRequest):
     print(result)
     
     if result == 'user_exists':
-        return {'error': 'User already exists'}, 400
+        raise HTTPException(status_code=409, detail="User already exists")
     elif result == 'error':
-        return {'error': 'Error creating user'}, 500
-    return {'message': 'User created successfully'}, 201
+        raise HTTPException(status_code=500, detail="Error creating user")
+    return {'message': 'User created successfully'}
 
-@router.post('/add_faculty')
+@router.post('/add_faculty',status_code=201)
 async def addFaculty(add_user_request: AddUserRequest):
     first_name = add_user_request.first_name
     last_name = add_user_request.last_name
@@ -78,10 +78,10 @@ async def addFaculty(add_user_request: AddUserRequest):
     print(result)
     
     if result == 'user_exists':
-        return {'error': 'User already exists'}, 400
+        raise HTTPException(status_code=409, detail="User already exists")
     elif result == 'error':
-        return {'error': 'Error creating user'}, 500
-    return {'message': 'User created successfully'}, 201
+        raise HTTPException(status_code=500, detail="Error creating user")
+    return {'message': 'User created successfully'}
 
 class CreateTextbookRequest(BaseModel):
     tb_id: int
