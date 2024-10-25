@@ -56,6 +56,61 @@ async def add_user(first_name, last_name, email, password, current_date, user_id
         # Return error
         return 'error'
 
+async def add_faculty(first_name, last_name, email, password, current_date, user_id, role):
+    # query to check if user exists
+    check_query = "SELECT * FROM user WHERE user_id = :user_id"
+    
+    # query to insert user
+    insert_user_query = """
+    INSERT INTO user (user_id, first_name, last_name, email, password, role)  VALUES (:user_id, :first_name, :last_name, :email, :password, :role)
+    """
+    insert_faculty_query = """
+    INSERT INTO faculty (faculty_id, first_name, last_name, email, password)  VALUES (:user_id, :first_name, :last_name, :email, :password)
+    """
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        check_values = {"user_id": user_id}
+        
+        user_values  = {
+                    "user_id": user_id,
+                    "first_name": first_name, 
+                    "last_name": last_name, 
+                    "email": email, 
+                    "password": password,
+                    "role": role,
+                   }
+        
+        faculty_values  = {
+                    "user_id": user_id,
+                    "first_name": first_name, 
+                    "last_name": last_name, 
+                    "email": email, 
+                    "password": password,
+                   }
+        
+        # Check if user exists
+        existing_user = await database.fetch_one(query=check_query, values=check_values)
+        if existing_user:
+            return existing_user
+
+        # Insert user
+        user = await database.execute(query=insert_user_query, values=user_values)
+        # Insert faculty
+        faculty = await database.execute(query=insert_faculty_query, values=faculty_values)
+        
+        # Commit the transaction
+        await transaction.commit()
+        return faculty 
+    except Exception as e:
+        # Rollback the transaction
+        await transaction.rollback()
+        print(f"Error: {e}")
+        
+        traceback.print_exc()
+        # Return error
+        return 'error'
 
 async def create_textbook(tb_id, tb_name):
     # Query to check if textbook exists
