@@ -12,6 +12,7 @@ import FacultyLandingPage from "./pages/Faculty/FacultyLandingPage";
 import TALandingPage from "./pages/TA/TALandingPage";
 import StudentLandingPage from "./pages/Student/StudentLandingPage";
 import StudentPreLogin from "./pages/Student/StudentPreLogin";
+import AdminCreateFaculty from "./pages/Admin/AdminCreateFaculty";
 
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/landing" element={<AdminLandingPage />} />
+        <Route path="/admin/create-faculty-account" element={<AdminCreateFaculty />} />
+
         
         {/* Faculty routes */}
         <Route path="/faculty/login" element={<FacultyLoginPage />} />
