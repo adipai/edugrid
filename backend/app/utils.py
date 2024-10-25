@@ -11,13 +11,13 @@ def add_user(connection, first_name, last_name, email, password, current_date, u
     try:
         cursor = connection.cursor()
         # Check if user exists
-        cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+        cursor.execute("SELECT * FROM user WHERE id = %s", (user_id,))
         if cursor.fetchone():
             return 'user_exists'
 
         # Insert new user
-        cursor.execute("INSERT INTO user (user_id, first_name, last_name, email, password, role, score)  VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                       (user_id, first_name, last_name, email, password, role, 0))
+        cursor.execute("INSERT INTO user (id, first_name, last_name, email, password, role)  VALUES (%s, %s, %s, %s, %s, %s)",
+                       (user_id, first_name, last_name, email, password, role))
         connection.commit()
         return 'user_created'
     except Exception as e:
@@ -83,13 +83,13 @@ def create_evaluation_course(connection, course_id, course_name, e_textbook_id, 
     try:
         with connection.cursor() as cursor:
             # Check if course_id already exists to avoid duplication
-            cursor.execute("SELECT * FROM courses WHERE course_id = %s", (course_id,))
+            cursor.execute("SELECT * FROM course WHERE id = %s", (course_id,))
             if cursor.fetchone():
-                raise ValueError(f"Error: course_id {course_id} already exists in the database.")
+                raise ValueError(f"Error: id {course_id} already exists in the database.")
 
             # SQL insert statement
             insert_query = """
-            INSERT INTO courses (course_id, course_title, faculty_id, start_date, end_date)
+            INSERT INTO course (id, course_title, faculty_id, start_date, end_date)
             VALUES (%s, %s, %s, %s, %s)
             """
 
@@ -98,7 +98,7 @@ def create_evaluation_course(connection, course_id, course_name, e_textbook_id, 
         
         # Commit the transaction
         connection.commit()
-        print(f"Evaluation Course '{course_name}' with course_id: {course_id} successfully added.")
+        print(f"Evaluation Course '{course_name}' with id: {course_id} successfully added.")
         return 'Success'
     finally:
         # Close the connection
@@ -111,17 +111,17 @@ def create_active_course(connection, course_id, course_name, e_textbook_id, facu
     try:
         with connection.cursor() as cursor:
             # Check if course_id already exists to avoid duplication
-            cursor.execute("SELECT * FROM courses WHERE course_id = %s", (course_id,))
+            cursor.execute("SELECT * FROM course WHERE id = %s", (course_id,))
             if cursor.fetchone():
                 raise ValueError(f"Error: course_id {course_id} already exists in the database.")
             # Check if course_id already exists to avoid duplication
-            cursor.execute("SELECT * FROM active_courses WHERE course_id = %s", (course_id,))
+            cursor.execute("SELECT * FROM active_courses WHERE id = %s", (course_id,))
             if cursor.fetchone():
                 raise ValueError(f"Error: course_id {course_id} already exists in the database.")
 
             # SQL insert statement for courses table
             insert_course_query = """
-            INSERT INTO courses (course_id, course_title, faculty_id, start_date, end_date)
+            INSERT INTO course (id, course_title, faculty_id, start_date, end_date)
             VALUES (%s, %s, %s, %s, %s)
             """
             # Execute the insert query for courses
@@ -129,7 +129,7 @@ def create_active_course(connection, course_id, course_name, e_textbook_id, facu
 
             # SQL insert statement for active_courses table
             insert_active_course_query = """
-            INSERT INTO active_courses (active_course_id, course_id, unique_token, capacity)
+            INSERT INTO active_courses (id, course_id, unique_token, capacity)
             VALUES (%s, %s, %s, %s)
             """
             # Insert into active_courses table using active_course_id as '0'

@@ -76,8 +76,8 @@ def add_active_course():
     connection.close()
 
     if result:
-        return jsonify({'message': 'Evaluation course added successfully'}), 201
-    return jsonify({'error': 'Evaluation course already exists'}), 400
+        return jsonify({'message': 'Active course added successfully'}), 201
+    return jsonify({'error': 'Active course already exists'}), 400
 
 @routes.route('/content/create_text_context', methods=['POST'])
 def create_text_context():
