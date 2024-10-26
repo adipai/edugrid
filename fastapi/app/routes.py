@@ -2,6 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from app.utils import *
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
 
@@ -15,7 +16,7 @@ class LoginRequest(BaseModel):
     password: str
     role: str
 
-@router.post("/login", status_code=201)
+@router.post("/login", status_code=200)
 async def login(login_request: LoginRequest):
     user_id = login_request.user_id
     password = login_request.password
@@ -171,11 +172,11 @@ class CreateCourseRequest(BaseModel):
     textbook_id: int
     course_type: str
     faculty_id: str
-    ta_id: str 
+    ta_id: Optional[str] = None 
     start_date: datetime
     end_date: datetime
-    unique_token: str
-    capacity: int
+    unique_token: Optional[str] = None
+    capacity: Optional[int] = None
 
 
 @router.post('/create_course')

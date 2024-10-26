@@ -12,7 +12,7 @@ const FacultyLoginPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:8000/login', {
-        userId,
+        user_id: userId,
         password,
         role,
       }, {headers: {

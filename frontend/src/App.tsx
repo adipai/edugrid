@@ -13,6 +13,9 @@ import TALandingPage from "./pages/TA/TALandingPage";
 import StudentLandingPage from "./pages/Student/StudentLandingPage";
 import StudentPreLogin from "./pages/Student/StudentPreLogin";
 import AdminCreateFaculty from "./pages/Admin/AdminCreateFaculty";
+import AdminCreateEvaluationCourse from "./pages/Admin/AdminCreateEvaluationCourse";
+import AdminCreateActiveCourse from "./pages/Admin/AdminCreateActiveCourse";
+
 
 function App() {
   return (
@@ -26,7 +29,8 @@ function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/landing" element={<AdminLandingPage />} />
         <Route path="/admin/create-faculty-account" element={<AdminCreateFaculty />} />
-
+        <Route path="/admin/create-evaluation-course" element={<AdminCreateEvaluationCourse />} />
+        <Route path="/admin/create-active-course" element={<AdminCreateActiveCourse />} />
         
         {/* Faculty routes */}
         <Route path="/faculty/login" element={<FacultyLoginPage />} />
