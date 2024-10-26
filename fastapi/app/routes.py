@@ -249,6 +249,16 @@ async def _get_textbook(tb_id: Optional[int] = None):
         raise HTTPException(status_code=404, detail="Textbook not found")
     return {'textbook': result}
 
+@router.get('/api/v1/chapter')
+async def _get_chapter(tb_id: Optional[int] = None, chap_id: Optional[int] = None):
+    
+    result = await get_chapter_details(tb_id,chap_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Textbook not found")
+    return {'chapter': result}
+
 class CreateTextbookRequest(BaseModel):
     tb_id: int
     tb_name: str
