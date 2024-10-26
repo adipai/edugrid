@@ -32,17 +32,20 @@ const AdminAddNewChapter: React.FC = () => {
     e.preventDefault();
     // Handle form submission logic here
     try {
-      const response = await axios.post('http://localhost:8000/create_chapter', {
+      const response = await axios.post(
+        "http://localhost:8000/create_chapter",
+        {
           tb_id,
           chap_id: chapterId,
           chap_title: chapterTitle,
-          created_by: createdBy
-      });
-      console.log('Chapter created:', response.data);
+          created_by: createdBy,
+        }
+      );
+      console.log("Chapter created:", response.data);
       navigate(`/admin/create-new-section?tb_id=${tb_id}&chap_id=${chapterId}`);
-  } catch (error) {
-      console.error('Error creating chapter:', error);
-  }
+    } catch (error) {
+      console.error("Error creating chapter:", error);
+    }
   };
 
   return (

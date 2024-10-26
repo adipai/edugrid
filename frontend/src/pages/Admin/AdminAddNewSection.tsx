@@ -82,14 +82,15 @@ const AdminAddNewSection: React.FC = () => {
           />
         </div>
         <button type="submit" onClick={(e) => handleSubmit(e)}>
-          Add new content block
+          Add new section
         </button>
       </form>
       {/* <div>
         <Link to="/add-content-block">Add new content block</Link>
       </div> */}
       <div>
-        <Link to="/admin/landing">Go back</Link>
+        {/* <Link to="/admin/landing">Go back</Link> */}
+        <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
       <div>
         <Link to="/admin/landing">Landing Page</Link>
