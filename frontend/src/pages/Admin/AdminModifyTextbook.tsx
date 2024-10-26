@@ -72,7 +72,7 @@ const AdminModifyTextbook: React.FC = () => {
           <>
             <li>
               <Link
-                to={`/admin/create-new-section?tb_id=${textbookDetails.textbook_id}`}
+                to={`/admin/create-new-chapter?tb_id=${textbookDetails.textbook_id}`}
               >
                 1. Add New Chapter
               </Link>
