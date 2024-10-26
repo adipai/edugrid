@@ -15,6 +15,7 @@ import StudentPreLogin from "./pages/Student/StudentPreLogin";
 import AdminCreateFaculty from "./pages/Admin/AdminCreateFaculty";
 import AdminCreateEvaluationCourse from "./pages/Admin/AdminCreateEvaluationCourse";
 import AdminCreateActiveCourse from "./pages/Admin/AdminCreateActiveCourse";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
         <Route path="/student/prelogin" element={<StudentPreLogin />} />
         <Route path="/student/login" element={<StudentLoginPage />} />
         
+        <Route path="/change-password-page" element={<ChangePasswordPage />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>

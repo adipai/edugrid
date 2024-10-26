@@ -56,6 +56,39 @@ async def add_user(first_name, last_name, email, password, current_date, user_id
         # Return error
         return 'error'
 
+async def change_password(user_id, old_password, new_password):  
+    # query to update password
+    query = """
+    UPDATE user 
+    SET password = :new_password
+    WHERE user_id = :user_id AND password = :old_password        
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        values  = {
+                    "user_id": user_id,
+                    "new_password": new_password, 
+                    "old_password": old_password
+                   }
+        
+        # Update password
+        user = await database.execute(query=query, values=values)
+        
+        # Commit the transaction
+        await transaction.commit()
+        return user 
+    except Exception as e:
+        # Rollback the transaction
+        await transaction.rollback()
+        print(f"Error: {e}")
+        
+        traceback.print_exc()
+        # Return error
+        return 'error'
+
 async def add_faculty(first_name, last_name, email, password, current_date, user_id, role):
     # query to check if user exists
     check_query = "SELECT * FROM user WHERE user_id = :user_id"

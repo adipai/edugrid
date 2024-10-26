@@ -28,7 +28,25 @@ async def login(login_request: LoginRequest):
         return {"status": "success", "user": user}
     else:
         raise HTTPException(status_code=404, detail="User not found")
+    
+class ChangePasswordRequest(BaseModel):
+    user_id: str
+    old_password: str
+    new_password: str
 
+@router.post("/change_password", status_code=200)    
+async def changePassword(change_password_request: ChangePasswordRequest):
+    user_id = change_password_request.user_id
+    old_password = change_password_request.old_password
+    new_password = change_password_request.new_password
+    
+    user = await change_password(user_id, old_password, new_password)
+    
+    if user:
+        return {"status": "success", "user": user}
+    else:
+        raise HTTPException(status_code=400, detail="Incorrect details")
+    
 class AddUserRequest(BaseModel):
     first_name: str
     last_name: str
