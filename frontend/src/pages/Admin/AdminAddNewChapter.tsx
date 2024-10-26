@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const AdminAddNewChapter: React.FC = () => {
   const [chapterId, setChapterId] = useState("");
@@ -7,6 +7,7 @@ const AdminAddNewChapter: React.FC = () => {
   const [tbDetails, setTbDetails] = useState<any>({});
 
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const tb_id = queryParams.get("tb_id");
   const createdBy = localStorage.getItem('user_id')
@@ -59,7 +60,7 @@ const AdminAddNewChapter: React.FC = () => {
             <button type="submit">Add Chapter</button>
           </li>
           <li>
-            <Link to={`/admin/textbook`}>Back to Textbook</Link>
+            <div onClick={(e) => navigate(-1)}>Back to Textbook</div>
           </li>
           <li>
             <Link to={`/admin/landing`}>Landing Page</Link>
