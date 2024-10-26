@@ -368,4 +368,33 @@ async def create_activity_request(create_activity_request: CreateActivityRequest
     elif result == 'error':
         raise HTTPException(status_code=500, detail="Error creating activity block")
     
-    return {"message": "Activity block created and updated successfully"}
+    return {"message": "Activity created successfully"}
+
+
+
+class AddContentRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    content: str
+    block_id: str
+    block_type: str = "text"
+
+
+## need to send block type from front-end (here block type is either "text" or "picture" depending on what is clicked)
+@router.post("/add_content")
+async def add_content_request(add_content_request: AddContentRequest):
+
+    tb_id = add_content_request.tb_id
+    chap_id = add_content_request.chap_id
+    sec_id = add_content_request.sec_id
+    content = add_content_request.content
+    block_id = add_content_request.block_id
+    block_type = add_content_request.block_type
+
+    result = await add_content(tb_id, chap_id, sec_id, content, block_id, block_type)
+
+    if(result == 'error'):
+        raise HTTPException(status_code=500, detail=f"Error adding {block_type}")
+
+    return {"message": f"{block_type} Content added"}

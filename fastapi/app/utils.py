@@ -594,3 +594,55 @@ async def create_activity(tb_id: int, chap_id: str, sec_id: str, block_id: str, 
         await transaction.rollback()
         print(f"Error creating activity block: {e}")
         return 'error'
+
+
+async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str):
+    check_query = """
+        SELECT content, block_type FROM block 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+    """
+    delete_activity_query = """
+        DELETE FROM activity WHERE textbook_id = :tb_id AND chapter_id = :chap_id 
+        AND section_id = :sec_id AND block_id = :block_id AND unique_activity_id = :activity_id
+    """
+    update_query = """
+        UPDATE block SET content = :content, block_type = :block_type 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+    """
+    
+    async with database.transaction() as transaction:
+        try:
+            # Fetch the current content and block type
+            current_data = await database.fetch_one(
+                query=check_query, 
+                values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+
+            if current_data:
+                current_content, current_block_type = current_data
+                if current_block_type == "activity":
+                    await database.execute(
+                        query=delete_activity_query, 
+                        values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": current_content}
+                    )
+
+            # Update the content and block type in the block table
+            await database.execute(
+                query=update_query, 
+                values={
+                    "content": content, 
+                    "block_type": block_type, 
+                    "tb_id": tb_id, 
+                    "chap_id": chap_id, 
+                    "sec_id": sec_id, 
+                    "block_id": block_id
+                }
+            )
+
+            return "success"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error adding {block_type}: {e}")
+            print(traceback.format_exc())
+            return "error"
