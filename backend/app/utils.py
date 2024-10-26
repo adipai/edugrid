@@ -4,7 +4,7 @@ import traceback
 import argparse
 
 from datetime import datetime
-# from constants import connection
+from constants import connection
 
 
 def add_user(connection, first_name, last_name, email, password, current_date, user_id, role):
@@ -214,7 +214,7 @@ def create_section(connection, tb_id, chap_id, sec_id, sec_name, created_by):
 
             # Commit the changes
             connection.commit()
-            print(f"Section '{sec_name}' created in chapter ID '{chap_id}' of textbook ID '{tb_id}'.")
+            return f"Section '{sec_name}' created in chapter ID '{chap_id}' of textbook ID '{tb_id}'."
 
     except Exception as e:
         print(f"Error creating section: {e}")
@@ -240,7 +240,7 @@ def create_block(connection, tb_id, chap_id, sec_id, block_id, created_by):
 
             # Commit the changes
             connection.commit()
-            print(f"Content block '{block_id}' created in section ID '{sec_id}' of chapter ID '{chap_id}' in textbook ID '{tb_id}'.")
+            return f"Content block '{block_id}' created in section ID '{sec_id}' of chapter ID '{chap_id}' in textbook ID '{tb_id}'."
 
     except Exception as e:
         print(f"Error creating block: {e}")
@@ -254,9 +254,9 @@ def create_activity(connection, tb_id, chap_id, sec_id, block_id, activity_id, c
             cursor.execute("SELECT * FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s", 
                            (tb_id, chap_id, sec_id, block_id, activity_id))
             if cursor.fetchone():
-                raise ValueError("Activity block already exists in the section.")
+                return "Activity block already exists in the section."
 
-            # If all checks pass, insert into block
+            # If all checks pass, insert into activity
             cursor.execute("""
                 INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id, created_by)
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -426,56 +426,105 @@ def modify_block(connection, tb_id, chap_id, sec_id, block_id, user_modifying):
 
 
 
-def check_modify_activity(connection, tb_id, chap_id, sec_id, block_id, activity_id, user_modifying):
-    """Check if the activity exists for modification."""
+# def check_modify_activity(connection, tb_id, chap_id, sec_id, block_id, activity_id):
+#     """Check if the activity exists for modification."""
 
-    try:
-        with connection.cursor() as cursor:
-            # Check if activity_id exists in the activity table
-            cursor.execute("SELECT COUNT(*) FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s", (tb_id, chap_id, sec_id, block_id, activity_id))
-            count, created_by = cursor.fetchone()
+#     try:
+#         with connection.cursor() as cursor:
+#             # Check if activity_id exists in the activity table
+#             cursor.execute("SELECT COUNT(*) FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s", (tb_id, chap_id, sec_id, block_id, activity_id))
+#             count, created_by = cursor.fetchone()
 
-            # If activity_id does not exist, raise an error
-            if count == 0:
-                return "Activity doesn't exist, so can't modify."
+#             # If activity_id does not exist, raise an error
+#             if count > 0:
+#                 return "New Activity ID already exists, so can't add"
             
-            return "Activity exists, so can modify"
+#             return "New Activity ID doesn't exist - good to go!"
 
-    except Exception as e:
-        print(f"Error modifying activity: {e}")
-        connection.rollback()
+#     except Exception as e:
+#         print(f"Error modifying activity: {e}")
+#         connection.rollback()
     
 def modify_activity_add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text, \
                 option_1, option_1_explanation, option_2, option_2_explanation, \
-                option_3, option_3_explanation, option_4, option_4_explanation, answer):
+                option_3, option_3_explanation, option_4, option_4_explanation, answer, user_modifying):
         
     """ Add question and other corresponding things to the question table and delete previous activity"""
 
     try:
         with connection.cursor() as cursor:
-            # Check if tb_id, chap_id, sec_id, and block_id already exist in the content table
-            cursor.execute("SELECT * FROM question WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id= %s AND question_id =%s", 
-                           (tb_id, chap_id, sec_id, block_id, activity_id, question_id))
-            if cursor.fetchone():
-                return "Question ID already exists for the activity"
-            
-            # If all checks pass, insert into block
-            cursor.execute("""
-                INSERT INTO question (textbook_id, chapter_id, section_id, block_id, unique_activity_id, question_id, 
-                question_text, option_1, opt_1_explanation, option_2, opt_2_explanation, 
-                option_3, opt_3_explanation, option_4, opt_4_explanation, answer)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text, 
-                option_1, option_1_explanation, option_2, option_2_explanation, 
-                option_3, option_3_explanation, option_4, option_4_explanation, answer)) 
+            # Retrieve content from the block table based on tb_id, chap_id, sec_id, and block_id
+            cursor.execute(
+                "SELECT content, block_type FROM block WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s",
+                (tb_id, chap_id, sec_id, block_id)
+            )
+            content, content_type = cursor.fetchone()
 
-            # Commit the changes
-            connection.commit()
+            if(content_type == "activity"):
+
+                # Store the retrieved content as prev_activity_id
+                prev_activity_id = content
+
+                # Check if activity_id exists in the activity table
+                cursor.execute(
+                    "SELECT COUNT(*) FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s",
+                    (tb_id, chap_id, sec_id, block_id, prev_activity_id)
+                )
+                count, = cursor.fetchone()
+
+                if count > 0:
+                    cursor.execute(
+                        "DELETE FROM activity WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s AND unique_activity_id = %s",
+                        (tb_id, chap_id, sec_id, block_id, prev_activity_id)
+                    )
+                    print(f"Previous Activity {[prev_activity_id]} deleted.")
+                else:
+                    return "Previous Activity does not exist."
+
+                # Update the content of the block table with the new activity_id
+                cursor.execute(
+                    "UPDATE block SET content = %s WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s",
+                    (activity_id, tb_id, chap_id, sec_id, block_id)
+                )
+                # If all checks pass, insert into activity
+                cursor.execute("""
+                    INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id, created_by)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (tb_id, chap_id, sec_id, block_id, activity_id, user_modifying)) 
+
+                add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text, \
+                    option_1, option_1_explanation, option_2, option_2_explanation, \
+                    option_3, option_3_explanation, option_4, option_4_explanation, answer)
+                # Commit the changes
+                connection.commit()
+            
+            elif(content_type == "text" or content_type == "picture"):
+                # Update the content and contenty type of the block table with the new activity_id
+                cursor.execute(
+                    "UPDATE block SET content = %s, block_type = %s WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s",
+                    (activity_id, "activity", tb_id, chap_id, sec_id, block_id)
+                )
+                # If all checks pass, insert into activity
+                cursor.execute("""
+                    INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id, created_by)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (tb_id, chap_id, sec_id, block_id, activity_id, user_modifying)) 
+
+                add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text, \
+                    option_1, option_1_explanation, option_2, option_2_explanation, \
+                    option_3, option_3_explanation, option_4, option_4_explanation, answer)
+                # Commit the changes
+                connection.commit()
+            
+            else:
+                return "Invalid existing content type"
+
             return "Modified Activity"
 
     except Exception as e:
         print(f"Error creating question: {e}")
         connection.rollback()  # Rollback in case of error
+        print(traceback.format_exc())
 
 def add_content(connection, tb_id, chap_id, sec_id, content, block_id, block_type="text"):
 
@@ -555,8 +604,6 @@ def add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, ques
     except Exception as e:
         print(f"Error creating question: {e}")
         connection.rollback()  # Rollback in case of error
-
-
 
 
 
@@ -712,6 +759,8 @@ def modify_block_func(connection):
     modify_section(connection, 1, "1", "1")
     print(modify_block(connection, 1, "1", "1", "3", "23890001"))
 
+
+
 def add_block_func(connection):
     # Placeholder for adding block functionality
 
@@ -739,13 +788,96 @@ def create_activity_func(connection):
     create_activity(connection, 1, "1", "1", "4", "ACT0", "12345678")
     add_question(connection, 1, "1", "1", "4", "ACT0", "1", "Who is Rishi", "A", "1", "B", "2", "C", "3", "D", "4", 2)
 
+def modify_activity_func(connection):
+
+    modify_textbook(connection, 1, "12345678")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_activity_add_question(connection, 1, "1", "1", "4", "ACT0", "1", "Who is Aditya", "P", "6", "Q", "7", "R", "8", "S", "9", 3, "12345678"))
+
+    print(modify_activity_add_question(connection, 1, "1", "1", "4", "ACT1", "1", "Who is Aditya", "P", "6", "Q", "7", "R", "8", "S", "9", 3, "12345678"))
+
+    print(modify_activity_add_question(connection, 1, "1", "1", "4", "ACT0", "2", "Who is Aditya", "P", "6", "Q", "7", "R", "8", "S", "9", 3, "12345678"))
+
+    print(modify_activity_add_question(connection, 1, "1", "1", "4", "ACT0", "1", "Who is Rishi", "A", "1", "B", "2", "C", "3", "D", "4", 2, "12345678"))
+
+
+
+
+def add_block_func_edgecases(connection):
+    # Placeholder for adding block edgecases functionality
+    ## add block ("2") by modifying till section - by faculty (Rishi), tb_id = 1 -- SHOULD PASS
+    modify_textbook(connection, 1, "12345678")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    create_block(connection, 1, "1", "1", "5", "12345678")
+    add_content(connection, 1, "1", "1", "Virtualizatio  High", "5", block_type="text")
+
+    ## add block ("2") by modifying till section - by faculty (Rishi), tb_id = 1 -- SHOULD PASS
+    modify_textbook(connection, 1, "12345678")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    create_block(connection, 1, "1", "1", "6", "12345678")
+    add_content(connection, 1, "1", "1", "sample2.png", "6", block_type="picture")
+
+    ## add block ("2") by modifying till section - by faculty (Rishi), tb_id = 1 -- SHOULD PASS
+    modify_textbook(connection, 1, "12345678")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    create_block(connection, 1, "1", "1", "7", "12345678")
+    create_activity(connection, 1, "1", "1", "7", "ACT2", "12345678")
+    add_question(connection, 1, "1", "1", "7", "ACT2", "1", "Who is Deepak", "L", "1", "M", "2", "N", "3", "O", "4", 3)
+
+
+def modify_block_func_edgecases(connection):
+    # Placeholder for modifying block edgecases functionality
+
+    # Text to Picture/Activity
+    modify_textbook(connection, 1, "12378900")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_block(connection, 1, "1", "1", "5", "12378900"))
+    add_content(connection, 1, "1", "1", "sample3.png", "5", block_type="picture")
+
+    modify_textbook(connection, 1, "12378900")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_activity_add_question(connection, 1, "1", "1", "5", "ACT2", "1", "Who is Shashank", "P", "6", "Q", "7", "R", "8", "S", "9", 3, "12378900"))
+
+
+    # Picture to Text/Activity
+    modify_textbook(connection, 1, "12378900")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_block(connection, 1, "1", "1", "6", "12378900"))
+    add_content(connection, 1, "1", "1", "OS huyaaa", "6", block_type="text")
+
+    modify_textbook(connection, 1, "12378900")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_activity_add_question(connection, 1, "1", "1", "6", "ACT2", "1", "Who is Shashank", "P", "6", "Q", "7", "R", "8", "S", "9", 3, "12378900"))
+
+
+    # Activity to Text/Picture
+    modify_textbook(connection, 1, "12378900")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_block(connection, 1, "1", "1", "7", "12378900"))
+    add_content(connection, 1, "1", "1", "OS is boring", "7", block_type="text")
+
+
+    modify_textbook(connection, 1, "12378900")
+    modify_chapter(connection, 1, "1")
+    modify_section(connection, 1, "1", "1")
+    print(modify_block(connection, 1, "1", "1", "7", "12378900"))
+    add_content(connection, 1, "1", "1", "sample4.png", "7", block_type="picture")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7"], help="1: Create Textbook, \
+    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"], help="1: Create Textbook, \
                                     2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
-                                    5: Modify Block, 6: Add block, 7: Create Activity")
+                                    5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases")
     
     # Parse the arguments
     args = parser.parse_args()
@@ -770,6 +902,13 @@ def main():
     
     elif(args.action == "7"):
         create_activity_func(connection)
+    
+    elif(args.action == "8"):
+        modify_activity_func(connection)
+    
+    elif(args.action == "9"):
+        # add_block_func_edgecases(connection)
+        modify_block_func_edgecases(connection)
 
 if __name__ == "__main__":
     main()
