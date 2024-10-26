@@ -389,6 +389,59 @@ async def add_content_request(add_content_request: AddContentRequest):
 
     return {"message": f"{block_type} Content added"}
 
+
+class AddQuestionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    activity_id: str
+    question_id: str
+    question_text: str
+    option_1: str
+    option_1_explanation: str
+    option_2: str
+    option_2_explanation: str
+    option_3: str
+    option_3_explanation: str
+    option_4: str
+    option_4_explanation: str
+    answer: str
+
+    
+@router.post('/add_question')
+async def add_question_request(add_question_request: AddQuestionRequest):
+    # Extract data from the request
+    tb_id = add_question_request.tb_id
+    chap_id = add_question_request.chap_id
+    sec_id = add_question_request.sec_id
+    block_id = add_question_request.block_id
+    activity_id = add_question_request.activity_id
+    question_id = add_question_request.question_id
+    question_text = add_question_request.question_text
+    option_1 = add_question_request.option_1
+    option_1_explanation = add_question_request.option_1_explanation
+    option_2 = add_question_request.option_2
+    option_2_explanation = add_question_request.option_2_explanation
+    option_3 = add_question_request.option_3
+    option_3_explanation = add_question_request.option_3_explanation
+    option_4 = add_question_request.option_4
+    option_4_explanation = add_question_request.option_4_explanation
+    answer = add_question_request.answer
+
+    # Call the add_question function to handle the logic
+    result = await add_question(tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text,
+                                    option_1, option_1_explanation, option_2, option_2_explanation,
+                                    option_3, option_3_explanation, option_4, option_4_explanation, answer)
+    
+    if result == "Question ID already exists for the activity":
+        raise HTTPException(status_code=400, detail=result)
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error adding question")
+
+    return {"message": f"Question id '{question_id}' created for the activity"}
+
+
 class GetPendingEnrollmentsRequest(BaseModel):
     unique_course_id: str
 

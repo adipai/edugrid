@@ -655,7 +655,82 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
             print(f"Error adding {block_type}: {e}")
             print(traceback.format_exc())
             return "error"
-        
+
+
+async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_id: str, 
+                       activity_id: str, question_id: str, question_text: str, 
+                       option_1: str, option_1_explanation: str, option_2: str, 
+                       option_2_explanation: str, option_3: str, option_3_explanation: str, 
+                       option_4: str, option_4_explanation: str, answer: str):
+
+    check_query = """
+        SELECT question_id FROM question 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id 
+        AND block_id = :block_id AND unique_activity_id = :activity_id 
+        AND question_id = :question_id
+    """
+    insert_query = """
+        INSERT INTO question (textbook_id, chapter_id, section_id, block_id, unique_activity_id, 
+                              question_id, question_text, option_1, opt_1_explanation, 
+                              option_2, opt_2_explanation, option_3, opt_3_explanation, 
+                              option_4, opt_4_explanation, answer) 
+        VALUES (:tb_id, :chap_id, :sec_id, :block_id, :activity_id, :question_id, 
+                :question_text, :option_1, :option_1_explanation, 
+                :option_2, :option_2_explanation, :option_3, 
+                :option_3_explanation, :option_4, :option_4_explanation, :answer)
+    """
+
+    async with connection.transaction() as transaction:
+        try:
+            # Check if the question ID already exists for the activity
+            existing_question = await connection.fetch_one(
+                query=check_query, 
+                values={
+                    "tb_id": tb_id, 
+                    "chap_id": chap_id, 
+                    "sec_id": sec_id, 
+                    "block_id": block_id, 
+                    "activity_id": activity_id, 
+                    "question_id": question_id
+                }
+            )
+
+            if existing_question:
+                return "Question ID already exists for the activity"
+
+            # Insert the new question into the question table
+            await connection.execute(
+                query=insert_query, 
+                values={
+                    "tb_id": tb_id,
+                    "chap_id": chap_id,
+                    "sec_id": sec_id,
+                    "block_id": block_id,
+                    "activity_id": activity_id,
+                    "question_id": question_id,
+                    "question_text": question_text,
+                    "option_1": option_1,
+                    "option_1_explanation": option_1_explanation,
+                    "option_2": option_2,
+                    "option_2_explanation": option_2_explanation,
+                    "option_3": option_3,
+                    "option_3_explanation": option_3_explanation,
+                    "option_4": option_4,
+                    "option_4_explanation": option_4_explanation,
+                    "answer": answer
+                }
+            )
+
+            return "success"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error adding question: {e}")
+            print(traceback.format_exc())
+            return "error"
+
+
+
 async def fetch_pending_enrollments(unique_course_id: str):
     enrollment_query = """
     SELECT student_id, status
