@@ -1,6 +1,8 @@
 import databases
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-DATABASE_URL = "mysql://drajend2:200537951@classdb2.csc.ncsu.edu:3306/drajend2"
-# DATABASE_URL = "mysql://user:user_password@localhost:3306/mydb"
-
+DATABASE_URL = os.getenv('DATABASE_URL', 'localhost')
+print(DATABASE_URL)
 database = databases.Database(DATABASE_URL)
