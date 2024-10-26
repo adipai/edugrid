@@ -16,10 +16,8 @@ const AdminCreateTextbook: React.FC = () => {
                 created_by: createdBy
             });
             console.log('Textbook created:', response.data);
-            window.alert('Textbook created successfully!');
             navigate('/admin/create-new-chapter?tb_id=' + textbookId);
         } catch (error) {
-            window.alert('Textbook creation failed!');
             console.error('Error creating textbook:', error);
         }
     };
