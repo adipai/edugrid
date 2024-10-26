@@ -9,7 +9,6 @@ const AdminCreateActiveCourse = () => {
     const [facultyId, setFacultyId] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [taId, setTaId] = useState('');
     const [courseCapacity, setCourseCapacity] = useState(0);
     const [uniqueToken, setUniqueToken] = useState('');
 
@@ -28,7 +27,6 @@ const AdminCreateActiveCourse = () => {
                 course_type: "active",
                 start_date: startDate,
                 end_date: endDate,
-                ta_id: taId,
                 unique_token: uniqueToken,
                 capacity: courseCapacity
               };
@@ -97,15 +95,6 @@ const AdminCreateActiveCourse = () => {
                         type="text" 
                         value={facultyId} 
                         onChange={(e) => setFacultyId(e.target.value)} 
-                        required 
-                    />
-                </div>
-                <div>
-                    <label>Teaching assistant ID:</label>
-                    <input 
-                        type="text" 
-                        value={taId} 
-                        onChange={(e) => setTaId(e.target.value)} 
                         required 
                     />
                 </div>

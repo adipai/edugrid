@@ -291,13 +291,13 @@ async def create_textbook(tb_id, tb_name):
         print(f"Error creating textbook: {e}")
         return 'error'
 
-async def create_course(course_id, course_name, textbook_id, course_type, faculty_id, ta_id, start_date, end_date, unique_token, capacity):
+async def create_course(course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity):
     # Query to check if course exists
     check_query = """SELECT * FROM course WHERE course_id = :course_id"""
     
-    # Query to insert textbook
+    # Query to insert course
     insert_query = """
-    INSERT INTO course (course_id, course_name, textbook_id, course_type, faculty_id, ta_id, start_date, end_date, unique_token, capacity) VALUES (:course_id, :course_name, :textbook_id, :course_type, :faculty_id, :ta_id, :start_date, :end_date, :unique_token, :capacity)
+    INSERT INTO course (course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity) VALUES (:course_id, :course_name, :textbook_id, :course_type, :faculty_id, :start_date, :end_date, :unique_token, :capacity)
     """
     
     # Start a transaction
@@ -310,7 +310,7 @@ async def create_course(course_id, course_name, textbook_id, course_type, facult
             return "course_exists"
         
         # Insert textbook
-        await database.execute(query=insert_query, values={"course_id": course_id, "course_name": course_name, "textbook_id": textbook_id, "course_type": course_type, "faculty_id": faculty_id, "ta_id": ta_id, "start_date": start_date, "end_date": end_date, "unique_token": unique_token, "capacity": capacity})
+        await database.execute(query=insert_query, values={"course_id": course_id, "course_name": course_name, "textbook_id": textbook_id, "course_type": course_type, "faculty_id": faculty_id, "start_date": start_date, "end_date": end_date, "unique_token": unique_token, "capacity": capacity})
         
         # Commit the transaction
         await transaction.commit()
@@ -322,4 +322,56 @@ async def create_course(course_id, course_name, textbook_id, course_type, facult
         # Rollback the transaction
         await transaction.rollback()
         print(f"Error creating course: {e}")
+        return 'error'
+
+async def view_courses_faculty(faculty_id):
+    # Query to view courses exists
+    courses_query = """SELECT * FROM course WHERE faculty_id = :faculty_id"""
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if textbook exists
+        courses = await database.fetch_all(query=courses_query, values={"faculty_id": faculty_id})
+        await transaction.commit()
+
+        if not courses:
+            return "no_courses_found"
+        
+        course_list = [dict(course) for course in courses]
+        print(f"Retrieved {len(course_list)} courses for faculty ID '{faculty_id}'.")
+        return course_list
+    
+    except Exception as e:
+        # Rollback the transaction
+        await transaction.rollback()
+        print(f"Error retrieving courses for faculty ID '{faculty_id}': {e}")
+        return 'error'
+    
+async def view_courses_ta(ta_id):
+    # Query to view courses exists
+    courses_query = """SELECT c.course_id, c.course_name FROM course c
+      JOIN teaching_assistant ta ON c.course_id = ta.course_id
+      WHERE ta.ta_id = :ta_id"""
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if textbook exists
+        courses = await database.fetch_all(query=courses_query, values={"ta_id": ta_id})
+        await transaction.commit()
+
+        if not courses:
+            return "no_courses_found"
+        
+        course_list = [dict(course) for course in courses]
+        print(f"Retrieved {len(course_list)} courses for teaching assistant ID '{ta_id}'.")
+        return course_list
+    
+    except Exception as e:
+        # Rollback the transaction
+        await transaction.rollback()
+        print(f"Error retrieving courses for teaching assistant ID '{ta_id}': {e}")
         return 'error'

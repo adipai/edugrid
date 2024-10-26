@@ -16,6 +16,7 @@ import AdminCreateFaculty from "./pages/Admin/AdminCreateFaculty";
 import AdminCreateEvaluationCourse from "./pages/Admin/AdminCreateEvaluationCourse";
 import AdminCreateActiveCourse from "./pages/Admin/AdminCreateActiveCourse";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
+import FacultyCoursesPage from "./pages/Faculty/FacultyCoursesPage";
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
         {/* Faculty routes */}
         <Route path="/faculty/login" element={<FacultyLoginPage />} />
         <Route path="/faculty/landing" element={<FacultyLandingPage />} />
+        <Route path="/faculty/courses" element={<FacultyCoursesPage />} />
         
         {/* TA routes */}
         <Route path="/ta/login" element={<TALoginPage />} />

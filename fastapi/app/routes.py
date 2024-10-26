@@ -190,7 +190,6 @@ class CreateCourseRequest(BaseModel):
     textbook_id: int
     course_type: str
     faculty_id: str
-    ta_id: Optional[str] = None 
     start_date: datetime
     end_date: datetime
     unique_token: Optional[str] = None
@@ -204,16 +203,33 @@ async def create_course_request(create_course_request: CreateCourseRequest):
     textbook_id = create_course_request.textbook_id
     course_type = create_course_request.course_type
     faculty_id = create_course_request.faculty_id
-    ta_id = create_course_request.ta_id
     start_date = create_course_request.start_date
     end_date = create_course_request.end_date
     unique_token = create_course_request.unique_token
     capacity = create_course_request.capacity
 
-    result = await create_course(course_id, course_name, textbook_id, course_type, faculty_id, ta_id, start_date, end_date, unique_token, capacity)
+    result = await create_course(course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity)
     
     if result == 'course_exists':
         return {'error': 'Course already exists'}, 400
     elif result == 'error':
         return {'error': 'Error creating course'}, 500
     return {'message': 'Course created successfully'}, 201
+
+class ViewCoursesRequest(BaseModel):
+    user_id: str
+    role: str
+
+@router.post("/view_courses", status_code=200)    
+async def view_courses_request(view_courses_request: ViewCoursesRequest):
+    user_id = view_courses_request.user_id
+    role = view_courses_request.role
+    if role == "faculty":
+        courses = await view_courses_faculty(user_id)
+    else:
+        courses = await view_courses_ta(user_id)
+    
+    if courses:
+        return {"status": "success", "courses": courses}
+    else:
+        raise HTTPException(status_code=404, detail="Not found")
