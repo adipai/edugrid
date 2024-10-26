@@ -323,3 +323,12 @@ async def create_course(course_id, course_name, textbook_id, course_type, facult
         await transaction.rollback()
         print(f"Error creating course: {e}")
         return 'error'
+
+async def get_textbook_details(tb_id):
+    query = """
+        SELECT * 
+        FROM textbook 
+        WHERE textbook_id = :tb_id
+    """
+    values = {"tb_id": tb_id}
+    return await database.fetch_one(query=query, values=values)

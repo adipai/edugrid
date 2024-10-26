@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from app.utils import *
 from pydantic import BaseModel
@@ -217,3 +218,16 @@ async def create_course_request(create_course_request: CreateCourseRequest):
     elif result == 'error':
         return {'error': 'Error creating course'}, 500
     return {'message': 'Course created successfully'}, 201
+
+class GetTextBookRequest(BaseModel):
+    tb_id: int
+
+@router.get('/api/v1/textbook')
+async def _get_textbook(tb_id: Optional[int] = None):
+    
+    result = await get_textbook_details(tb_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Textbook not found")
+    return {'textbook': result}
