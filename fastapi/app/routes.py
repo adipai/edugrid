@@ -230,7 +230,7 @@ async def _get_textbook(tb_id: Optional[int] = None):
     return {'textbook': result}
 
 @router.get('/api/v1/chapter')
-async def _get_chapter(tb_id: Optional[int] = None, chap_id: Optional[int] = None):
+async def _get_chapter(tb_id: Optional[int] = None, chap_id: Optional[str] = None):
     
     result = await get_chapter_details(tb_id,chap_id)
     
