@@ -348,6 +348,15 @@ async def get_textbook_details(tb_id):
     values = {"tb_id": tb_id}
     return await database.fetch_one(query=query, values=values)
 
+async def get_chapter_details(tb_id, chap_id):
+    query = """
+        SELECT * 
+        FROM chapter 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id
+    """
+    values = {"tb_id": tb_id, "chap_id": chap_id}
+    return await database.fetch_one(query=query, values=values)
+
 """
 TEXTBOOK MODULE
 """

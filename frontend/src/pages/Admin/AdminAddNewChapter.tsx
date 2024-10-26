@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from 'axios';
+
 
 const AdminAddNewChapter: React.FC = () => {
   const [chapterId, setChapterId] = useState("");
@@ -10,6 +12,8 @@ const AdminAddNewChapter: React.FC = () => {
   const queryParams = new URLSearchParams(location.search);
   const tb_id = queryParams.get("tb_id");
   const createdBy = localStorage.getItem('user_id')
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     // Fetch textbook data here
@@ -24,11 +28,23 @@ const AdminAddNewChapter: React.FC = () => {
       });
   }, [tb_id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission logic here
     console.log("Chapter ID:", chapterId);
     console.log("Chapter Title:", chapterTitle);
+    try {
+      const response = await axios.post('http://localhost:8000/create_chapter', {
+          tb_id: tb_id,
+          chap_id: chapterId,
+          chap_title: chapterTitle,
+          created_by: createdBy
+      });
+      console.log('Chapter created:', response.data);
+      navigate('/admin/create-new-section?tb_id=' + tb_id + "&chap_id=" + chapterId);
+  } catch (error) {
+      console.error('Error creating chapter:', error);
+  }
   };
 
   return (
@@ -59,7 +75,7 @@ const AdminAddNewChapter: React.FC = () => {
             <button type="submit">Add Chapter</button>
           </li>
           <li>
-            <Link to={`/admin/textbook`}>Back to Textbook</Link>
+            <div onClick={(e) => navigate(-1)}>Back to Textbook</div>
           </li>
           <li>
             <Link to={`/admin/landing`}>Landing Page</Link>

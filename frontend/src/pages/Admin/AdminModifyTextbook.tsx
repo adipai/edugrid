@@ -41,6 +41,7 @@ const AdminModifyTextbook: React.FC = () => {
   };
 
   const handleGoBack = (e: React.FormEvent) => {
+    e.preventDefault();
     setSearchTbId("");
     setTextbookDetails(null);
   };
