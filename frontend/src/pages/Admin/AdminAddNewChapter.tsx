@@ -9,6 +9,7 @@ const AdminAddNewChapter: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tb_id = queryParams.get("tb_id");
+  const createdBy = localStorage.getItem('user_id')
 
   useEffect(() => {
     // Fetch textbook data here
