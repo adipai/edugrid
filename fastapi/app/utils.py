@@ -655,3 +655,17 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
             print(f"Error adding {block_type}: {e}")
             print(traceback.format_exc())
             return "error"
+        
+async def fetch_pending_enrollments(unique_course_id: str):
+    enrollment_query = """
+    SELECT student_id, status
+    FROM enrollment
+    WHERE unique_course_id = :unique_course_id AND status = 'Pending'
+    """
+    try:
+        
+        enrollments = await database.fetch_all(query=enrollment_query, values={"unique_course_id": unique_course_id})
+        return enrollments
+    except Exception as e:
+        print(f"Error fetching pending enrollments for course ID '{unique_course_id}': {e}")
+        return None

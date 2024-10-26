@@ -167,26 +167,6 @@ async def addTa(add_student_request: AddStudentRequest):
         raise HTTPException(status_code=500, detail="Error creating user")
     return {'message': 'User created successfully'}
 
-"""
-class CreateTextbookRequest(BaseModel):
-    tb_id: int
-    tb_name: str
-
-
-@router.post('/create_textbook')
-async def create_textbook_request(create_textbook_request: CreateTextbookRequest):
-    tb_id = create_textbook_request.tb_id
-    tb_name = create_textbook_request.tb_name
-    
-    result = await create_textbook(tb_id, tb_name)
-    
-    if result == 'textbook_exists':
-        return {'error': 'Textbook already exists'}, 400
-    elif result == 'error':
-        return {'error': 'Error creating textbook'}, 500
-    return {'message': 'Textbook created successfully'}, 201
-"""
-
 class CreateCourseRequest(BaseModel):
     course_id: str
     course_name: str
@@ -408,3 +388,18 @@ async def add_content_request(add_content_request: AddContentRequest):
         raise HTTPException(status_code=500, detail=f"Error adding {block_type}")
 
     return {"message": f"{block_type} Content added"}
+
+class GetPendingEnrollmentsRequest(BaseModel):
+    unique_course_id: str
+
+@router.post('/get_pending_enrollments')
+async def get_pending_enrollments(request: GetPendingEnrollmentsRequest):
+    unique_course_id = request.unique_course_id
+    
+    # Call the function to fetch pending enrollments
+    result = await fetch_pending_enrollments(unique_course_id)
+    
+    if result is None:
+        raise HTTPException(status_code=404, detail="No pending enrollments found.")
+    
+    return {"pending_enrollments": result}, 200
