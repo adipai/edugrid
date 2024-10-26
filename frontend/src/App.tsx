@@ -22,6 +22,13 @@ import AdminCreateTextbook from "./pages/Admin/AdminCreateTextbook";
 import AdminAddNewChapter from "./pages/Admin/AdminAddNewChapter";
 import AdminModifyTextbook from "./pages/Admin/AdminModifyTextbook";
 import AdminAddNewSection from "./pages/Admin/AdminAddNewSection";
+import AdminAddNewContentBlock from "./pages/Admin/AdminAddNewContentBlock";
+import AdminModifyChapter from "./pages/Admin/AdminModifyChapter";
+import AdminContentAddText from "./pages/Admin/AdminContentAddText";
+import AdminContentPicText from "./pages/Admin/AdminContentAddPic";
+import AdminActivityAddQuestion from "./pages/Admin/AdminActivityAddQuestion";
+import AdminModifySection from "./pages/Admin/AdminModifySection";
+import AdminModifyContentBlock from "./pages/Admin/AdminModifyContentBlock";
 
 function App() {
   return (
@@ -39,8 +46,15 @@ function App() {
         <Route path="/admin/create-active-course" element={<AdminCreateActiveCourse />} />
         <Route path="/admin/create-textbook" element={<AdminCreateTextbook />} />
         <Route path="/admin/create-new-chapter" element={<AdminAddNewChapter />} />
-        <Route path="/admin/modify-textbook" element={<AdminModifyTextbook />} />
         <Route path="/admin/create-new-section" element={<AdminAddNewSection />} />
+        <Route path="/admin/create-new-content" element={<AdminAddNewContentBlock />} />
+        <Route path="/admin/content-add-text" element={<AdminContentAddText />} />
+        <Route path="/admin/content-add-pic" element={<AdminContentPicText />} />
+        <Route path="/admin/activity-add-question" element={<AdminActivityAddQuestion />} />
+        <Route path="/admin/modify-textbook" element={<AdminModifyTextbook />} />
+        <Route path="/admin/modify-chapter" element={<AdminModifyChapter />} />
+        <Route path="/admin/modify-section" element={<AdminModifySection />} />
+        <Route path="/admin/modify-content" element={<AdminModifyContentBlock />} />
 
         
         {/* Faculty routes */}

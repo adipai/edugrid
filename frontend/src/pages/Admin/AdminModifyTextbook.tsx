@@ -8,19 +8,19 @@ const AdminModifyTextbook: React.FC = () => {
 
   useEffect(() => {
     // Fetch textbook data here
-    if (!searchTbId){
-        return;
+    if (!searchTbId) {
+      return;
     }
     console.log(`http://localhost:8000/api/v1/textbook?tb_id=${searchTbId}`);
     fetch(`http://localhost:8000/api/v1/textbook?tb_id=${searchTbId}`)
       .then((response) => response.json())
       .then((data) => {
         // Handle the fetched textbook data here
-        console.log(data)
-        if (data?.textbook){
-            setTextbookDetails(data.textbook);
-        }else{
-            window.alert("Textbook not found");
+        console.log(data);
+        if (data?.textbook) {
+          setTextbookDetails(data.textbook);
+        } else {
+          window.alert("Textbook not found");
         }
       })
       .catch((error) => {
@@ -65,30 +65,40 @@ const AdminModifyTextbook: React.FC = () => {
           </button>
         </form>
       )}
-      {textbookDetails && (
-        <>
-          <h2>Textbook: {textbookDetails?.title}</h2>
-          <ul>
+
+      {textbookDetails && <h2>Textbook: {textbookDetails?.title}</h2>}
+      <ul>
+        {textbookDetails && (
+          <>
             <li>
-              <Link to={`/admin/create-new-section?tb_id=${textbookDetails.textbook_id}`}>
+              <Link
+                to={`/admin/create-new-section?tb_id=${textbookDetails.textbook_id}`}
+              >
                 1. Add New Chapter
               </Link>
             </li>
             <li>
-              <Link to={`/admin/modify-chapter?tb_id=${textbookDetails.textbook_id}`}>
+              <Link
+                to={`/admin/modify-chapter?tb_id=${textbookDetails.textbook_id}`}
+              >
                 2. Modify Chapter
               </Link>
             </li>
             <li>
-              {/* <Link to={`/admin/landing`}>3. Go Back</Link> */}
               <div onClick={(e) => handleGoBack(e)}>3. Go Back</div>
             </li>
-            <li>
-              <Link to={`/admin/landing`}>4. Landing Page</Link>
-            </li>
-          </ul>
-        </>
-      )}
+          </>
+        )}
+
+        {!textbookDetails && (
+          <li>
+            <Link to={`/admin/landing`}>3. Go Back</Link>{" "}
+          </li>
+        )}
+        <li>
+          <Link to={`/admin/landing`}>4. Landing Page</Link>
+        </li>
+      </ul>
     </div>
   );
 };
