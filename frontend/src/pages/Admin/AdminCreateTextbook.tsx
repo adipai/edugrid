@@ -6,16 +6,17 @@ const AdminCreateTextbook: React.FC = () => {
     const [textbookId, setTextbookId] = useState('');
     const [textbookName, setTextbookName] = useState('');
     const navigate = useNavigate();
-
+    const createdBy = localStorage.getItem('user_id')
 
     const handleCreateTextbook = async () => {
         try {
             const response = await axios.post('http://localhost:8000/create_textbook', {
                 tb_id: textbookId,
                 tb_name: textbookName,
+                created_by: createdBy
             });
             console.log('Textbook created:', response.data);
-            navigate('/admin/create-new-section?tb_id=' + textbookId);
+            navigate('/admin/create-new-chapter?tb_id=' + textbookId);
         } catch (error) {
             console.error('Error creating textbook:', error);
         }
