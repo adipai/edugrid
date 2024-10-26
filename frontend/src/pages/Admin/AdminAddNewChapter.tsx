@@ -75,7 +75,7 @@ const AdminAddNewChapter: React.FC = () => {
             <button type="submit">Add Chapter</button>
           </li>
           <li>
-            <Link to={`/admin/textbook`}>Back to Textbook</Link>
+            <div onClick={(e) => navigate(-1)}>Back to Textbook</div>
           </li>
           <li>
             <Link to={`/admin/landing`}>Landing Page</Link>

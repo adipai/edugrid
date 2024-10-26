@@ -397,7 +397,7 @@ async def create_textbook(tb_id: int, tb_name: str, created_by: str):
         return 'error'
 
 
-async def create_chapter(tb_id: int, chap_id: int, chap_title: str, created_by: str):
+async def create_chapter(tb_id: int, chap_id: str, chap_title: str, created_by: str):
     # Query to check if the chapter already exists in the textbook
     check_query = """
     SELECT * FROM chapter WHERE textbook_id = :tb_id AND chapter_id = :chap_id
@@ -438,7 +438,7 @@ async def create_chapter(tb_id: int, chap_id: int, chap_title: str, created_by: 
         print(f"Error creating chapter: {e}")
         return 'error'
 
-async def create_section(tb_id: int, chap_id: int, sec_id: int, sec_name: str, created_by: str):
+async def create_section(tb_id: int, chap_id: str, sec_id: str, sec_name: str, created_by: str):
     # Query to check if the section already exists in the chapter
     check_query = """
     SELECT * FROM section WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
@@ -486,7 +486,7 @@ async def create_section(tb_id: int, chap_id: int, sec_id: int, sec_name: str, c
         print(f"Error creating section: {e}")
         return 'error'
     
-async def create_block(tb_id: int, chap_id: int, sec_id: int, block_id: int, created_by: str):
+async def create_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, created_by: str):
     # Query to check if the content block already exists in the section
     check_query = """
     SELECT * FROM block WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
@@ -537,7 +537,7 @@ async def create_block(tb_id: int, chap_id: int, sec_id: int, block_id: int, cre
         return 'error'
 
 
-async def create_activity(tb_id: int, chap_id: int, sec_id: int, block_id: int, activity_id: int, created_by: str):
+async def create_activity(tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, created_by: str):
     # Query to check if the activity block already exists in the section
     check_query = """
     SELECT * FROM activity WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND unique_activity_id = :activity_id
@@ -567,6 +567,18 @@ async def create_activity(tb_id: int, chap_id: int, sec_id: int, block_id: int, 
         )
         if existing_activity:
             return "activity_exists"
+    
+        # Update the content and block type in the block table
+        await database.execute(
+            query=update_query,
+            values={
+                "activity_id": activity_id,
+                "tb_id": tb_id,
+                "chap_id": chap_id,
+                "sec_id": sec_id,
+                "block_id": block_id
+            }
+        )
         
         # Insert the new activity block
         await database.execute(
@@ -578,18 +590,6 @@ async def create_activity(tb_id: int, chap_id: int, sec_id: int, block_id: int, 
                 "block_id": block_id,
                 "activity_id": activity_id,
                 "created_by": created_by
-            }
-        )
-        
-        # Update the content and block type in the block table
-        await database.execute(
-            query=update_query,
-            values={
-                "activity_id": activity_id,
-                "tb_id": tb_id,
-                "chap_id": chap_id,
-                "sec_id": sec_id,
-                "block_id": block_id
             }
         )
         

@@ -217,7 +217,7 @@ async def create_course_request(create_course_request: CreateCourseRequest):
         return {'error': 'Course already exists'}, 400
     elif result == 'error':
         return {'error': 'Error creating course'}, 500
-    return {'message': 'Course created successfully'}, 201
+    return {'message': 'Course created successfully'}
 
 class ViewCoursesRequest(BaseModel):
     user_id: str
@@ -278,11 +278,11 @@ async def create_textbook_request(create_textbook_request: CreateTextbookRequest
     elif result == 'error':
         raise HTTPException(status_code=500, detail="Error creating textbook")
     
-    return {"message": "Textbook created successfully"}, 201
+    return {"message": "Textbook created successfully"}
 
 class CreateChapterRequest(BaseModel):
     tb_id: int
-    chap_id: int
+    chap_id: str
     chap_title: str
     created_by: str
 
@@ -301,12 +301,12 @@ async def create_chapter_request(create_chapter_request: CreateChapterRequest):
     elif result == 'error':
         raise HTTPException(status_code=500, detail="Error creating chapter")
     
-    return {"message": "Chapter created successfully"}, 201
+    return {"message": "Chapter created successfully"}
 
 class CreateSectionRequest(BaseModel):
     tb_id: int
-    chap_id: int
-    sec_id: int
+    chap_id: str
+    sec_id: str
     sec_name: str
     created_by: str
 
@@ -326,7 +326,7 @@ async def create_section_request(create_section_request: CreateSectionRequest):
     elif result == 'error':
         raise HTTPException(status_code=500, detail="Error creating section")
     
-    return {"message": "Section created successfully"}, 201
+    return {"message": "Section created successfully"}
 
 class CreateBlockRequest(BaseModel):
     tb_id: int
@@ -351,7 +351,7 @@ async def create_block_request(create_block_request: CreateBlockRequest):
     elif result == 'error':
         raise HTTPException(status_code=500, detail="Error creating content block")
     
-    return {"message": "Content block created successfully"}, 201
+    return {"message": "Content block created successfully"}
 
 class CreateActivityRequest(BaseModel):
     tb_id: int
@@ -378,4 +378,4 @@ async def create_activity_request(create_activity_request: CreateActivityRequest
     elif result == 'error':
         raise HTTPException(status_code=500, detail="Error creating activity block")
     
-    return {"message": "Activity block created and updated successfully"}, 201
+    return {"message": "Activity block created and updated successfully"}
