@@ -47,7 +47,7 @@ function App() {
         <Route path="/admin/create-textbook" element={<AdminCreateTextbook />} />
         <Route path="/admin/create-new-chapter" element={<AdminAddNewChapter />} />
         <Route path="/admin/create-new-section" element={<AdminAddNewSection />} />
-        <Route path="/admin/create-new-content" element={<AdminAddNewContentBlock />} />
+        <Route path="/admin/create-new-block" element={<AdminAddNewContentBlock />} />
         <Route path="/admin/content-add-text" element={<AdminContentAddText />} />
         <Route path="/admin/content-add-pic" element={<AdminContentPicText />} />
         <Route path="/admin/activity-add-question" element={<AdminActivityAddQuestion />} />

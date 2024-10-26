@@ -310,9 +310,9 @@ async def create_section_request(create_section_request: CreateSectionRequest):
 
 class CreateBlockRequest(BaseModel):
     tb_id: int
-    chap_id: int
-    sec_id: int
-    block_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
     created_by: str
 
 @router.post('/create_block')
@@ -335,10 +335,10 @@ async def create_block_request(create_block_request: CreateBlockRequest):
 
 class CreateActivityRequest(BaseModel):
     tb_id: int
-    chap_id: int
-    sec_id: int
-    block_id: int
-    activity_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    activity_id: str
     created_by: str
 
 @router.post('/create_activity')
