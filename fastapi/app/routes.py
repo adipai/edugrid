@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from app.utils import *
 from pydantic import BaseModel
@@ -166,6 +167,7 @@ async def addTa(add_student_request: AddStudentRequest):
         raise HTTPException(status_code=500, detail="Error creating user")
     return {'message': 'User created successfully'}
 
+"""
 class CreateTextbookRequest(BaseModel):
     tb_id: int
     tb_name: str
@@ -183,6 +185,7 @@ async def create_textbook_request(create_textbook_request: CreateTextbookRequest
     elif result == 'error':
         return {'error': 'Error creating textbook'}, 500
     return {'message': 'Textbook created successfully'}, 201
+"""
 
 class CreateCourseRequest(BaseModel):
     course_id: str
@@ -233,3 +236,136 @@ async def view_courses_request(view_courses_request: ViewCoursesRequest):
         return {"status": "success", "courses": courses}
     else:
         raise HTTPException(status_code=404, detail="Not found")
+class GetTextBookRequest(BaseModel):
+    tb_id: int
+
+@router.get('/api/v1/textbook')
+async def _get_textbook(tb_id: Optional[int] = None):
+    
+    result = await get_textbook_details(tb_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Textbook not found")
+    return {'textbook': result}
+
+class CreateTextbookRequest(BaseModel):
+    tb_id: int
+    tb_name: str
+    created_by: str
+
+@router.post('/create_textbook')
+async def create_textbook_request(create_textbook_request: CreateTextbookRequest):
+    tb_id = create_textbook_request.tb_id
+    tb_name = create_textbook_request.tb_name
+    created_by = create_textbook_request.created_by
+    
+    # Call the create_textbook function to handle the logic
+    result = await create_textbook(tb_id, tb_name, created_by)
+    
+    if result == 'textbook_exists':
+        raise HTTPException(status_code=400, detail="Textbook ID already exists")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error creating textbook")
+    
+    return {"message": "Textbook created successfully"}, 201
+
+class CreateChapterRequest(BaseModel):
+    tb_id: int
+    chap_id: int
+    chap_title: str
+    created_by: str
+
+@router.post('/create_chapter')
+async def create_chapter_request(create_chapter_request: CreateChapterRequest):
+    tb_id = create_chapter_request.tb_id
+    chap_id = create_chapter_request.chap_id
+    chap_title = create_chapter_request.chap_title
+    created_by = create_chapter_request.created_by
+    
+    # Call the create_chapter function to handle the logic
+    result = await create_chapter(tb_id, chap_id, chap_title, created_by)
+    
+    if result == 'chapter_exists':
+        raise HTTPException(status_code=400, detail="Chapter already exists in the textbook.")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error creating chapter")
+    
+    return {"message": "Chapter created successfully"}, 201
+
+class CreateSectionRequest(BaseModel):
+    tb_id: int
+    chap_id: int
+    sec_id: int
+    sec_name: str
+    created_by: str
+
+@router.post('/create_section')
+async def create_section_request(create_section_request: CreateSectionRequest):
+    tb_id = create_section_request.tb_id
+    chap_id = create_section_request.chap_id
+    sec_id = create_section_request.sec_id
+    sec_name = create_section_request.sec_name
+    created_by = create_section_request.created_by
+    
+    # Call the create_section function to handle the logic
+    result = await create_section(tb_id, chap_id, sec_id, sec_name, created_by)
+    
+    if result == 'section_exists':
+        raise HTTPException(status_code=400, detail="Section already exists in the chapter.")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error creating section")
+    
+    return {"message": "Section created successfully"}, 201
+
+class CreateBlockRequest(BaseModel):
+    tb_id: int
+    chap_id: int
+    sec_id: int
+    block_id: int
+    created_by: str
+
+@router.post('/create_block')
+async def create_block_request(create_block_request: CreateBlockRequest):
+    tb_id = create_block_request.tb_id
+    chap_id = create_block_request.chap_id
+    sec_id = create_block_request.sec_id
+    block_id = create_block_request.block_id
+    created_by = create_block_request.created_by
+    
+    # Call the create_block function to handle the logic
+    result = await create_block(tb_id, chap_id, sec_id, block_id, created_by)
+    
+    if result == 'block_exists':
+        raise HTTPException(status_code=400, detail="Content block already exists in the section.")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error creating content block")
+    
+    return {"message": "Content block created successfully"}, 201
+
+class CreateActivityRequest(BaseModel):
+    tb_id: int
+    chap_id: int
+    sec_id: int
+    block_id: int
+    activity_id: int
+    created_by: str
+
+@router.post('/create_activity')
+async def create_activity_request(create_activity_request: CreateActivityRequest):
+    tb_id = create_activity_request.tb_id
+    chap_id = create_activity_request.chap_id
+    sec_id = create_activity_request.sec_id
+    block_id = create_activity_request.block_id
+    activity_id = create_activity_request.activity_id
+    created_by = create_activity_request.created_by
+    
+    # Call the create_activity function to handle the logic
+    result = await create_activity(tb_id, chap_id, sec_id, block_id, activity_id, created_by)
+    
+    if result == 'activity_exists':
+        raise HTTPException(status_code=400, detail="Activity block already exists in the section.")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="Error creating activity block")
+    
+    return {"message": "Activity block created and updated successfully"}, 201

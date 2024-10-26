@@ -258,39 +258,6 @@ async def add_student(first_name, last_name, email, password, current_date, user
         # Return error
         return 'error'
 
-async def create_textbook(tb_id, tb_name):
-    # Query to check if textbook exists
-    check_query = """SELECT * FROM textbook WHERE textbook_id = :tb_id"""
-    
-    # Query to insert textbook
-    insert_query = """
-    INSERT INTO textbook (textbook_id, title) VALUES (:tb_id, :tb_name)
-    """
-    
-    # Start a transaction
-    transaction = await database.transaction()
-    
-    try:
-        # Check if textbook exists
-        existing_textbook = await database.fetch_one(query=check_query, values={"tb_id": tb_id})
-        if existing_textbook:
-            return "textbook_exists"
-        
-        # Insert textbook
-        await database.execute(query=insert_query, values={"tb_id": tb_id, "tb_name": tb_name})
-        
-        # Commit the transaction
-        await transaction.commit()
-        print(f"Textbook '{tb_name}' created with ID '{tb_id}'.")
-        
-        return {"message": f"Textbook '{tb_name}' created with ID '{tb_id}'."}
-    
-    except Exception as e:
-        # Rollback the transaction
-        await transaction.rollback()
-        print(f"Error creating textbook: {e}")
-        return 'error'
-
 async def create_course(course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity):
     # Query to check if course exists
     check_query = """SELECT * FROM course WHERE course_id = :course_id"""
@@ -327,12 +294,10 @@ async def create_course(course_id, course_name, textbook_id, course_type, facult
 async def view_courses_faculty(faculty_id):
     # Query to view courses exists
     courses_query = """SELECT * FROM course WHERE faculty_id = :faculty_id"""
-    
     # Start a transaction
     transaction = await database.transaction()
     
     try:
-        # Check if textbook exists
         courses = await database.fetch_all(query=courses_query, values={"faculty_id": faculty_id})
         await transaction.commit()
 
@@ -354,12 +319,10 @@ async def view_courses_ta(ta_id):
     courses_query = """SELECT c.course_id, c.course_name FROM course c
       JOIN teaching_assistant ta ON c.course_id = ta.course_id
       WHERE ta.ta_id = :ta_id"""
-    
     # Start a transaction
     transaction = await database.transaction()
     
     try:
-        # Check if textbook exists
         courses = await database.fetch_all(query=courses_query, values={"ta_id": ta_id})
         await transaction.commit()
 
@@ -374,4 +337,260 @@ async def view_courses_ta(ta_id):
         # Rollback the transaction
         await transaction.rollback()
         print(f"Error retrieving courses for teaching assistant ID '{ta_id}': {e}")
+        return 'error'
+
+async def get_textbook_details(tb_id):
+    query = """
+        SELECT * 
+        FROM textbook 
+        WHERE textbook_id = :tb_id
+    """
+    values = {"tb_id": tb_id}
+    return await database.fetch_one(query=query, values=values)
+
+"""
+TEXTBOOK MODULE
+"""
+async def create_textbook(tb_id: int, tb_name: str, created_by: str):
+    # Query to check if textbook exists
+    check_query = "SELECT * FROM textbook WHERE textbook_id = :tb_id"
+    
+    # Query to insert textbook
+    insert_query = """
+    INSERT INTO textbook (textbook_id, title, created_by)
+    VALUES (:tb_id, :tb_name, :created_by)
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if textbook exists
+        existing_textbook = await database.fetch_one(query=check_query, values={"tb_id": tb_id})
+        if existing_textbook:
+            return "textbook_exists"
+        
+        # Insert textbook
+        await database.execute(
+            query=insert_query, 
+            values={"tb_id": tb_id, "tb_name": tb_name, "created_by": created_by}
+        )
+        
+        # Commit the transaction
+        await transaction.commit()
+        
+        return "success"
+    
+    except Exception as e:
+        # Rollback the transaction in case of error
+        await transaction.rollback()
+        print(f"Error creating textbook: {e}")
+        return 'error'
+
+
+async def create_chapter(tb_id: int, chap_id: int, chap_title: str, created_by: str):
+    # Query to check if the chapter already exists in the textbook
+    check_query = """
+    SELECT * FROM chapter WHERE textbook_id = :tb_id AND chapter_id = :chap_id
+    """
+    
+    # Query to insert a new chapter
+    insert_query = """
+    INSERT INTO chapter (textbook_id, chapter_id, title, hidden_status, created_by)
+    VALUES (:tb_id, :chap_id, :chap_title, :hidden_status, :created_by)
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if the chapter already exists
+        existing_chapter = await database.fetch_one(
+            query=check_query,
+            values={"tb_id": tb_id, "chap_id": chap_id}
+        )
+        if existing_chapter:
+            return "chapter_exists"
+        
+        # Insert the new chapter with a default hidden status of "no"
+        await database.execute(
+            query=insert_query,
+            values={"tb_id": tb_id, "chap_id": chap_id, "chap_title": chap_title, "hidden_status": "no", "created_by": created_by}
+        )
+        
+        # Commit the transaction
+        await transaction.commit()
+        
+        return "success"
+    
+    except Exception as e:
+        # Rollback the transaction in case of error
+        await transaction.rollback()
+        print(f"Error creating chapter: {e}")
+        return 'error'
+
+async def create_section(tb_id: int, chap_id: int, sec_id: int, sec_name: str, created_by: str):
+    # Query to check if the section already exists in the chapter
+    check_query = """
+    SELECT * FROM section WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
+    """
+    
+    # Query to insert a new section
+    insert_query = """
+    INSERT INTO section (textbook_id, chapter_id, section_id, title, hidden_status, created_by)
+    VALUES (:tb_id, :chap_id, :sec_id, :sec_name, :hidden_status, :created_by)
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if the section already exists
+        existing_section = await database.fetch_one(
+            query=check_query,
+            values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+        )
+        if existing_section:
+            return "section_exists"
+        
+        # Insert the new section with a default hidden status of "no"
+        await database.execute(
+            query=insert_query,
+            values={
+                "tb_id": tb_id,
+                "chap_id": chap_id,
+                "sec_id": sec_id,
+                "sec_name": sec_name,
+                "hidden_status": "no",
+                "created_by": created_by
+            }
+        )
+        
+        # Commit the transaction
+        await transaction.commit()
+        
+        return "success"
+    
+    except Exception as e:
+        # Rollback the transaction in case of error
+        await transaction.rollback()
+        print(f"Error creating section: {e}")
+        return 'error'
+    
+async def create_block(tb_id: int, chap_id: int, sec_id: int, block_id: int, created_by: str):
+    # Query to check if the content block already exists in the section
+    check_query = """
+    SELECT * FROM block WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+    """
+    
+    # Query to insert a new content block
+    insert_query = """
+    INSERT INTO block (textbook_id, chapter_id, section_id, block_id, block_type, content, hidden_status, created_by)
+    VALUES (:tb_id, :chap_id, :sec_id, :block_id, :block_type, :content, :hidden_status, :created_by)
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if the content block already exists
+        existing_block = await database.fetch_one(
+            query=check_query,
+            values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+        )
+        if existing_block:
+            return "block_exists"
+        
+        # Insert the new content block with default values for block_type and content, and a hidden status of "no"
+        await database.execute(
+            query=insert_query,
+            values={
+                "tb_id": tb_id,
+                "chap_id": chap_id,
+                "sec_id": sec_id,
+                "block_id": block_id,
+                "block_type": None,
+                "content": None,
+                "hidden_status": "no",
+                "created_by": created_by
+            }
+        )
+        
+        # Commit the transaction
+        await transaction.commit()
+        
+        return "success"
+    
+    except Exception as e:
+        # Rollback the transaction in case of error
+        await transaction.rollback()
+        print(f"Error creating block: {e}")
+        return 'error'
+
+
+async def create_activity(tb_id: int, chap_id: int, sec_id: int, block_id: int, activity_id: int, created_by: str):
+    # Query to check if the activity block already exists in the section
+    check_query = """
+    SELECT * FROM activity WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND unique_activity_id = :activity_id
+    """
+    
+    # Query to insert a new activity block
+    insert_query = """
+    INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id, created_by)
+    VALUES (:tb_id, :chap_id, :sec_id, :block_id, :activity_id, :created_by)
+    """
+    
+    # Query to update the content and block type in the block table
+    update_query = """
+    UPDATE block
+    SET content = :activity_id, block_type = 'activity'
+    WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+    """
+    
+    # Start a transaction
+    transaction = await database.transaction()
+    
+    try:
+        # Check if the activity block already exists
+        existing_activity = await database.fetch_one(
+            query=check_query,
+            values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": activity_id}
+        )
+        if existing_activity:
+            return "activity_exists"
+        
+        # Insert the new activity block
+        await database.execute(
+            query=insert_query,
+            values={
+                "tb_id": tb_id,
+                "chap_id": chap_id,
+                "sec_id": sec_id,
+                "block_id": block_id,
+                "activity_id": activity_id,
+                "created_by": created_by
+            }
+        )
+        
+        # Update the content and block type in the block table
+        await database.execute(
+            query=update_query,
+            values={
+                "activity_id": activity_id,
+                "tb_id": tb_id,
+                "chap_id": chap_id,
+                "sec_id": sec_id,
+                "block_id": block_id
+            }
+        )
+        
+        # Commit the transaction
+        await transaction.commit()
+        
+        return "success"
+    
+    except Exception as e:
+        # Rollback the transaction in case of error
+        await transaction.rollback()
+        print(f"Error creating activity block: {e}")
         return 'error'

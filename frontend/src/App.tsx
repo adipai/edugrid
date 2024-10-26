@@ -18,6 +18,10 @@ import AdminCreateActiveCourse from "./pages/Admin/AdminCreateActiveCourse";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import FacultyCoursesPage from "./pages/Faculty/FacultyCoursesPage";
 
+import AdminCreateTextbook from "./pages/Admin/AdminCreateTextbook";
+import AdminAddNewChapter from "./pages/Admin/AdminAddNewChapter";
+import AdminModifyTextbook from "./pages/Admin/AdminModifyTextbook";
+import AdminAddNewSection from "./pages/Admin/AdminAddNewSection";
 
 function App() {
   return (
@@ -33,6 +37,11 @@ function App() {
         <Route path="/admin/create-faculty-account" element={<AdminCreateFaculty />} />
         <Route path="/admin/create-evaluation-course" element={<AdminCreateEvaluationCourse />} />
         <Route path="/admin/create-active-course" element={<AdminCreateActiveCourse />} />
+        <Route path="/admin/create-textbook" element={<AdminCreateTextbook />} />
+        <Route path="/admin/create-new-chapter" element={<AdminAddNewChapter />} />
+        <Route path="/admin/modify-textbook" element={<AdminModifyTextbook />} />
+        <Route path="/admin/create-new-section" element={<AdminAddNewSection />} />
+
         
         {/* Faculty routes */}
         <Route path="/faculty/login" element={<FacultyLoginPage />} />

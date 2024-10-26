@@ -26,3 +26,7 @@ ADD CONSTRAINT fk_question_created_by FOREIGN KEY (created_by) REFERENCES user(u
 ALTER TABLE activity 
 ADD COLUMN IF NOT EXISTS created_by VARCHAR(8) DEFAULT NULL AFTER hidden_status,
 ADD CONSTRAINT fk_activity_created_by FOREIGN KEY (created_by) REFERENCES user(user_id);
+
+ALTER TABLE course
+DROP FOREIGN KEY course_ibfk_1,
+DROP COLUMN ta_id;
