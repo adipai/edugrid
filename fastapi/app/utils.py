@@ -1,5 +1,6 @@
 import traceback
 from app.database import database
+from datetime import datetime
 
 async def get_user(user_id: str, password: str, role: str):
     query = """
@@ -641,7 +642,7 @@ async def create_activity(tb_id: int, chap_id: str, sec_id: str, block_id: str, 
         return 'error'
 
 
-async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str):
+async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str, created_by: str):
     check_query = """
         SELECT content, block_type FROM block 
         WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
@@ -652,7 +653,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
     """
     update_query = """
         UPDATE block SET content = :content, block_type = :block_type 
-        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND created_by = :created_by
     """
     
     async with database.transaction() as transaction:
@@ -668,7 +669,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
                 if current_block_type == "activity":
                     await database.execute(
                         query=delete_activity_query, 
-                        values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": current_content}
+                        values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": current_content }
                     )
 
             # Update the content and block type in the block table
@@ -680,7 +681,8 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
                     "tb_id": tb_id, 
                     "chap_id": chap_id, 
                     "sec_id": sec_id, 
-                    "block_id": block_id
+                    "block_id": block_id,
+                    "created_by": created_by
                 }
             )
 
@@ -693,11 +695,11 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
             return "error"
 
 
-async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_id: str, 
+async def add_question(tb_id: int, chap_id: str, sec_id: str, block_id: str, 
                        activity_id: str, question_id: str, question_text: str, 
                        option_1: str, option_1_explanation: str, option_2: str, 
                        option_2_explanation: str, option_3: str, option_3_explanation: str, 
-                       option_4: str, option_4_explanation: str, answer: str):
+                       option_4: str, option_4_explanation: str, answer: int):
 
     check_query = """
         SELECT question_id FROM question 
@@ -716,10 +718,10 @@ async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_
                 :option_3_explanation, :option_4, :option_4_explanation, :answer)
     """
 
-    async with connection.transaction() as transaction:
+    async with database.transaction() as transaction:
         try:
             # Check if the question ID already exists for the activity
-            existing_question = await connection.fetch_one(
+            existing_question = await database.fetch_one(
                 query=check_query, 
                 values={
                     "tb_id": tb_id, 
@@ -735,7 +737,7 @@ async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_
                 return "Question ID already exists for the activity"
 
             # Insert the new question into the question table
-            await connection.execute(
+            await database.execute(
                 query=insert_query, 
                 values={
                     "tb_id": tb_id,
@@ -908,11 +910,11 @@ async def modify_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, use
 
 
 
-async def modify_activity_add_question(
+async def modify_content_add_question(
     tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
     question_text: str, option_1: str, option_1_explanation: str, option_2: str,
     option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
-    option_4_explanation: str, answer: str, user_modifying: str
+    option_4_explanation: str, answer: int, user_modifying: str
 ):
     """Modify activity content, add a question, and delete the previous activity if it exists."""
     
@@ -961,13 +963,39 @@ async def modify_activity_add_question(
             )
 
             # Insert question details
-            await add_question_async(
+            await add_question(
                 tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text,
                 option_1, option_1_explanation, option_2, option_2_explanation,
                 option_3, option_3_explanation, option_4, option_4_explanation, answer
             )
             
             return "Modified Activity"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error creating question: {e}")
+            return "Error"
+
+
+async def modify_activity_add_question(
+    tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
+    question_text: str, option_1: str, option_1_explanation: str, option_2: str,
+    option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
+    option_4_explanation: str, answer: int, user_modifying: str
+):
+    """Modify activity content by adding a new question."""
+    
+    async with database.transaction() as transaction:
+        try:
+
+            # Insert question details
+            await add_question(
+                tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text,
+                option_1, option_1_explanation, option_2, option_2_explanation,
+                option_3, option_3_explanation, option_4, option_4_explanation, answer
+            )
+            
+            return "Added new Question to this activity"
 
         except Exception as e:
             await transaction.rollback()
@@ -1098,3 +1126,53 @@ async def fetch_approved_enrollments(unique_course_id: str):
     except Exception as e:
         print(f"Error fetching enrolled students for course ID '{unique_course_id}': {e}")
         return None
+
+
+def check_course_details(input_course_id: str, current_date: str, user_modifying: str):
+    """ Check if user can modify the course content - user should be associated with course and within end date. """
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            # Step 1: Retrieve the role of the user from the user table
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            role_result = cursor.fetchone()
+            
+            role = role_result[0]
+
+            # Step 2: Check end date based on role
+            if role == 'faculty':
+                cursor.execute(
+                    "SELECT course_id, end_date FROM course WHERE faculty_id = %s",
+                    (user_modifying,)
+                )
+            elif role == 'teaching assistant':
+                cursor.execute(
+                    """
+                    SELECT c.course_id, c.end_date
+                    FROM course c
+                    JOIN teaching_assistant ta ON c.course_id = ta.course_id
+                    WHERE ta.ta_id = %s
+                    """,
+                    (user_modifying,)
+                )
+
+            course_data = cursor.fetchone()
+
+            original_course_id, end_date = course_data
+
+            # Step 3: Validate course association and modification permission
+            if input_course_id != original_course_id:
+                return "You are not associated with this course"
+
+            # Convert current_date to date object
+            current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
+            if current_date_obj <= end_date:
+                return "Modification allowed"
+            else:
+                return "Beyond the end date - can't change the course!"
+
+    except Exception as e:
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error"

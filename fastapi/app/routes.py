@@ -409,7 +409,8 @@ class AddContentRequest(BaseModel):
     sec_id: str
     content: str
     block_id: str
-    block_type: str = "text"
+    block_type: str
+    created_by: str
 
 
 ## need to send block type from front-end (here block type is either "text" or "picture" depending on what is clicked)
@@ -422,8 +423,9 @@ async def add_content_request(add_content_request: AddContentRequest):
     content = add_content_request.content
     block_id = add_content_request.block_id
     block_type = add_content_request.block_type
+    created_by = add_content_request.created_by
 
-    result = await add_content(tb_id, chap_id, sec_id, content, block_id, block_type)
+    result = await add_content(tb_id, chap_id, sec_id, content, block_id, block_type, created_by)
 
     if(result == 'error'):
         raise HTTPException(status_code=500, detail=f"Error adding {block_type}")
@@ -447,7 +449,7 @@ class AddQuestionRequest(BaseModel):
     option_3_explanation: str
     option_4: str
     option_4_explanation: str
-    answer: str
+    answer: int
 
     
 @router.post('/add_question')
@@ -569,7 +571,7 @@ async def modify_block_request(modify_block_request: ModifyBlockRequest):
     return {"message": result}
 
 
-class ModifyActivityRequest(BaseModel):
+class ModifyContentAddQuestionRequest(BaseModel):
     tb_id: int
     chap_id: str
     sec_id: str
@@ -585,25 +587,64 @@ class ModifyActivityRequest(BaseModel):
     option_3_explanation: str
     option_4: str
     option_4_explanation: str
-    answer: str
+    answer: int
     user_modifying: str
 
-@router.post("/modify_activity_add_question")
-async def modify_activity_request(modify_activity_request: ModifyActivityRequest):
-    result = await modify_activity_add_question(
-        modify_activity_request.tb_id, modify_activity_request.chap_id, modify_activity_request.sec_id, 
-        modify_activity_request.block_id, modify_activity_request.activity_id, 
-        modify_activity_request.question_id, modify_activity_request.question_text, 
-        modify_activity_request.option_1, modify_activity_request.option_1_explanation, 
-        modify_activity_request.option_2, modify_activity_request.option_2_explanation, 
-        modify_activity_request.option_3, modify_activity_request.option_3_explanation, 
-        modify_activity_request.option_4, modify_activity_request.option_4_explanation, 
-        modify_activity_request.answer, modify_activity_request.user_modifying
+@router.post("/modify_content_add_question")
+async def modify_content_add_question_request(modify_content_add_question_request: ModifyContentAddQuestionRequest):
+    result = await modify_content_add_question(
+        modify_content_add_question_request.tb_id, modify_content_add_question_request.chap_id, modify_content_add_question_request.sec_id, 
+        modify_content_add_question_request.block_id, modify_content_add_question_request.activity_id, 
+        modify_content_add_question_request.question_id, modify_content_add_question_request.question_text, 
+        modify_content_add_question_request.option_1, modify_content_add_question_request.option_1_explanation, 
+        modify_content_add_question_request.option_2, modify_content_add_question_request.option_2_explanation, 
+        modify_content_add_question_request.option_3, modify_content_add_question_request.option_3_explanation, 
+        modify_content_add_question_request.option_4, modify_content_add_question_request.option_4_explanation, 
+        modify_content_add_question_request.answer, modify_content_add_question_request.user_modifying
     )
     
     if result == "Error" or result == "Previous Activity does not exist.":
         raise HTTPException(status_code=500, detail="error happened")
     
+    return {"message": result}
+
+
+class ModifyActivityAddQuestionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    activity_id: str
+    question_id: str
+    question_text: str
+    option_1: str
+    option_1_explanation: str
+    option_2: str
+    option_2_explanation: str
+    option_3: str
+    option_3_explanation: str
+    option_4: str
+    option_4_explanation: str
+    answer: int
+    user_modifying: str
+
+@router.post("/modify_activity_add_question")
+async def modify_activity_add_question_request(modify_activity_add_question_request: ModifyActivityAddQuestionRequest):
+    result = await modify_content_add_question(
+        modify_activity_add_question_request.tb_id, modify_activity_add_question_request.chap_id, modify_activity_add_question_request.sec_id, 
+        modify_activity_add_question_request.block_id, modify_activity_add_question_request.activity_id, 
+        modify_activity_add_question_request.question_id, modify_activity_add_question_request.question_text, 
+        modify_activity_add_question_request.option_1, modify_activity_add_question_request.option_1_explanation, 
+        modify_activity_add_question_request.option_2, modify_activity_add_question_request.option_2_explanation, 
+        modify_activity_add_question_request.option_3, modify_activity_add_question_request.option_3_explanation, 
+        modify_activity_add_question_request.option_4, modify_activity_add_question_request.option_4_explanation, 
+        modify_activity_add_question_request.answer, modify_activity_add_question_request.user_modifying
+    )
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="error happened")
+    
+    return {"message": result}
     return {"message": result}
 
 
@@ -706,3 +747,26 @@ async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
         raise HTTPException(status_code=404, detail="No enrolled students found.")
     
     return {"enrolled_students": result}, 200
+
+
+class CourseDetailsRequest(BaseModel):
+    input_course_id: str
+    current_date: str  # YYYY-MM-DD format
+    user_modifying: str
+
+@router.post("/check_course_details")
+def check_course_details_request(request: CourseDetailsRequest):
+    result = check_course_details(
+        request.input_course_id,
+        request.current_date,
+        request.user_modifying
+    )
+
+    if result == "You are not associated with this course":
+        raise HTTPException(status_code=403, detail="You are not associated with this course")
+    elif result == "Beyond the end date - can't change the course!":
+        raise HTTPException(status_code=403, detail="Beyond the end date - can't change the course!")
+    elif result == "Error":
+        raise HTTPException(status_code=500, detail="Error checking course details")
+    return {"message": result}
+

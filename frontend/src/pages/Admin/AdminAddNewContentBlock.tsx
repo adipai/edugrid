@@ -87,7 +87,7 @@ const AdminAddNewContentBlock: React.FC = () => {
         );
       } else if (action === "activity") {
         navigate(
-          `/admin/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${blockId}`
+          `/admin/content-add-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${blockId}`
         );
       }
 

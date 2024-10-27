@@ -31,6 +31,7 @@ import AdminModifySection from "./pages/Admin/AdminModifySection";
 import AdminModifyContentBlock from "./pages/Admin/AdminModifyContentBlock";
 import FacultyActiveCoursesPage from "./pages/Faculty/FacultyActiveCoursesPage";
 import FacultyEvaluationCoursesPage from "./pages/Faculty/FacultyEvaluationCoursesPage";
+import AdminContentAddActivity from "./pages/Admin/AdminContentAddActivity";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         <Route path="/admin/create-new-block" element={<AdminAddNewContentBlock />} />
         <Route path="/admin/content-add-text" element={<AdminContentAddText />} />
         <Route path="/admin/content-add-pic" element={<AdminContentPicText />} />
+        <Route path="/admin/content-add-activity" element={<AdminContentAddActivity />} />
         <Route path="/admin/activity-add-question" element={<AdminActivityAddQuestion />} />
         <Route path="/admin/modify-textbook" element={<AdminModifyTextbook />} />
         <Route path="/admin/modify-chapter" element={<AdminModifyChapter />} />

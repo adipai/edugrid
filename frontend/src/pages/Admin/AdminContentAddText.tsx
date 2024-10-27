@@ -12,6 +12,7 @@ const AdminContentAddText: React.FC = () => {
   const chap_id = queryParams.get("chap_id");
   const sec_id = queryParams.get("sec_id");
   const block_id = queryParams.get("block_id");
+  const created_by = localStorage.getItem('user_id')
 
   const [chapDetails, setChapDetails] = useState<any>({});
   const [tbDetails, setTbDetails] = useState<any>({});
@@ -83,6 +84,7 @@ const AdminContentAddText: React.FC = () => {
         content: text,
         block_id,
         block_type: "text",
+        created_by
       });
       console.log("Block created:", response.data);
       // Redirect to the appropriate page based on the block type

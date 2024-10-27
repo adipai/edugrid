@@ -13,6 +13,7 @@ const AdminContentAddPic: React.FC = () => {
   const chap_id = queryParams.get("chap_id");
   const sec_id = queryParams.get("sec_id");
   const block_id = queryParams.get("block_id");
+  const createdBy = localStorage.getItem("user_id");
 
   const [chapDetails, setChapDetails] = useState<any>({});
   const [tbDetails, setTbDetails] = useState<any>({});
@@ -82,6 +83,7 @@ const AdminContentAddPic: React.FC = () => {
         content: pic,
         block_id,
         block_type: "picture",
+        created_by: createdBy,
       });
       console.log("Block created:", response.data);
       // Redirect to the appropriate page based on the block type
