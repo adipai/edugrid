@@ -822,6 +822,12 @@ async def hide_section_request(hide_section_request: HideSectionRequest):
     
     return {"message": result}
 
+class HideBlockRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+
 @router.post("/hide_block")
 async def hide_block_request(hide_block_request: HideBlockRequest):
     result = await hide_block(hide_block_request.tb_id, hide_block_request.chap_id, hide_block_request.sec_id, hide_block_request.block_id)

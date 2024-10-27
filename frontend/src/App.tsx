@@ -33,6 +33,7 @@ import FacultyEvaluationCoursesPage from "./pages/Faculty/FacultyEvaluationCours
 import AdminContentAddActivity from "./pages/Admin/AdminContentAddActivity";
 import FacultyViewWorklistPage from "./pages/Faculty/FacultyViewWorklistPage";
 import FacultyViewStudentsPage from "./pages/Faculty/FacultyViewStudentsPage";
+import FacultyApproveEnrollmentPage from "./pages/Faculty/FacultyApproveEnrollment";
 
 function App() {
   return (
@@ -70,6 +71,8 @@ function App() {
         <Route path="/faculty/evaluation-courses" element={<FacultyEvaluationCoursesPage />} />
         <Route path="/faculty/view-worklist" element={<FacultyViewWorklistPage />} />
         <Route path="/faculty/view-students" element={<FacultyViewStudentsPage />} />
+        <Route path="/faculty/approve-enrollment" element={<FacultyApproveEnrollmentPage />} />
+        
         
         {/* TA routes */}
         <Route path="/ta/login" element={<TALoginPage />} />

@@ -1368,7 +1368,6 @@ async def enroll_student(course_id: str, student_id: str):
             )
 
             # Commit the transaction
-            await transaction.commit()
             return "enrolled"
 
         except Exception as e:
