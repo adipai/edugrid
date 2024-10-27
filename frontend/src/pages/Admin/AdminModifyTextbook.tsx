@@ -26,10 +26,13 @@ const AdminModifyTextbook: React.FC = () => {
           setTextbookDetails(data.textbook);
         } else {
           console.log("Textbook not found");
+          throw new Error("Textbook not found");
         }
       })
       .catch((error) => {
         console.error("Error fetching textbook data:", error);
+        window.alert("Error fetching textbook data");
+        navigate(-1)
       });
   }, [tb_id]);
 
