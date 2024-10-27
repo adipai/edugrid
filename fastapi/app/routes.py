@@ -606,7 +606,7 @@ class ModifyActivityAddQuestionRequest(BaseModel):
     answer: str
     user_modifying: str
 
-@router.post("/modify_content_add_question")
+@router.post("/modify_activity_add_question")
 async def modify_activity_add_question_request(modify_activity_add_question_request: ModifyActivityAddQuestionRequest):
     result = await modify_content_add_question(
         modify_activity_add_question_request.tb_id, modify_activity_add_question_request.chap_id, modify_activity_add_question_request.sec_id, 
