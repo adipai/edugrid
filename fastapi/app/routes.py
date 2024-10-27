@@ -727,3 +727,22 @@ async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
         raise HTTPException(status_code=404, detail="No enrolled students found.")
     
     return {"enrolled_students": result}, 200
+
+
+class CheckCourseEndDateRequest(BaseModel):
+    current_date: date
+    user_modifying: str
+
+@router.post("/check_course_end_date")
+async def check_course_end_date_request(check_course_end_date_request: CheckCourseEndDateRequest):
+    result = await check_course_end_date(
+        check_course_end_date_request.current_date,
+        check_course_end_date_request.user_modifying
+    )
+
+    if result == "Beyond the end date - can't change the course!":
+        raise HTTPException(status_code=403, detail="Beyond the end date - can't change the course!")
+    elif result == "error":
+        raise HTTPException(status_code=500, detail="Error")
+
+    return {"message": result}

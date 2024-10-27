@@ -1107,3 +1107,42 @@ async def fetch_approved_enrollments(unique_course_id: str):
     except Exception as e:
         print(f"Error fetching enrolled students for course ID '{unique_course_id}': {e}")
         return None
+
+
+async def check_course_end_date(current_date: date, user_modifying: str):
+    """Check if the user can modify the course content based on the end date."""
+    connection = await get_db_connection()
+    
+    try:
+        async with connection.transaction() as transaction:
+            # Step 1: Retrieve the role of the user from the user table
+            role_query = "SELECT role FROM user WHERE user_id = $1"
+            role_result = await connection.fetchrow(role_query, user_modifying)
+
+            role = role_result['role']
+
+            # Step 2: Check end date based on role
+            if role == 'faculty':
+                end_date_query = "SELECT end_date FROM course WHERE faculty_id = $1"
+                course_data = await connection.fetchrow(end_date_query, user_modifying)
+            elif role == 'teaching assistant':
+                end_date_query = """
+                    SELECT c.end_date
+                    FROM course c
+                    JOIN teaching_assistant ta ON c.course_id = ta.course_id
+                    WHERE ta.user_id = $1
+                """
+                course_data = await connection.fetchrow(end_date_query, user_modifying)
+
+            # Step 3: Retrieve the course end date and compare with current_date
+
+            end_date = course_data['end_date']
+            if current_date <= end_date:
+                return "Modification allowed"
+            else:
+                return "Beyond the end date - can't change the course!"
+
+    except Exception as e:
+        await transaction.rollback()
+        print(f"Error checking course end date: {e}")
+        return "error"

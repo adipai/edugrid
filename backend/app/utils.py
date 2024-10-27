@@ -715,6 +715,111 @@ def delete_block(connection, tb_id, chap_id, sec_id, block_id, user_modifying):
         connection.rollback()
         print(traceback.format_exc())
 
+def check_course_details(connection, input_course_id, current_date, user_modifying):
+
+    """ Checking if user can modify the course content - user should be associated with course and date should be within end date. """
+
+    try:
+        with connection.cursor() as cursor:
+            # Step 1: Retrieve the role of the user from the user table
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            role = cursor.fetchone()[0]
+            end_date = None
+            # Step 2: Check end date based on role
+            if role == 'faculty':
+                # Fetch the end date of the course for the faculty member
+                cursor.execute(
+                    "SELECT course_id, end_date FROM course WHERE faculty_id = %s",
+                    (user_modifying,)
+                )
+            elif role == 'teaching assistant':
+                # Join teaching assistant and course tables to fetch the end date
+                cursor.execute(
+                    """
+                    SELECT c.course_id, c.end_date
+                    FROM course c
+                    JOIN teaching_assistant ta ON c.course_id = ta.course_id
+                    WHERE ta.ta_id = %s
+                    """,
+                    (user_modifying,)
+                )
+            original_course_id, original_end_date = cursor.fetchone()
+
+            if(input_course_id != original_course_id):
+                return "You are not associated with this course"
+            
+            else:
+                end_date = original_end_date
+            
+
+            # Allow modification if current_date is within or before the end date
+            if(datetime.strptime(current_date, "%Y-%m-%d").date() <= end_date):
+                return "Modification allowed"
+            else:
+                return "Beyond the end date - can't change the course!"
+
+    except Exception as e:
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error"
+
+        
+def check_course_details(connection, input_course_id, current_date, user_modifying):
+
+    """ Checking if user can modify the course content - user should be associated with course and date should be within end date. """
+
+    try:
+        with connection.cursor() as cursor:
+            # Step 1: Retrieve the role of the user from the user table
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            role = cursor.fetchone()[0]
+            end_date = None
+            # Step 2: Check end date based on role
+            if role == 'faculty':
+                # Fetch the end date of the course for the faculty member
+                cursor.execute(
+                    "SELECT course_id, end_date FROM course WHERE faculty_id = %s",
+                    (user_modifying,)
+                )
+            elif role == 'teaching assistant':
+                # Join teaching assistant and course tables to fetch the end date
+                cursor.execute(
+                    """
+                    SELECT c.course_id, c.end_date
+                    FROM course c
+                    JOIN teaching_assistant ta ON c.course_id = ta.course_id
+                    WHERE ta.ta_id = %s
+                    """,
+                    (user_modifying,)
+                )
+            original_course_id, original_end_date = cursor.fetchone()
+
+            if(input_course_id != original_course_id):
+                return "You are not associated with this course"
+            
+            else:
+                end_date = original_end_date
+            
+
+            # Allow modification if current_date is within or before the end date
+            if(datetime.strptime(current_date, "%Y-%m-%d").date() <= end_date):
+                return "Modification allowed"
+            else:
+                return "Beyond the end date - can't change the course!"
+
+    except Exception as e:
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error"
+
+
+def check_course_details_func(connection):
+
+    print(check_course_details(connection, "1234", "2025-10-24", "32456789"))  # FAIL - faculty not associated with course
+    print(check_course_details(connection, "1234", "2025-10-24", "21348900")) # FAIL - TA not associated with course
+
+    print(check_course_details(connection, "1234", "2025-10-23", "12345678")) # PASS - can modify as within end date
+    print(check_course_details(connection, "1234", "2025-10-24", "12345678")) # FAIL - cant as beyond end date
 # Testing textbook creation
 def textbook_creation_flow(connection):
     try:
@@ -1017,9 +1122,10 @@ def delete_func(connection):
 
 def main():
     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], help="1: Create Textbook, \
+    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"], help="1: Create Textbook, \
                                     2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
-                                    5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases, 10: Delete operations")
+                                    5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases, 10: Delete operations, \
+                                    11: check course details")
     
     # Parse the arguments
     args = parser.parse_args()
@@ -1054,6 +1160,9 @@ def main():
     
     elif(args.action == "10"):
         delete_func(connection)
+    
+    elif(args.action == "11"):
+        check_course_details_func(connection)
 
 if __name__ == "__main__":
     main()
