@@ -741,7 +741,7 @@ async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
     unique_course_id = request.unique_course_id
     
     # Call the function to fetch pending enrollments
-    result = await fetch_pending_enrollments(unique_course_id)
+    result = await fetch_approved_enrollments(unique_course_id)
     
     if result is None:
         raise HTTPException(status_code=404, detail="No enrolled students found.")
