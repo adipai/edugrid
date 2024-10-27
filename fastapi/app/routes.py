@@ -549,7 +549,7 @@ async def modify_block_request(modify_block_request: ModifyBlockRequest):
     return {"message": result}
 
 
-class ModifyActivityRequest(BaseModel):
+class ModifyContentAddQuestionRequest(BaseModel):
     tb_id: int
     chap_id: str
     sec_id: str
@@ -568,22 +568,61 @@ class ModifyActivityRequest(BaseModel):
     answer: str
     user_modifying: str
 
-@router.post("/modify_activity_add_question")
-async def modify_activity_request(modify_activity_request: ModifyActivityRequest):
-    result = await modify_activity_add_question(
-        modify_activity_request.tb_id, modify_activity_request.chap_id, modify_activity_request.sec_id, 
-        modify_activity_request.block_id, modify_activity_request.activity_id, 
-        modify_activity_request.question_id, modify_activity_request.question_text, 
-        modify_activity_request.option_1, modify_activity_request.option_1_explanation, 
-        modify_activity_request.option_2, modify_activity_request.option_2_explanation, 
-        modify_activity_request.option_3, modify_activity_request.option_3_explanation, 
-        modify_activity_request.option_4, modify_activity_request.option_4_explanation, 
-        modify_activity_request.answer, modify_activity_request.user_modifying
+@router.post("/modify_content_add_question")
+async def modify_content_add_question_request(modify_content_add_question_request: ModifyContentAddQuestionRequest):
+    result = await modify_content_add_question(
+        modify_content_add_question_request.tb_id, modify_content_add_question_request.chap_id, modify_content_add_question_request.sec_id, 
+        modify_content_add_question_request.block_id, modify_content_add_question_request.activity_id, 
+        modify_content_add_question_request.question_id, modify_content_add_question_request.question_text, 
+        modify_content_add_question_request.option_1, modify_content_add_question_request.option_1_explanation, 
+        modify_content_add_question_request.option_2, modify_content_add_question_request.option_2_explanation, 
+        modify_content_add_question_request.option_3, modify_content_add_question_request.option_3_explanation, 
+        modify_content_add_question_request.option_4, modify_content_add_question_request.option_4_explanation, 
+        modify_content_add_question_request.answer, modify_content_add_question_request.user_modifying
     )
     
     if result == "Error" or result == "Previous Activity does not exist.":
         raise HTTPException(status_code=500, detail="error happened")
     
+    return {"message": result}
+
+
+class ModifyActivityAddQuestionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    activity_id: str
+    question_id: str
+    question_text: str
+    option_1: str
+    option_1_explanation: str
+    option_2: str
+    option_2_explanation: str
+    option_3: str
+    option_3_explanation: str
+    option_4: str
+    option_4_explanation: str
+    answer: str
+    user_modifying: str
+
+@router.post("/modify_content_add_question")
+async def modify_activity_add_question_request(modify_activity_add_question_request: ModifyActivityAddQuestionRequest):
+    result = await modify_content_add_question(
+        modify_activity_add_question_request.tb_id, modify_activity_add_question_request.chap_id, modify_activity_add_question_request.sec_id, 
+        modify_activity_add_question_request.block_id, modify_activity_add_question_request.activity_id, 
+        modify_activity_add_question_request.question_id, modify_activity_add_question_request.question_text, 
+        modify_activity_add_question_request.option_1, modify_activity_add_question_request.option_1_explanation, 
+        modify_activity_add_question_request.option_2, modify_activity_add_question_request.option_2_explanation, 
+        modify_activity_add_question_request.option_3, modify_activity_add_question_request.option_3_explanation, 
+        modify_activity_add_question_request.option_4, modify_activity_add_question_request.option_4_explanation, 
+        modify_activity_add_question_request.answer, modify_activity_add_question_request.user_modifying
+    )
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="error happened")
+    
+    return {"message": result}
     return {"message": result}
 
 

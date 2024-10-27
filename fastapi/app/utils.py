@@ -890,7 +890,7 @@ async def modify_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, use
 
 
 
-async def modify_activity_add_question(
+async def modify_content_add_question(
     tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
     question_text: str, option_1: str, option_1_explanation: str, option_2: str,
     option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
@@ -943,13 +943,39 @@ async def modify_activity_add_question(
             )
 
             # Insert question details
-            await add_question_async(
+            await add_question(
                 tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text,
                 option_1, option_1_explanation, option_2, option_2_explanation,
                 option_3, option_3_explanation, option_4, option_4_explanation, answer
             )
             
             return "Modified Activity"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error creating question: {e}")
+            return "Error"
+
+
+async def modify_activity_add_question(
+    tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
+    question_text: str, option_1: str, option_1_explanation: str, option_2: str,
+    option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
+    option_4_explanation: str, answer: str, user_modifying: str
+):
+    """Modify activity content by adding a new question."""
+    
+    async with database.transaction() as transaction:
+        try:
+
+            # Insert question details
+            await add_question(
+                tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text,
+                option_1, option_1_explanation, option_2, option_2_explanation,
+                option_3, option_3_explanation, option_4, option_4_explanation, answer
+            )
+            
+            return "Added new Question to this activity"
 
         except Exception as e:
             await transaction.rollback()
