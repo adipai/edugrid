@@ -260,6 +260,26 @@ async def _get_block(tb_id:int, chap_id: str, sec_id: str, block_id: str):
         raise HTTPException(status_code=404, detail="Block not found")
     return {'block': result}
 
+@router.get('/api/v1/active-course')
+async def _get_active_course(course_id: int):
+    
+    result = await get_active_course_details(course_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return {'course': result}
+
+@router.get('/api/v1/evaluation-course')
+async def _get_eval_course(course_id: int):
+    
+    result = await get_eval_course_details(course_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return {'course': result}
+
 class CreateTextbookRequest(BaseModel):
     tb_id: int
     tb_name: str

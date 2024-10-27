@@ -375,6 +375,24 @@ async def get_block_details(tb_id, chap_id, sec_id, block_id):
     values = {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
     return await database.fetch_one(query=query, values=values)
 
+async def get_active_course_details(course_id):
+    query = """
+        SELECT * 
+        FROM course 
+        WHERE course_id = :course_id AND course_type = "active"
+    """
+    values = {"course_id": course_id}
+    return await database.fetch_one(query=query, values=values)
+
+async def get_eval_course_details(course_id):
+    query = """
+        SELECT * 
+        FROM course 
+        WHERE course_id = :course_id AND course_type = 'evaluation'
+    """
+    values = {"course_id": course_id}
+    return await database.fetch_one(query=query, values=values)
+
 """
 TEXTBOOK MODULE
 """

@@ -29,6 +29,8 @@ import AdminContentPicText from "./pages/Admin/AdminContentAddPic";
 import AdminActivityAddQuestion from "./pages/Admin/AdminActivityAddQuestion";
 import AdminModifySection from "./pages/Admin/AdminModifySection";
 import AdminModifyContentBlock from "./pages/Admin/AdminModifyContentBlock";
+import FacultyActiveCoursesPage from "./pages/Faculty/FacultyActiveCoursesPage";
+import FacultyEvaluationCoursesPage from "./pages/Faculty/FacultyEvaluationCoursesPage";
 
 function App() {
   return (
@@ -61,6 +63,8 @@ function App() {
         <Route path="/faculty/login" element={<FacultyLoginPage />} />
         <Route path="/faculty/landing" element={<FacultyLandingPage />} />
         <Route path="/faculty/courses" element={<FacultyCoursesPage />} />
+        <Route path="/faculty/active-courses" element={<FacultyActiveCoursesPage />} />
+        <Route path="/faculty/evaluation-courses" element={<FacultyEvaluationCoursesPage />} />
         
         {/* TA routes */}
         <Route path="/ta/login" element={<TALoginPage />} />
