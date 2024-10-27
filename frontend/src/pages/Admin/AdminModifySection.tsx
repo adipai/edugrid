@@ -75,7 +75,7 @@ const AdminModifySection: React.FC = () => {
       return;
     }
     fetch(
-      `http://localhost:8000/api/v1/section?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sectionId}`
+      `http://localhost:8000/api/v1/section?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`
     )
       .then((response) => response.json())
       .then((data) => {
