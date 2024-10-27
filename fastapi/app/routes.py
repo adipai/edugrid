@@ -220,7 +220,7 @@ class GetTextBookRequest(BaseModel):
     tb_id: int
 
 @router.get('/api/v1/textbook')
-async def _get_textbook(tb_id: Optional[int] = None):
+async def _get_textbook(tb_id: int):
     
     result = await get_textbook_details(tb_id)
     
@@ -230,14 +230,35 @@ async def _get_textbook(tb_id: Optional[int] = None):
     return {'textbook': result}
 
 @router.get('/api/v1/chapter')
-async def _get_chapter(tb_id: Optional[int] = None, chap_id: Optional[str] = None):
+async def _get_chapter(tb_id: int, chap_id: str):
     
     result = await get_chapter_details(tb_id,chap_id)
     
     print(result)
     if not result:
-        raise HTTPException(status_code=404, detail="Textbook not found")
+        raise HTTPException(status_code=404, detail="Chapter not found")
     return {'chapter': result}
+
+
+@router.get('/api/v1/section')
+async def _get_section(tb_id:int, chap_id: str, sec_id: str):
+    
+    result = await get_section_details(tb_id,chap_id, sec_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Section not found")
+    return {'section': result}
+
+@router.get('/api/v1/block')
+async def _get_block(tb_id:int, chap_id: str, sec_id: str, block_id: str):
+    
+    result = await get_block_details(tb_id,chap_id, sec_id, block_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Block not found")
+    return {'block': result}
 
 class CreateTextbookRequest(BaseModel):
     tb_id: int
@@ -441,6 +462,202 @@ async def add_question_request(add_question_request: AddQuestionRequest):
 
     return {"message": f"Question id '{question_id}' created for the activity"}
 
+class ModifyTextbookRequest(BaseModel):
+    tb_id: int
+    user_modifying: str
+
+
+@router.post("/modify_textbook")
+async def modify_textbook_request(modify_textbook_request: ModifyTextbookRequest):
+    # Extract values from the request model
+    tb_id = modify_textbook_request.tb_id
+    user_modifying = modify_textbook_request.user_modifying
+    
+    # Call the modify_textbook function to check permissions and textbook existence
+    result = await modify_textbook(tb_id, user_modifying)
+    
+    # Handle various outcomes
+    if result == "Textbook doesn't exist, so can't modify.":
+        raise HTTPException(status_code=404, detail=result)
+    elif result == "You are not associated with this course, so can't modify":
+        raise HTTPException(status_code=403, detail=result)
+    elif result == "error":
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    return {"message": result}
+
+
+class ModifyChapterRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+
+
+# Modify Chapter
+@router.post("/modify_chapter")
+async def modify_chapter_request(modify_chapter_request: ModifyChapterRequest):
+    result = await modify_chapter(modify_chapter_request.tb_id, modify_chapter_request.chap_id)
+
+    if result == "Chapter doesn't exist, so can't modify.":
+        raise HTTPException(status_code=404, detail="Chapter doesn't exist, so can't modify.")
+    if result == "error":
+        raise HTTPException(status_code=500, detail="Error modifying chapter.")
+    return {"message": result}
+
+class ModifySectionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+
+
+# Modify Section
+@router.post("/modify_section")
+async def modify_section_request(modify_section_request: ModifySectionRequest):
+    
+    result = await modify_section(modify_section_request.tb_id, modify_section_request.chap_id, modify_section_request.sec_id)
+
+    if result == "Section doesn't exist, so can't modify.":
+        raise HTTPException(status_code=404, detail="Section doesn't exist, so can't modify.")
+    elif result == "error":
+        raise HTTPException(status_code=500, detail="Error modifying section.")
+    return {"message": result}
+
+
+class ModifyBlockRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    user_modifying: str
+
+@router.post("/modify_block")
+async def modify_block_request(modify_block_request: ModifyBlockRequest):
+    result = await modify_block(
+        modify_block_request.tb_id,
+        modify_block_request.chap_id,
+        modify_block_request.sec_id,
+        modify_block_request.block_id,
+        modify_block_request.user_modifying
+    )
+
+    if result == "Block doesn't exist, so can't modify":
+        raise HTTPException(status_code=404, detail="Block doesn't exist, so can't modify.")
+    elif "Don't have permission" in result:
+        raise HTTPException(status_code=403, detail=result)
+    elif result == "error":
+        raise HTTPException(status_code=500, detail="Error modifying block.")
+
+    return {"message": result}
+
+
+class ModifyActivityRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    activity_id: str
+    question_id: str
+    question_text: str
+    option_1: str
+    option_1_explanation: str
+    option_2: str
+    option_2_explanation: str
+    option_3: str
+    option_3_explanation: str
+    option_4: str
+    option_4_explanation: str
+    answer: str
+    user_modifying: str
+
+@router.post("/modify_activity_add_question")
+async def modify_activity_request(modify_activity_request: ModifyActivityRequest):
+    result = await modify_activity_add_question(
+        modify_activity_request.tb_id, modify_activity_request.chap_id, modify_activity_request.sec_id, 
+        modify_activity_request.block_id, modify_activity_request.activity_id, 
+        modify_activity_request.question_id, modify_activity_request.question_text, 
+        modify_activity_request.option_1, modify_activity_request.option_1_explanation, 
+        modify_activity_request.option_2, modify_activity_request.option_2_explanation, 
+        modify_activity_request.option_3, modify_activity_request.option_3_explanation, 
+        modify_activity_request.option_4, modify_activity_request.option_4_explanation, 
+        modify_activity_request.answer, modify_activity_request.user_modifying
+    )
+    
+    if result == "Error" or result == "Previous Activity does not exist.":
+        raise HTTPException(status_code=500, detail="error happened")
+    
+    return {"message": result}
+
+
+
+class DeleteChapterRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    user_modifying: str
+
+@router.post("/delete_chapter")
+async def delete_chapter_request(delete_chapter_request: DeleteChapterRequest):
+    result = await delete_chapter_async(
+        delete_chapter_request.tb_id,
+        delete_chapter_request.chap_id,
+        delete_chapter_request.user_modifying
+    )
+    
+    if "don't have permission" in result or "doesn't exist" in result:
+        raise HTTPException(status_code=400, detail=result)
+    elif "error" in result.lower():
+        raise HTTPException(status_code=500, detail=result)
+
+    return {"message": result}
+
+class DeleteSectionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    user_modifying: str
+
+
+@router.post("/delete_section")
+async def delete_section_request(delete_section_request: DeleteSectionRequest):
+    result = await delete_section_async(
+        delete_section_request.tb_id,
+        delete_section_request.chap_id,
+        delete_section_request.sec_id,
+        delete_section_request.user_modifying
+    )
+    
+    if "don't have permission" in result or "doesn't exist" in result:
+        raise HTTPException(status_code=400, detail=result)
+    elif "error" in result.lower():
+        raise HTTPException(status_code=500, detail=result)
+
+    return {"message": result}
+
+
+
+class DeleteBlockRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+    user_modifying: str
+
+@router.post("/delete_block")
+async def delete_block_request(delete_block_request: DeleteBlockRequest):
+    result = await delete_block_async(
+        delete_block_request.tb_id,
+        delete_block_request.chap_id,
+        delete_block_request.sec_id,
+        delete_block_request.block_id,
+        delete_block_request.user_modifying
+    )
+    
+    if "don't have permission" in result or "doesn't exist" in result:
+        raise HTTPException(status_code=400, detail=result)
+    elif "error" in result.lower():
+        raise HTTPException(status_code=500, detail=result)
+
+    return {"message": result}
+
+    
 
 class GetPendingEnrollmentsRequest(BaseModel):
     unique_course_id: str
@@ -456,3 +673,16 @@ async def get_pending_enrollments(request: GetPendingEnrollmentsRequest):
         raise HTTPException(status_code=404, detail="No pending enrollments found.")
     
     return {"pending_enrollments": result}, 200
+
+
+@router.post('/get_enrolled_students')
+async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
+    unique_course_id = request.unique_course_id
+    
+    # Call the function to fetch pending enrollments
+    result = await fetch_pending_enrollments(unique_course_id)
+    
+    if result is None:
+        raise HTTPException(status_code=404, detail="No enrolled students found.")
+    
+    return {"enrolled_students": result}, 200

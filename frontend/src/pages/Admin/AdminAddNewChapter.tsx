@@ -16,6 +16,9 @@ const AdminAddNewChapter: React.FC = () => {
 
 
   useEffect(() => {
+    if (!tb_id) {
+      return;
+    }
     // Fetch textbook data here
     fetch(`http://localhost:8000/api/v1/textbook?tb_id=${tb_id}`)
       .then((response) => response.json())

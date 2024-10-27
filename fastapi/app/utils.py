@@ -357,6 +357,24 @@ async def get_chapter_details(tb_id, chap_id):
     values = {"tb_id": tb_id, "chap_id": chap_id}
     return await database.fetch_one(query=query, values=values)
 
+async def get_section_details(tb_id, chap_id, sec_id):
+    query = """
+        SELECT * 
+        FROM section 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
+    """
+    values = {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+    return await database.fetch_one(query=query, values=values)
+
+async def get_block_details(tb_id, chap_id, sec_id, block_id):
+    query = """
+        SELECT * 
+        FROM block 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+    """
+    values = {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+    return await database.fetch_one(query=query, values=values)
+
 """
 TEXTBOOK MODULE
 """
@@ -730,8 +748,311 @@ async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_
             return "error"
 
 
+async def modify_textbook(tb_id: int, user_modifying: str):
+    """Check if the textbook exists for modification and validate user access."""
+
+    # Queries to check textbook existence and user access
+    check_textbook_query = """
+        SELECT COUNT(*) FROM textbook WHERE textbook_id = :tb_id
+    """
+    check_user_role_query = """
+        SELECT role FROM user WHERE user_id = :user_modifying
+    """
+    check_faculty_access_query = """
+        SELECT textbook_id FROM course WHERE faculty_id = :user_modifying
+    """
+    check_ta_access_query = """
+        SELECT c.textbook_id
+        FROM teaching_assistant t
+        JOIN course c ON t.course_id = c.course_id
+        WHERE t.ta_id = :user_modifying
+    """
+
+    async with database.transaction() as transaction:
+        try:
+            # Check if textbook exists
+            count = await database.fetch_val(
+                query=check_textbook_query, 
+                values={"tb_id": tb_id}
+            )
+            if count == 0:
+                return "Textbook doesn't exist, so can't modify."
+
+            # Fetch the role of the user modifying
+            modifying_user_role = await database.fetch_val(
+                query=check_user_role_query, 
+                values={"user_modifying": user_modifying}
+            )
+
+            # Check access based on user role
+            if modifying_user_role == "faculty":
+                associated_tb_id = await database.fetch_val(
+                    query=check_faculty_access_query, 
+                    values={"user_modifying": user_modifying}
+                )
+                if associated_tb_id != tb_id:
+                    return "You are not associated with this course, so can't modify."
+
+            elif modifying_user_role == "teaching assistant":
+                associated_tb_id = await database.fetch_val(
+                    query=check_ta_access_query, 
+                    values={"user_modifying": user_modifying}
+                )
+                if associated_tb_id != tb_id:
+                    return "You are not associated with this course, so can't modify."
+
+            return "Textbook under modification"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error modifying textbook: {e}")
+            print(traceback.format_exc())
+            return "error"
+
+async def modify_chapter(tb_id: int, chap_id: str):
+    """Check if the chapter exists for modification."""
+    check_query = """
+        SELECT COUNT(*) FROM chapter WHERE textbook_id = :tb_id AND chapter_id = :chap_id
+    """
+    async with database.transaction() as transaction:
+        try:
+            count = await database.fetch_val(query=check_query, values={"tb_id": tb_id, "chap_id": chap_id})
+            if count == 0:
+                return "Chapter doesn't exist, so can't modify."
+            return "Chapter under modification"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error modifying chapter: {e}")
+            print(traceback.format_exc())
+            return "error"
+
+
+async def modify_section(tb_id: int, chap_id: str, sec_id: str):
+    """Check if the section exists for modification."""
+    check_query = """
+        SELECT COUNT(*) FROM section WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
+    """
+    async with database.transaction() as transaction:
+        try:
+            count = await database.fetch_val(query=check_query, values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id})
+            if count == 0:
+                return "Section doesn't exist, so can't modify."
+            return "Section under modification"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error modifying section: {e}")
+            print(traceback.format_exc())
+            return "error"
+
+
+async def modify_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, user_modifying: str):
+    """Check if the block exists for modification and verify user permissions."""
+    
+    check_query = """
+        SELECT COUNT(*), created_by FROM block 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+    """
+    role_query = "SELECT role FROM user WHERE user_id = :user_id"
+    
+    async with database.transaction() as transaction:
+        try:
+            # Check if block exists and get the creator
+            result = await database.fetch_one(
+                query=check_query,
+                values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+            count, created_by = result if result else (0, None)
+            
+            if count == 0:
+                return "Block doesn't exist, so can't modify."
+
+            # Fetch the roles of both the user modifying and the block creator
+            modifying_user_role = await database.fetch_val(query=role_query, values={"user_id": user_modifying})
+            creator_user_role = await database.fetch_val(query=role_query, values={"user_id": created_by})
+
+            # Check permissions based on roles
+            if creator_user_role == "admin" and modifying_user_role != "admin":
+                return "Don't have permission to modify this block added by admin"
+            elif creator_user_role == "faculty" and modifying_user_role == "teaching assistant":
+                return "Don't have permission to modify this block added by faculty"
+            elif user_modifying != created_by and creator_user_role == "teaching assistant" and modifying_user_role == "teaching assistant":
+                return "Don't have permission to modify this block added by another TA"
+
+            return "Block under modification"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error modifying block: {e}")
+            print(traceback.format_exc())
+            return "error"
+
+
+
+async def modify_activity_add_question(
+    tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
+    question_text: str, option_1: str, option_1_explanation: str, option_2: str,
+    option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
+    option_4_explanation: str, answer: str, user_modifying: str
+):
+    """Modify activity content, add a question, and delete the previous activity if it exists."""
+    
+    async with database.transaction() as transaction:
+        try:
+            # Retrieve content and type from block
+            content_result = await database.fetch_one(
+                query="SELECT content, block_type FROM block WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+            
+            
+            content, content_type = content_result
+
+            # If the content type is activity, remove previous activity if it exists
+            if content_type == "activity":
+                prev_activity_id = content
+
+                # Check if activity exists in the activity table
+                count = await database.fetch_val(
+                    query="SELECT COUNT(*) FROM activity WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND unique_activity_id = :prev_activity_id",
+                    values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "prev_activity_id": prev_activity_id}
+                )
+                
+                # If activity exists, delete it
+                if count > 0:
+                    await database.execute(
+                        query="DELETE FROM activity WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND unique_activity_id = :prev_activity_id",
+                        values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "prev_activity_id": prev_activity_id}
+                    )
+                    print(f"Previous Activity [{prev_activity_id}] deleted.")
+                else:
+                    return "Previous Activity does not exist."
+
+            # If the content type is text or picture, update block content and type to 'activity'
+            if content_type in ["text", "picture"]:
+                await database.execute(
+                    query="UPDATE block SET content = :activity_id, block_type = 'activity' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                    values={"activity_id": activity_id, "tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+                )
+
+            # Insert new activity
+            await database.execute(
+                query="INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id, created_by) VALUES (:tb_id, :chap_id, :sec_id, :block_id, :activity_id, :user_modifying)",
+                values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": activity_id, "user_modifying": user_modifying}
+            )
+
+            # Insert question details
+            await add_question_async(
+                tb_id, chap_id, sec_id, block_id, activity_id, question_id, question_text,
+                option_1, option_1_explanation, option_2, option_2_explanation,
+                option_3, option_3_explanation, option_4, option_4_explanation, answer
+            )
+            
+            return "Modified Activity"
+
+        except Exception as e:
+            await transaction.rollback()
+            print(f"Error creating question: {e}")
+            return "Error"
+
+
+async def delete_chapter_async(connection, tb_id, chap_id, user_modifying):
+    """ Deleting chapter asynchronously. """
+    try:
+        async with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*), created_by FROM chapter WHERE textbook_id = %s AND chapter_id = %s", (tb_id, chap_id))
+            count, created_by = await cursor.fetchone()
+            
+            if count == 0:
+                return "Chapter doesn't exist, so can't delete"
+            
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            modifying_user_role = await cursor.fetchone()[0]
+
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (created_by,))
+            creator_user_role = await cursor.fetchone()[0]
+
+            if creator_user_role == "admin" and modifying_user_role != "admin":
+                return "Don't have permission to delete"
+            elif creator_user_role == "faculty" and modifying_user_role == "teaching assistant":
+                return "Don't have permission to delete"
+            
+            await cursor.execute("DELETE FROM chapter WHERE textbook_id = %s AND chapter_id = %s", (tb_id, chap_id))
+            await connection.commit()
+            return "Chapter deleted successfully"
+
+    except Exception as e:
+        print(f"Error deleting chapter: {e}")
+        await connection.rollback()
+        print(traceback.format_exc())
+        return "An error occurred while deleting the chapter."
+
+async def delete_section_async(connection, tb_id, chap_id, sec_id, user_modifying):
+    """ Deleting section asynchronously. """
+    try:
+        async with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*), created_by FROM section WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s", (tb_id, chap_id, sec_id))
+            count, created_by = await cursor.fetchone()
+            
+            if count == 0:
+                return "Section doesn't exist, so can't delete"
+            
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            modifying_user_role = await cursor.fetchone()[0]
+
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (created_by,))
+            creator_user_role = await cursor.fetchone()[0]
+
+            if creator_user_role == "admin" and modifying_user_role != "admin":
+                return "Don't have permission to delete"
+            elif creator_user_role == "faculty" and modifying_user_role == "teaching assistant":
+                return "Don't have permission to delete"
+            
+            await cursor.execute("DELETE FROM section WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s", (tb_id, chap_id, sec_id))
+            await connection.commit()
+            return "Section deleted successfully"
+
+    except Exception as e:
+        print(f"Error deleting section: {e}")
+        await connection.rollback()
+        print(traceback.format_exc())
+        return "An error occurred while deleting the section."
+
+async def delete_block_async(connection, tb_id, chap_id, sec_id, block_id, user_modifying):
+    """ Deleting block asynchronously. """
+    try:
+        async with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*), created_by FROM block WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s", (tb_id, chap_id, sec_id, block_id))
+            count, created_by = await cursor.fetchone()
+            
+            if count == 0:
+                return "Block doesn't exist, so can't delete"
+            
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            modifying_user_role = await cursor.fetchone()[0]
+
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (created_by,))
+            creator_user_role = await cursor.fetchone()[0]
+
+            if creator_user_role == "admin" and modifying_user_role != "admin":
+                return "Don't have permission to delete"
+            elif creator_user_role == "faculty" and modifying_user_role == "teaching assistant":
+                return "Don't have permission to delete"
+            
+            await cursor.execute("DELETE FROM block WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s", (tb_id, chap_id, sec_id, block_id))
+            await connection.commit()
+            return "Block deleted successfully"
+
+    except Exception as e:
+        print(f"Error deleting block: {e}")
+        await connection.rollback()
+        print(traceback.format_exc())
+        return "An error occurred while deleting the block."
+
 
 async def fetch_pending_enrollments(unique_course_id: str):
+    
     enrollment_query = """
     SELECT student_id, status
     FROM enrollment
@@ -743,4 +1064,19 @@ async def fetch_pending_enrollments(unique_course_id: str):
         return enrollments
     except Exception as e:
         print(f"Error fetching pending enrollments for course ID '{unique_course_id}': {e}")
+        return None
+    
+    
+async def fetch_approved_enrollments(unique_course_id: str):
+    
+    enrollment_query = """
+    SELECT student_id, status
+    FROM enrollment
+    WHERE unique_course_id = :unique_course_id AND status = 'Enrolled'
+    """
+    try:
+        enrollments = await database.fetch_all(query=enrollment_query, values={"unique_course_id": unique_course_id})
+        return enrollments
+    except Exception as e:
+        print(f"Error fetching enrolled students for course ID '{unique_course_id}': {e}")
         return None

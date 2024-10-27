@@ -607,6 +607,114 @@ def add_question(connection, tb_id, chap_id, sec_id, block_id, activity_id, ques
 
 
 
+def delete_chapter(connection, tb_id, chap_id, user_modifying):
+
+    """ Deleting chapter """
+    try:
+        with connection.cursor() as cursor:
+            # Check if chap_id exists in the chapter table
+            cursor.execute("SELECT COUNT(*), created_by FROM chapter WHERE textbook_id = %s AND chapter_id = %s", (tb_id, chap_id))
+            count, created_by = cursor.fetchone()
+            
+            # If chap_id does not exist, raise an error
+            if count == 0:
+                return "Chapter doesn't exist, so can't delete"
+            
+            # Fetch the role of the user modifying
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            modifying_user_role = cursor.fetchone()[0]
+
+            # Fetch the role of the block creator
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (created_by,))
+            creator_user_role = cursor.fetchone()[0]
+
+            if(creator_user_role == "admin" and modifying_user_role != "admin"):
+                return "Don't have permission to delete"
+            
+            elif(creator_user_role == "faculty" and modifying_user_role == "teaching assistant"):
+                return "Don't have permission to delete"
+            
+            cursor.execute("DELETE FROM chapter WHERE textbook_id = %s AND chapter_id = %s", (tb_id, chap_id))
+            connection.commit()  # Commit the transaction
+            return "Chapter deleted successfully"
+
+    except Exception as e:
+        print(f"Error deleting chapter: {e}")
+        connection.rollback()
+        print(traceback.format_exc())
+
+def delete_section(connection, tb_id, chap_id, sec_id, user_modifying):
+
+    """ Deleting section """
+    try:
+        with connection.cursor() as cursor:
+            # Check if chap_id exists in the chapter table
+            cursor.execute("SELECT COUNT(*), created_by FROM section WHERE textbook_id = %s AND chapter_id = %s AND section_id =  %s", (tb_id, chap_id, sec_id))
+            count, created_by = cursor.fetchone()
+            
+            # If chap_id does not exist, raise an error
+            if count == 0:
+                return "Section doesn't exist, so can't delete"
+            
+            # Fetch the role of the user modifying
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            modifying_user_role = cursor.fetchone()[0]
+
+            # Fetch the role of the block creator
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (created_by,))
+            creator_user_role = cursor.fetchone()[0]
+
+            if(creator_user_role == "admin" and modifying_user_role != "admin"):
+                return "Don't have permission to delete"
+            
+            elif(creator_user_role == "faculty" and modifying_user_role == "teaching assistant"):
+                return "Don't have permission to delete"
+            
+            cursor.execute("DELETE FROM section WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s", (tb_id, chap_id, sec_id))
+            connection.commit()  # Commit the transaction
+            return "Section deleted successfully"
+
+    except Exception as e:
+        print(f"Error deleting section: {e}")
+        connection.rollback()
+        print(traceback.format_exc())
+
+def delete_block(connection, tb_id, chap_id, sec_id, block_id, user_modifying):
+
+    """ Deleting chapter """
+    try:
+        with connection.cursor() as cursor:
+            # Check if chap_id exists in the chapter table
+            cursor.execute("SELECT COUNT(*), created_by FROM block WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s", (tb_id, chap_id, sec_id, block_id))
+            count, created_by = cursor.fetchone()
+            
+            # If chap_id does not exist, raise an error
+            if count == 0:
+                return "Block doesn't exist, so can't delete"
+            
+            # Fetch the role of the user modifying
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
+            modifying_user_role = cursor.fetchone()[0]
+
+            # Fetch the role of the block creator
+            cursor.execute("SELECT role FROM user WHERE user_id = %s", (created_by,))
+            creator_user_role = cursor.fetchone()[0]
+
+            if(creator_user_role == "admin" and modifying_user_role != "admin"):
+                return "Don't have permission to delete"
+            
+            elif(creator_user_role == "faculty" and modifying_user_role == "teaching assistant"):
+                return "Don't have permission to delete"
+            
+            cursor.execute("DELETE FROM block WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s", (tb_id, chap_id, sec_id, block_id))
+            connection.commit()  # Commit the transaction
+            return "Block deleted successfully"
+
+    except Exception as e:
+        print(f"Error deleting block: {e}")
+        connection.rollback()
+        print(traceback.format_exc())
+
 # Testing textbook creation
 def textbook_creation_flow(connection):
     try:
@@ -873,11 +981,45 @@ def modify_block_func_edgecases(connection):
     add_content(connection, 1, "1", "1", "sample4.png", "7", block_type="picture")
 
 
+def delete_func(connection):
+
+    # Placeholder for deleting things functionalities
+
+    # first add chapter to tb_id = 1 and then I will start deleting one-by-one
+    modify_textbook(connection, 1, "12345678")
+    create_chapter(connection, 1, "2", "Abstraction", "12345678")
+    create_section(connection, 1, "2", "1", "Def", "12345678")
+    create_block(connection, 1, "2", "1", "1", "12345678")
+    add_content(connection, 1, "2", "1", "Abstr BOO", "1", block_type = "text")
+
+    # ## --- PASS CASES
+    # delete-block
+    delete_block(connection, 1, "2", "1", "1", "12345678")
+    
+    # delete-section
+    delete_section(connection, 1, "2", "1", "12345678")
+
+    # delete-chapter
+    delete_chapter(connection, 1, "2", "12345678")
+
+    ## --- FAIL CASES
+    # delete-block
+    print(delete_block(connection, 1, "2", "1", "1", "21115678"))
+    
+    # delete-section
+    print(delete_section(connection, 1, "2", "1", "21115678"))
+
+    # delete-chapter
+    print(delete_chapter(connection, 1, "2", "21115678"))
+
+
+    
+
 def main():
     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"], help="1: Create Textbook, \
+    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], help="1: Create Textbook, \
                                     2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
-                                    5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases")
+                                    5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases, 10: Delete operations")
     
     # Parse the arguments
     args = parser.parse_args()
@@ -909,6 +1051,9 @@ def main():
     elif(args.action == "9"):
         # add_block_func_edgecases(connection)
         modify_block_func_edgecases(connection)
+    
+    elif(args.action == "10"):
+        delete_func(connection)
 
 if __name__ == "__main__":
     main()
