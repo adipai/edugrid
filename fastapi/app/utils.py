@@ -1222,3 +1222,157 @@ def check_course_details(input_course_id: str, current_date: str, user_modifying
         print("An error occurred:", e)
         print(traceback.format_exc())
         return "Error"
+
+    
+async def hide_chapter(tb_id: int, chap_id: str):
+    """Set hidden_status of a chapter and all following entities to 'yes'."""
+    async with database.transaction():
+        try:
+            # Step 1: Set the chapter row to hidden
+            await database.execute(
+                "UPDATE chapter SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            # Step 2: Set related sections to hidden
+            await database.execute(
+                "UPDATE section SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            # Step 3: Set related blocks to hidden
+            await database.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            # Step 4: Set related activities to hidden
+            await database.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            return "Chapter and related entities successfully hidden."
+
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"
+
+
+async def hide_section(tb_id: int, chap_id: str, sec_id: str):
+    """Set hidden_status of a section and all following entities to 'yes'."""
+    async with database.transaction():
+        try:
+            # Step 1: Set related sections to hidden
+            await database.execute(
+                "UPDATE section SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+            )
+
+            # Step 2: Set related blocks to hidden
+            await database.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+            )
+
+            # Step 3: Set related activities to hidden
+            await database.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+            )
+
+            return "Section and related entities successfully hidden."
+
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"
+
+
+
+async def hide_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
+    """Set hidden_status of a block and all following entities to 'yes'."""
+    async with database.transaction():
+        try:
+            # Step 1: Set related blocks to hidden
+            await database.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+
+            # Step 2: Set related activities to hidden
+            await database.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+
+            return "Block and related entities successfully hidden."
+
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"
+        
+
+async def enroll_student(course_id: str, student_id: str):
+    # Query to check if the student is already enrolled
+    check_enrollment_query = """
+    SELECT status
+    FROM enrollment
+    WHERE unique_course_id = :course_id AND student_id = :student_id;
+    """
+    
+    # Query to check course capacity
+    check_capacity_query = """
+    SELECT c.capacity, COUNT(e.student_id) AS enrolled_count
+    FROM course AS c
+    LEFT JOIN enrollment AS e ON c.course_id = e.unique_course_id AND e.status = 'Enrolled'
+    WHERE c.course_id = :course_id
+    GROUP BY c.capacity
+    HAVING enrolled_count < c.capacity;
+    """
+    
+    # Query to update enrollment status
+    update_status_query = """
+    UPDATE enrollment
+    SET status = 'Enrolled'
+    WHERE unique_course_id = :course_id AND student_id = :student_id AND status = 'Pending';
+    """
+    
+    async with database.transaction() as transaction:
+        try:
+            # Step 1: Check if the student is already enrolled
+            enrollment_status = await database.fetch_one(
+                query=check_enrollment_query,
+                values={"course_id": course_id, "student_id": student_id}
+            )
+
+            if enrollment_status:
+                if enrollment_status["status"] == 'Enrolled':
+                    return "already_enrolled"
+
+            # Step 2: Check if the course has capacity
+            capacity_available = await database.fetch_one(
+                query=check_capacity_query,
+                values={"course_id": course_id}
+            )
+
+            if not capacity_available:
+                return "at_capacity"
+
+            # Step 3: Update the status to 'Enrolled'
+            await database.execute(
+                query=update_status_query,
+                values={"course_id": course_id, "student_id": student_id}
+            )
+
+            # Commit the transaction
+            await transaction.commit()
+            return "enrolled"
+
+        except Exception as e:
+            # Rollback the transaction in case of error
+            await transaction.rollback()
+            print(f"Error enrolling student: {e}")
+            return "error"

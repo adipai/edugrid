@@ -764,7 +764,7 @@ async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
     unique_course_id = request.unique_course_id
     
     # Call the function to fetch pending enrollments
-    result = await fetch_pending_enrollments(unique_course_id)
+    result = await fetch_approved_enrollments(unique_course_id)
     
     if result is None:
         raise HTTPException(status_code=404, detail="No enrolled students found.")
@@ -793,3 +793,61 @@ def check_course_details_request(request: CourseDetailsRequest):
         raise HTTPException(status_code=500, detail="Error checking course details")
     return {"message": result}
 
+
+class HideChapterRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+
+@router.post("/hide_chapter")
+async def hide_chapter_request(hide_chapter_request: HideChapterRequest):
+    result = await hide_chapter(hide_chapter_request.tb_id, hide_chapter_request.chap_id)
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="Error hiding chapter")
+    
+    return {"message": result}
+
+
+class HideSectionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+
+@router.post("/hide_section")
+async def hide_section_request(hide_section_request: HideSectionRequest):
+    result = await hide_section(hide_section_request.tb_id, hide_section_request.chap_id, hide_section_request.sec_id)
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="Error hiding section")
+    
+    return {"message": result}
+
+@router.post("/hide_block")
+async def hide_block_request(hide_block_request: HideBlockRequest):
+    result = await hide_block(hide_block_request.tb_id, hide_block_request.chap_id, hide_block_request.sec_id, hide_block_request.block_id)
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="Error hiding block")
+    
+    return {"message": result}
+
+class EnrollStudentRequest(BaseModel):
+    course_id: str
+    student_id: str
+
+@router.post('/enroll_student')
+async def enroll_student_request(request: EnrollStudentRequest):
+    course_id = request.course_id
+    student_id = request.student_id
+    
+    # Call the function to handle the enrollment logic
+    result = await enroll_student(course_id, student_id)
+    
+    if result == 'already_enrolled':
+        raise HTTPException(status_code=400, detail=f"Student {student_id} is already enrolled in course {course_id}.")
+    elif result == 'at_capacity':
+        raise HTTPException(status_code=400, detail=f"Course {course_id} is at capacity. Enrollment not possible.")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="An error occurred during enrollment.")
+    
+    return {"message": f"Student with ID {student_id} has been succesfully enrolled in course {course_id}."}, 200

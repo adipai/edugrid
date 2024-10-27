@@ -1,20 +1,23 @@
-import React, { useEffect, useState} from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const AdminModifyTextbook: React.FC = () => {
-  const [searchTbId, setSearchTbId] = useState("");
   const [textbookId, setTextbookId] = useState("");
   const [textbookDetails, setTextbookDetails] = useState<any>(null);
+
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const tb_id = queryParams.get("tb_id");
 
   useEffect(() => {
-    // Fetch textbook data here
-    if (!searchTbId) {
+    if (!tb_id) {
+      setTextbookDetails(null);
       return;
     }
-    console.log(`http://localhost:8000/api/v1/textbook?tb_id=${searchTbId}`);
-    fetch(`http://localhost:8000/api/v1/textbook?tb_id=${searchTbId}`)
+    fetch(`http://localhost:8000/api/v1/textbook?tb_id=${tb_id}`)
       .then((response) => response.json())
       .then((data) => {
         // Handle the fetched textbook data here
@@ -22,24 +25,22 @@ const AdminModifyTextbook: React.FC = () => {
         if (data?.textbook) {
           setTextbookDetails(data.textbook);
         } else {
-          window.alert("Textbook not found");
+          console.log("Textbook not found");
+          throw new Error("Textbook not found");
         }
       })
       .catch((error) => {
         console.error("Error fetching textbook data:", error);
+        window.alert("Error fetching textbook data");
+        navigate(-1)
       });
-  }, [searchTbId]);
+  }, [tb_id]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Handle form submission logic here
-    console.log("Submitted e-textbook ID:", textbookId);
-  };
-
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-    setSearchTbId(textbookId);
     setTextbookId("");
+    navigate("/admin/modify-textbook?tb_id=" + textbookId);
   };
 
   return (
@@ -57,9 +58,7 @@ const AdminModifyTextbook: React.FC = () => {
               required
             />
           </div>
-          <button type="submit" onClick={(e) => handleSearch(e)}>
-            Submit
-          </button>
+          <button type="submit">Submit</button>
         </form>
       )}
 
@@ -81,17 +80,11 @@ const AdminModifyTextbook: React.FC = () => {
                 2. Modify Chapter
               </Link>
             </li>
-            <li>
-            <div onClick={() => navigate(-1)}>Go Back</div>
-            </li>
           </>
         )}
-
-        {!textbookDetails && (
-          <li>
-            <Link to={`/admin/landing`}>3. Go Back</Link>{" "}
-          </li>
-        )}
+        <li>
+          <div onClick={() => navigate(-1)}>3. Go Back</div>
+        </li>
         <li>
           <Link to={`/admin/landing`}>4. Landing Page</Link>
         </li>
