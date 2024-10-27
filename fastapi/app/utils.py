@@ -681,7 +681,7 @@ async def add_question(tb_id: int, chap_id: str, sec_id: str, block_id: str,
                        activity_id: str, question_id: str, question_text: str, 
                        option_1: str, option_1_explanation: str, option_2: str, 
                        option_2_explanation: str, option_3: str, option_3_explanation: str, 
-                       option_4: str, option_4_explanation: str, answer: str):
+                       option_4: str, option_4_explanation: str, answer: int):
 
     check_query = """
         SELECT question_id FROM question 
@@ -896,7 +896,7 @@ async def modify_content_add_question(
     tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
     question_text: str, option_1: str, option_1_explanation: str, option_2: str,
     option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
-    option_4_explanation: str, answer: str, user_modifying: str
+    option_4_explanation: str, answer: int, user_modifying: str
 ):
     """Modify activity content, add a question, and delete the previous activity if it exists."""
     
@@ -963,7 +963,7 @@ async def modify_activity_add_question(
     tb_id: int, chap_id: str, sec_id: str, block_id: str, activity_id: str, question_id: str,
     question_text: str, option_1: str, option_1_explanation: str, option_2: str,
     option_2_explanation: str, option_3: str, option_3_explanation: str, option_4: str,
-    option_4_explanation: str, answer: str, user_modifying: str
+    option_4_explanation: str, answer: int, user_modifying: str
 ):
     """Modify activity content by adding a new question."""
     
