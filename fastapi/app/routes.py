@@ -567,7 +567,7 @@ class ModifyContentAddQuestionRequest(BaseModel):
     option_3_explanation: str
     option_4: str
     option_4_explanation: str
-    answer: str
+    answer: int
     user_modifying: str
 
 @router.post("/modify_content_add_question")
