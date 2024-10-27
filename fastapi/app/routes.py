@@ -808,3 +808,23 @@ async def hide_block_request(hide_block_request: HideBlockRequest):
     
     return {"message": result}
 
+class EnrollStudentRequest(BaseModel):
+    course_id: str
+    student_id: str
+
+@router.post('/enroll_student')
+async def enroll_student_request(request: EnrollStudentRequest):
+    course_id = request.course_id
+    student_id = request.student_id
+    
+    # Call the function to handle the enrollment logic
+    result = await enroll_student(course_id, student_id)
+    
+    if result == 'already_enrolled':
+        raise HTTPException(status_code=400, detail=f"Student {student_id} is already enrolled in course {course_id}.")
+    elif result == 'at_capacity':
+        raise HTTPException(status_code=400, detail=f"Course {course_id} is at capacity. Enrollment not possible.")
+    elif result == 'error':
+        raise HTTPException(status_code=500, detail="An error occurred during enrollment.")
+    
+    return {"message": f"Student with ID {student_id} has been succesfully enrolled in course {course_id}."}, 200

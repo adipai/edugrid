@@ -1267,3 +1267,66 @@ async def hide_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
             print("An error occurred:", e)
             print(traceback.format_exc())
             return "Error"
+        
+
+async def enroll_student(course_id: str, student_id: str):
+    # Query to check if the student is already enrolled
+    check_enrollment_query = """
+    SELECT status
+    FROM enrollment
+    WHERE unique_course_id = :course_id AND student_id = :student_id;
+    """
+    
+    # Query to check course capacity
+    check_capacity_query = """
+    SELECT c.capacity, COUNT(e.student_id) AS enrolled_count
+    FROM course AS c
+    LEFT JOIN enrollment AS e ON c.course_id = e.unique_course_id AND e.status = 'Enrolled'
+    WHERE c.course_id = :course_id
+    GROUP BY c.capacity
+    HAVING enrolled_count < c.capacity;
+    """
+    
+    # Query to update enrollment status
+    update_status_query = """
+    UPDATE enrollment
+    SET status = 'Enrolled'
+    WHERE unique_course_id = :course_id AND student_id = :student_id AND status = 'Pending';
+    """
+    
+    async with database.transaction() as transaction:
+        try:
+            # Step 1: Check if the student is already enrolled
+            enrollment_status = await database.fetch_one(
+                query=check_enrollment_query,
+                values={"course_id": course_id, "student_id": student_id}
+            )
+
+            if enrollment_status:
+                if enrollment_status["status"] == 'Enrolled':
+                    return "already_enrolled"
+
+            # Step 2: Check if the course has capacity
+            capacity_available = await database.fetch_one(
+                query=check_capacity_query,
+                values={"course_id": course_id}
+            )
+
+            if not capacity_available:
+                return "at_capacity"
+
+            # Step 3: Update the status to 'Enrolled'
+            await database.execute(
+                query=update_status_query,
+                values={"course_id": course_id, "student_id": student_id}
+            )
+
+            # Commit the transaction
+            await transaction.commit()
+            return "enrolled"
+
+        except Exception as e:
+            # Rollback the transaction in case of error
+            await transaction.rollback()
+            print(f"Error enrolling student: {e}")
+            return "error"
