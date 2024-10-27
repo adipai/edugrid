@@ -220,7 +220,7 @@ class GetTextBookRequest(BaseModel):
     tb_id: int
 
 @router.get('/api/v1/textbook')
-async def _get_textbook(tb_id: Optional[int] = None):
+async def _get_textbook(tb_id: int):
     
     result = await get_textbook_details(tb_id)
     
@@ -230,14 +230,25 @@ async def _get_textbook(tb_id: Optional[int] = None):
     return {'textbook': result}
 
 @router.get('/api/v1/chapter')
-async def _get_chapter(tb_id: Optional[int] = None, chap_id: Optional[str] = None):
+async def _get_chapter(tb_id: int, chap_id: str):
     
     result = await get_chapter_details(tb_id,chap_id)
     
     print(result)
     if not result:
-        raise HTTPException(status_code=404, detail="Textbook not found")
+        raise HTTPException(status_code=404, detail="Chapter not found")
     return {'chapter': result}
+
+
+@router.get('/api/v1/section')
+async def _get_chapter(tb_id:int, chap_id: str, sec_id: str):
+    
+    result = await get_section_details(tb_id,chap_id, sec_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Section not found")
+    return {'section': result}
 
 class CreateTextbookRequest(BaseModel):
     tb_id: int
@@ -440,6 +451,10 @@ async def add_question_request(add_question_request: AddQuestionRequest):
         raise HTTPException(status_code=500, detail="Error adding question")
 
     return {"message": f"Question id '{question_id}' created for the activity"}
+
+class ModifyTextbookRequest(BaseModel):
+    tb_id: int
+    user_modifying: str
 
 
 @router.post("/modify_textbook")
