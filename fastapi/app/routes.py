@@ -456,3 +456,16 @@ async def get_pending_enrollments(request: GetPendingEnrollmentsRequest):
         raise HTTPException(status_code=404, detail="No pending enrollments found.")
     
     return {"pending_enrollments": result}, 200
+
+
+@router.post('/get_enrolled_students')
+async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
+    unique_course_id = request.unique_course_id
+    
+    # Call the function to fetch pending enrollments
+    result = await fetch_pending_enrollments(unique_course_id)
+    
+    if result is None:
+        raise HTTPException(status_code=404, detail="No enrolled students found.")
+    
+    return {"enrolled_students": result}, 200

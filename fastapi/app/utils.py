@@ -732,6 +732,7 @@ async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_
 
 
 async def fetch_pending_enrollments(unique_course_id: str):
+    
     enrollment_query = """
     SELECT student_id, status
     FROM enrollment
@@ -743,4 +744,19 @@ async def fetch_pending_enrollments(unique_course_id: str):
         return enrollments
     except Exception as e:
         print(f"Error fetching pending enrollments for course ID '{unique_course_id}': {e}")
+        return None
+    
+    
+async def fetch_approved_enrollments(unique_course_id: str):
+    
+    enrollment_query = """
+    SELECT student_id, status
+    FROM enrollment
+    WHERE unique_course_id = :unique_course_id AND status = 'Enrolled'
+    """
+    try:
+        enrollments = await database.fetch_all(query=enrollment_query, values={"unique_course_id": unique_course_id})
+        return enrollments
+    except Exception as e:
+        print(f"Error fetching enrolled students for course ID '{unique_course_id}': {e}")
         return None
