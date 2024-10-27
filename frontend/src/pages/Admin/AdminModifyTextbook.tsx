@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState} from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AdminModifyTextbook: React.FC = () => {
   const [searchTbId, setSearchTbId] = useState("");
   const [textbookId, setTextbookId] = useState("");
   const [textbookDetails, setTextbookDetails] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch textbook data here
@@ -38,12 +40,6 @@ const AdminModifyTextbook: React.FC = () => {
     event.preventDefault();
     setSearchTbId(textbookId);
     setTextbookId("");
-  };
-
-  const handleGoBack = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchTbId("");
-    setTextbookDetails(null);
   };
 
   return (
@@ -86,7 +82,7 @@ const AdminModifyTextbook: React.FC = () => {
               </Link>
             </li>
             <li>
-              <div onClick={(e) => handleGoBack(e)}>3. Go Back</div>
+            <div onClick={() => navigate(-1)}>Go Back</div>
             </li>
           </>
         )}
