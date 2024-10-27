@@ -89,8 +89,6 @@ const AdminContentAddText: React.FC = () => {
       navigate(
         `/admin/create-new-block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`
       );
-
-      // navigate(`/admin/create-new-section?tb_id=${tb_id}&chap_id=${chapterId}`);
     } catch (error) {
       console.error("Error creating block:", error);
     }
@@ -115,7 +113,7 @@ const AdminContentAddText: React.FC = () => {
       <button onClick={handleAddClick}>Add</button>
       <div>
         {/* <Link to="/admin">Go Back</Link> */}
-        <div onClick={() => navigate(-1)}></div>
+        <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
       <div>
         <Link to="/">Landing Page</Link>
