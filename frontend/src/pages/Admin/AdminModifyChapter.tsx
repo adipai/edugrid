@@ -49,8 +49,7 @@ const AdminModifyChapter: React.FC = () => {
         // Handle the fetched chapter data here
         if (data?.chapter) {
           setChapDetails(data.chapter);
-        }
-        else{
+        } else {
           console.log("Chapter not found");
           throw new Error("Chapter not found");
         }
@@ -98,7 +97,11 @@ const AdminModifyChapter: React.FC = () => {
             </Link>
           </div>
           <div>
-            <Link to={`/admin/modify-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}>2. Modify section</Link>
+            <Link
+              to={`/admin/modify-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
+            >
+              2. Modify section
+            </Link>
           </div>
         </>
       )}
