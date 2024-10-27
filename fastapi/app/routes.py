@@ -429,7 +429,7 @@ class AddQuestionRequest(BaseModel):
     option_3_explanation: str
     option_4: str
     option_4_explanation: str
-    answer: str
+    answer: int
 
     
 @router.post('/add_question')

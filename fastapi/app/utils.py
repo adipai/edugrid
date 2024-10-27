@@ -676,7 +676,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
             return "error"
 
 
-async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_id: str, 
+async def add_question(tb_id: int, chap_id: str, sec_id: str, block_id: str, 
                        activity_id: str, question_id: str, question_text: str, 
                        option_1: str, option_1_explanation: str, option_2: str, 
                        option_2_explanation: str, option_3: str, option_3_explanation: str, 
@@ -699,10 +699,10 @@ async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_
                 :option_3_explanation, :option_4, :option_4_explanation, :answer)
     """
 
-    async with connection.transaction() as transaction:
+    async with database.transaction() as transaction:
         try:
             # Check if the question ID already exists for the activity
-            existing_question = await connection.fetch_one(
+            existing_question = await database.fetch_one(
                 query=check_query, 
                 values={
                     "tb_id": tb_id, 
@@ -718,7 +718,7 @@ async def add_question(connection, tb_id: int, chap_id: str, sec_id: str, block_
                 return "Question ID already exists for the activity"
 
             # Insert the new question into the question table
-            await connection.execute(
+            await database.execute(
                 query=insert_query, 
                 values={
                     "tb_id": tb_id,

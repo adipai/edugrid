@@ -14,6 +14,7 @@ const AdminContentAddActivity: React.FC = () => {
   const sec_id = queryParams.get("sec_id");
   const block_id = queryParams.get("block_id");
   const user_id = localStorage.getItem("user_id");
+  const activity_id = queryParams.get("activity_id");
 
   const [chapDetails, setChapDetails] = useState<any>({});
   const [tbDetails, setTbDetails] = useState<any>({});
@@ -75,14 +76,23 @@ const AdminContentAddActivity: React.FC = () => {
   }, [tb_id, chap_id, sec_id, block_id]);
 
   const handleAddClick = async () => {
-    try {
-        const response = await axios.post("http://localhost:8000/create_activity", {
-          tb_id,
-          chap_id,
-          sec_id,
-          block_id,
-          created_by: user_id,
-        });
+    if (activity_id) {
+      navigate(
+        `/admin/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
+      );
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/create_activity",
+          {
+            tb_id,
+            chap_id,
+            sec_id,
+            block_id,
+            created_by: user_id,
+            activity_id: text,
+          }
+        );
         console.log("Block created:", response.data);
         // Redirect to the appropriate page based on the block type
         navigate(
@@ -91,6 +101,7 @@ const AdminContentAddActivity: React.FC = () => {
       } catch (error) {
         console.error("Error creating block:", error);
       }
+    }
   };
 
   return (
@@ -102,12 +113,18 @@ const AdminContentAddActivity: React.FC = () => {
       <h3>Block Name: {blockDetails?.block_id}</h3>
       <div>
         <label htmlFor="addText">Unique Acitivity ID:</label>
-        <input
-          type="text"
-          id="addText"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+
+        {activity_id && (
+          <input type="text" id="addText" value={activity_id} disabled={true} />
+        )}
+        {!activity_id && (
+          <input
+            type="text"
+            id="addText"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+        )}
       </div>
       <button onClick={handleAddClick}>Add Question</button>
       <div>
