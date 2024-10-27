@@ -623,7 +623,7 @@ async def create_activity(tb_id: int, chap_id: str, sec_id: str, block_id: str, 
         return 'error'
 
 
-async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str):
+async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str, created_by: str):
     check_query = """
         SELECT content, block_type FROM block 
         WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
@@ -634,7 +634,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
     """
     update_query = """
         UPDATE block SET content = :content, block_type = :block_type 
-        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND created_by = :created_by
     """
     
     async with database.transaction() as transaction:
@@ -650,7 +650,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
                 if current_block_type == "activity":
                     await database.execute(
                         query=delete_activity_query, 
-                        values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": current_content}
+                        values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": current_content }
                     )
 
             # Update the content and block type in the block table
@@ -662,7 +662,8 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
                     "tb_id": tb_id, 
                     "chap_id": chap_id, 
                     "sec_id": sec_id, 
-                    "block_id": block_id
+                    "block_id": block_id,
+                    "created_by": created_by
                 }
             )
 

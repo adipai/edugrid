@@ -389,7 +389,8 @@ class AddContentRequest(BaseModel):
     sec_id: str
     content: str
     block_id: str
-    block_type: str = "text"
+    block_type: str
+    created_by: str
 
 
 ## need to send block type from front-end (here block type is either "text" or "picture" depending on what is clicked)
@@ -402,8 +403,9 @@ async def add_content_request(add_content_request: AddContentRequest):
     content = add_content_request.content
     block_id = add_content_request.block_id
     block_type = add_content_request.block_type
+    created_by = add_content_request.created_by
 
-    result = await add_content(tb_id, chap_id, sec_id, content, block_id, block_type)
+    result = await add_content(tb_id, chap_id, sec_id, content, block_id, block_type, created_by)
 
     if(result == 'error'):
         raise HTTPException(status_code=500, detail=f"Error adding {block_type}")
