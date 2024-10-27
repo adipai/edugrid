@@ -17,7 +17,6 @@ import AdminCreateEvaluationCourse from "./pages/Admin/AdminCreateEvaluationCour
 import AdminCreateActiveCourse from "./pages/Admin/AdminCreateActiveCourse";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import FacultyCoursesPage from "./pages/Faculty/FacultyCoursesPage";
-
 import AdminCreateTextbook from "./pages/Admin/AdminCreateTextbook";
 import AdminAddNewChapter from "./pages/Admin/AdminAddNewChapter";
 import AdminModifyTextbook from "./pages/Admin/AdminModifyTextbook";
@@ -32,6 +31,8 @@ import AdminModifyContentBlock from "./pages/Admin/AdminModifyContentBlock";
 import FacultyActiveCoursesPage from "./pages/Faculty/FacultyActiveCoursesPage";
 import FacultyEvaluationCoursesPage from "./pages/Faculty/FacultyEvaluationCoursesPage";
 import AdminContentAddActivity from "./pages/Admin/AdminContentAddActivity";
+import FacultyViewWorklistPage from "./pages/Faculty/FacultyViewWorklistPage";
+import FacultyViewStudentsPage from "./pages/Faculty/FacultyViewStudentsPage";
 
 function App() {
   return (
@@ -67,6 +68,8 @@ function App() {
         <Route path="/faculty/courses" element={<FacultyCoursesPage />} />
         <Route path="/faculty/active-courses" element={<FacultyActiveCoursesPage />} />
         <Route path="/faculty/evaluation-courses" element={<FacultyEvaluationCoursesPage />} />
+        <Route path="/faculty/view-worklist" element={<FacultyViewWorklistPage />} />
+        <Route path="/faculty/view-students" element={<FacultyViewStudentsPage />} />
         
         {/* TA routes */}
         <Route path="/ta/login" element={<TALoginPage />} />

@@ -303,7 +303,8 @@ async def view_courses_faculty(faculty_id):
         await transaction.commit()
 
         if not courses:
-            return "no_courses_found"
+            print("no_courses_found")
+            return []
         
         course_list = [dict(course) for course in courses]
         print(f"Retrieved {len(course_list)} courses for faculty ID '{faculty_id}'.")
@@ -313,7 +314,7 @@ async def view_courses_faculty(faculty_id):
         # Rollback the transaction
         await transaction.rollback()
         print(f"Error retrieving courses for faculty ID '{faculty_id}': {e}")
-        return 'error'
+        return []
     
 async def view_courses_ta(ta_id):
     # Query to view courses exists
@@ -328,7 +329,8 @@ async def view_courses_ta(ta_id):
         await transaction.commit()
 
         if not courses:
-            return "no_courses_found"
+            print("no_courses_found")
+            return []
         
         course_list = [dict(course) for course in courses]
         print(f"Retrieved {len(course_list)} courses for teaching assistant ID '{ta_id}'.")
@@ -338,7 +340,7 @@ async def view_courses_ta(ta_id):
         # Rollback the transaction
         await transaction.rollback()
         print(f"Error retrieving courses for teaching assistant ID '{ta_id}': {e}")
-        return 'error'
+        return []
 
 async def get_textbook_details(tb_id):
     query = """
@@ -394,6 +396,50 @@ async def get_eval_course_details(course_id):
     values = {"course_id": course_id}
     return await database.fetch_one(query=query, values=values)
 
+async def get_worklist(course_id):
+    query = """
+        SELECT * 
+        FROM enrollment
+        WHERE unique_course_id = :course_id AND status = "pending"
+    """
+    values = {"course_id": course_id}
+    try:
+        worklist = await database.fetch_all(query=query, values=values)
+        if not worklist:
+            print("no_students_found")
+            return []
+            
+        work_list = [dict(student) for student in worklist]
+        print(f"Retrieved {len(work_list)} waitlisted students for course ID '{course_id}'.")
+        return work_list
+
+    except Exception as e:
+        # Rollback the transaction
+        print(f"Error retrieving worklist for course ID '{course_id}': {e}")
+        return []
+
+async def get_enrolled_list(course_id):
+    query = """
+        SELECT * 
+        FROM enrollment
+        WHERE unique_course_id = :course_id AND status = "enrolled"
+    """
+    values = {"course_id": course_id}
+    try:
+        worklist = await database.fetch_all(query=query, values=values)
+        if not worklist:
+            print("no_students_found")
+            return []
+            
+        work_list = [dict(student) for student in worklist]
+        print(f"Retrieved {len(work_list)} enrolled students for course ID '{course_id}'.")
+        return work_list
+
+    except Exception as e:
+        # Rollback the transaction
+        print(f"Error retrieving enrolled for course ID '{course_id}': {e}")
+        return []
+    
 """
 TEXTBOOK MODULE
 """

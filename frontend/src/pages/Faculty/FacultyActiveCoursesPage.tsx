@@ -1,34 +1,35 @@
 import React, { useEffect, useState} from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 // import { useNavigate } from "react-router-dom";
 
 const FacultyActiveCoursesPage: React.FC = () => {
-  const [searchCourseId, setSearchCourseId] = useState("");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialCourseId = queryParams.get("course_id"); // Get course ID from query params
+  const [searchCourseId, setSearchCourseId] = useState(initialCourseId || "");
   const [courseId, setCourseId] = useState("");
   const [courseDetails, setCourseDetails] = useState<any>(null);
 //   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch textbook data here
-    if (!searchCourseId) {
-      return;
+useEffect(() => {
+  if (searchCourseId) {
+    fetchCourseDetails(searchCourseId);
+  }
+}, [searchCourseId]);
+
+  const fetchCourseDetails = async (courseId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${courseId}`);
+      const data = await response.json();
+      if (data?.course) {
+        setCourseDetails(data.course);
+      } else {
+        alert("Course not found");
+      }
+    } catch (error) {
+      console.error("Error fetching course data:", error);
     }
-    console.log(`http://localhost:8000/api/v1/active-course?course_id=${searchCourseId}`);
-    fetch(`http://localhost:8000/api/v1/active-course?course_id=${searchCourseId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the fetched textbook data here
-        console.log(data);
-        if (data?.course) {
-          setCourseDetails(data.course);
-        } else {
-          window.alert("Course not found");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching course data:", error);
-      });
-  }, [searchCourseId]);
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

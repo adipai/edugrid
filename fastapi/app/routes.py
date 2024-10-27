@@ -280,6 +280,29 @@ async def _get_eval_course(course_id: int):
         raise HTTPException(status_code=404, detail="Course not found")
     return {'course': result}
 
+class ViewWorklistRequest(BaseModel):
+    course_id: int
+
+@router.post('/view_worklist')
+async def _view_worklist(view_worklist_request: ViewWorklistRequest):
+    course_id = view_worklist_request.course_id
+    result = await get_worklist(course_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Waitlist empty")
+    return {'students': result}
+
+@router.post('/view_enrolled_students')
+async def _view_worklist(view_worklist_request: ViewWorklistRequest):
+    course_id = view_worklist_request.course_id
+    result = await get_enrolled_list(course_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Enrolled list empty")
+    return {'students': result}
+
 class CreateTextbookRequest(BaseModel):
     tb_id: int
     tb_name: str
