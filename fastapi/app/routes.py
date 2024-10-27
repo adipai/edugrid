@@ -605,7 +605,7 @@ class ModifyActivityAddQuestionRequest(BaseModel):
     option_3_explanation: str
     option_4: str
     option_4_explanation: str
-    answer: str
+    answer: int
     user_modifying: str
 
 @router.post("/modify_activity_add_question")
@@ -729,20 +729,24 @@ async def get_enrolled_students(request: GetPendingEnrollmentsRequest):
     return {"enrolled_students": result}, 200
 
 
-class CheckCourseEndDateRequest(BaseModel):
-    current_date: date
+class CourseDetailsRequest(BaseModel):
+    input_course_id: str
+    current_date: str  # YYYY-MM-DD format
     user_modifying: str
 
-@router.post("/check_course_end_date")
-async def check_course_end_date_request(check_course_end_date_request: CheckCourseEndDateRequest):
-    result = await check_course_end_date(
-        check_course_end_date_request.current_date,
-        check_course_end_date_request.user_modifying
+@router.post("/check_course_details")
+def check_course_details_request(request: CourseDetailsRequest):
+    result = check_course_details(
+        request.input_course_id,
+        request.current_date,
+        request.user_modifying
     )
 
-    if result == "Beyond the end date - can't change the course!":
+    if result == "You are not associated with this course":
+        raise HTTPException(status_code=403, detail="You are not associated with this course")
+    elif result == "Beyond the end date - can't change the course!":
         raise HTTPException(status_code=403, detail="Beyond the end date - can't change the course!")
-    elif result == "error":
-        raise HTTPException(status_code=500, detail="Error")
-
+    elif result == "Error":
+        raise HTTPException(status_code=500, detail="Error checking course details")
     return {"message": result}
+
