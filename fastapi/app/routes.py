@@ -241,7 +241,7 @@ async def _get_chapter(tb_id: int, chap_id: str):
 
 
 @router.get('/api/v1/section')
-async def _get_chapter(tb_id:int, chap_id: str, sec_id: str):
+async def _get_section(tb_id:int, chap_id: str, sec_id: str):
     
     result = await get_section_details(tb_id,chap_id, sec_id)
     
@@ -249,6 +249,16 @@ async def _get_chapter(tb_id:int, chap_id: str, sec_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Section not found")
     return {'section': result}
+
+@router.get('/api/v1/block')
+async def _get_block(tb_id:int, chap_id: str, sec_id: str, block_id: str):
+    
+    result = await get_block_details(tb_id,chap_id, sec_id, block_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Block not found")
+    return {'block': result}
 
 class CreateTextbookRequest(BaseModel):
     tb_id: int
