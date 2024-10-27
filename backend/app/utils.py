@@ -715,54 +715,6 @@ def delete_block(connection, tb_id, chap_id, sec_id, block_id, user_modifying):
         connection.rollback()
         print(traceback.format_exc())
 
-def check_course_details(connection, input_course_id, current_date, user_modifying):
-
-    """ Checking if user can modify the course content - user should be associated with course and date should be within end date. """
-
-    try:
-        with connection.cursor() as cursor:
-            # Step 1: Retrieve the role of the user from the user table
-            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
-            role = cursor.fetchone()[0]
-            end_date = None
-            # Step 2: Check end date based on role
-            if role == 'faculty':
-                # Fetch the end date of the course for the faculty member
-                cursor.execute(
-                    "SELECT course_id, end_date FROM course WHERE faculty_id = %s",
-                    (user_modifying,)
-                )
-            elif role == 'teaching assistant':
-                # Join teaching assistant and course tables to fetch the end date
-                cursor.execute(
-                    """
-                    SELECT c.course_id, c.end_date
-                    FROM course c
-                    JOIN teaching_assistant ta ON c.course_id = ta.course_id
-                    WHERE ta.ta_id = %s
-                    """,
-                    (user_modifying,)
-                )
-            original_course_id, original_end_date = cursor.fetchone()
-
-            if(input_course_id != original_course_id):
-                return "You are not associated with this course"
-            
-            else:
-                end_date = original_end_date
-            
-
-            # Allow modification if current_date is within or before the end date
-            if(datetime.strptime(current_date, "%Y-%m-%d").date() <= end_date):
-                return "Modification allowed"
-            else:
-                return "Beyond the end date - can't change the course!"
-
-    except Exception as e:
-        print("An error occurred:", e)
-        print(traceback.format_exc())
-        return "Error"
-
         
 def check_course_details(connection, input_course_id, current_date, user_modifying):
 
@@ -811,6 +763,121 @@ def check_course_details(connection, input_course_id, current_date, user_modifyi
         print("An error occurred:", e)
         print(traceback.format_exc())
         return "Error"
+
+
+
+def hide_chapter(connection, tb_id, chap_id):
+    """Set hidden_status of a chapter and all following entities to 'yes'."""
+    try:
+        with connection.cursor() as cursor:
+            # Step 1: Set the chapter row to hidden
+            cursor.execute(
+                "UPDATE chapter SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s",
+                (tb_id, chap_id)
+            )
+
+            # Step 2: Set related sections to hidden
+            cursor.execute(
+                "UPDATE section SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s",
+                (tb_id, chap_id)
+            )
+
+
+            # Step 3: Set related blocks to hidden
+            cursor.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s",
+                (tb_id, chap_id)
+            )
+
+            # Step 4: Set related activities to hidden
+            cursor.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s",
+                (tb_id, chap_id)
+            )
+
+            # Commit the transaction to save changes
+            connection.commit()
+            return "Chapter and related entities successfully hidden."
+
+    except Exception as e:
+        # Rollback if an error occurs
+        connection.rollback()
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error"
+
+def hide_section(connection, tb_id, chap_id, sec_id):
+
+    """Set hidden_status of a section and all following entities to 'yes'."""
+    try:
+        with connection.cursor() as cursor:
+
+            # Step 1: Set related sections to hidden
+            cursor.execute(
+                "UPDATE section SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s",
+                (tb_id, chap_id, sec_id)
+            )
+
+            # Step 2: Set related blocks to hidden
+            cursor.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s",
+                (tb_id, chap_id, sec_id)
+            )
+
+            # Step 3: Set related activities to hidden
+            cursor.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s",
+                (tb_id, chap_id, sec_id)
+            )
+
+            # Commit the transaction to save changes
+            connection.commit()
+            return "Section and related entities successfully hidden."
+
+    except Exception as e:
+        # Rollback if an error occurs
+        connection.rollback()
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error"
+
+
+def hide_block(connection, tb_id, chap_id, sec_id, block_id):
+    """Set hidden_status of a block and all following entities to 'yes'."""
+    try:
+        with connection.cursor() as cursor:
+
+            # Step 1: Set related blocks to hidden
+            cursor.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s",
+                (tb_id, chap_id, sec_id, block_id)
+            )
+
+            # Step 2: Set related activities to hidden
+            cursor.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s",
+                (tb_id, chap_id, sec_id, block_id)
+            )
+
+            # Commit the transaction to save changes
+            connection.commit()
+            return "Block and related entities successfully hidden."
+
+    except Exception as e:
+        # Rollback if an error occurs
+        connection.rollback()
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error"
+
+
+def check_hide_block_func(connection):
+
+    print(hide_block(connection, 1, "1", "1", "1"))
+    print(hide_block(connection, 1, "1", "1", "4"))
+
+    print(hide_section(connection, 1, "1", "1"))
+    print(hide_chapter(connection, 1, "1"))
 
 
 def check_course_details_func(connection):
@@ -1122,10 +1189,10 @@ def delete_func(connection):
 
 def main():
     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"], help="1: Create Textbook, \
+    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"], help="1: Create Textbook, \
                                     2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
                                     5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases, 10: Delete operations, \
-                                    11: check course details")
+                                    11: check course details, 12: Hiding textbook entities")
     
     # Parse the arguments
     args = parser.parse_args()
@@ -1163,6 +1230,9 @@ def main():
     
     elif(args.action == "11"):
         check_course_details_func(connection)
+    
+    elif(args.action == "12"):
+        check_hide_block_func(connection)
 
 if __name__ == "__main__":
     main()

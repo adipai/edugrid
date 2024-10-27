@@ -1176,3 +1176,94 @@ def check_course_details(input_course_id: str, current_date: str, user_modifying
         print("An error occurred:", e)
         print(traceback.format_exc())
         return "Error"
+
+    
+async def hide_chapter(tb_id: int, chap_id: str):
+    """Set hidden_status of a chapter and all following entities to 'yes'."""
+    async with database.transaction():
+        try:
+            # Step 1: Set the chapter row to hidden
+            await database.execute(
+                "UPDATE chapter SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            # Step 2: Set related sections to hidden
+            await database.execute(
+                "UPDATE section SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            # Step 3: Set related blocks to hidden
+            await database.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            # Step 4: Set related activities to hidden
+            await database.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id",
+                {"tb_id": tb_id, "chap_id": chap_id}
+            )
+
+            return "Chapter and related entities successfully hidden."
+
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"
+
+
+async def hide_section(tb_id: int, chap_id: str, sec_id: str):
+    """Set hidden_status of a section and all following entities to 'yes'."""
+    async with database.transaction():
+        try:
+            # Step 1: Set related sections to hidden
+            await database.execute(
+                "UPDATE section SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+            )
+
+            # Step 2: Set related blocks to hidden
+            await database.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+            )
+
+            # Step 3: Set related activities to hidden
+            await database.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+            )
+
+            return "Section and related entities successfully hidden."
+
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"
+
+
+
+async def hide_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
+    """Set hidden_status of a block and all following entities to 'yes'."""
+    async with database.transaction():
+        try:
+            # Step 1: Set related blocks to hidden
+            await database.execute(
+                "UPDATE block SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+
+            # Step 2: Set related activities to hidden
+            await database.execute(
+                "UPDATE activity SET hidden_status = 'yes' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+            )
+
+            return "Block and related entities successfully hidden."
+
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"

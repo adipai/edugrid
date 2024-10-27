@@ -770,3 +770,41 @@ def check_course_details_request(request: CourseDetailsRequest):
         raise HTTPException(status_code=500, detail="Error checking course details")
     return {"message": result}
 
+
+class HideChapterRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+
+@router.post("/hide_chapter")
+async def hide_chapter_request(hide_chapter_request: HideChapterRequest):
+    result = await hide_chapter(hide_chapter_request.tb_id, hide_chapter_request.chap_id)
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="Error hiding chapter")
+    
+    return {"message": result}
+
+
+class HideSectionRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+
+@router.post("/hide_section")
+async def hide_section_request(hide_section_request: HideSectionRequest):
+    result = await hide_section(hide_section_request.tb_id, hide_section_request.chap_id, hide_section_request.sec_id)
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="Error hiding section")
+    
+    return {"message": result}
+
+@router.post("/hide_block")
+async def hide_block_request(hide_block_request: HideBlockRequest):
+    result = await hide_block(hide_block_request.tb_id, hide_block_request.chap_id, hide_block_request.sec_id, hide_block_request.block_id)
+    
+    if result == "Error":
+        raise HTTPException(status_code=500, detail="Error hiding block")
+    
+    return {"message": result}
+
