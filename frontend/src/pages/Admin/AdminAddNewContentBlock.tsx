@@ -15,7 +15,7 @@ const AdminAddNewContentBlock: React.FC = () => {
 
   const [chapDetails, setChapDetails] = useState<any>({});
   const [tbDetails, setTbDetails] = useState<any>({});
-  const [secDetails, setsecDetails] = useState<any>({});
+  const [secDetails, setSecDetails] = useState<any>({});
 
   useEffect(() => {
     if (!tb_id || !chap_id || !sec_id) {
@@ -49,7 +49,7 @@ const AdminAddNewContentBlock: React.FC = () => {
         const response = await axios.get(
           `http://localhost:8000/api/v1/section?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`
         );
-        setsecDetails(response.data.section);
+        setSecDetails(response.data.section);
       } catch (error) {
         console.error("Error fetching section details:", error);
       }
@@ -99,10 +99,11 @@ const AdminAddNewContentBlock: React.FC = () => {
 
   return (
     <div>
+      <h1>Add New Content Block</h1>
+      <h3>Textbook Name: {tbDetails?.title}</h3>
+      <h3>Chapter Name: {chapDetails?.title}</h3>
+      <h3>Section Name: {secDetails?.title}</h3>
       <form>
-        <h3>Textbook Name: {tbDetails?.title}</h3>
-        <h3>Chapter Name: {chapDetails?.title}</h3>
-        <h3>Section Name: {secDetails?.title}</h3>
         <div>
           <label htmlFor="contentId">Content Id:</label>
           <input

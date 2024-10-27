@@ -15,6 +15,9 @@ const AdminAddNewSection: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!tb_id || !chap_id) {
+      return;
+    } 
     // Fetch chapter data here
     fetch(
       `http://localhost:8000/api/v1/chapter?tb_id=${tb_id}&chap_id=${chap_id}`
