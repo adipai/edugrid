@@ -98,7 +98,7 @@ useEffect(() => {
             </li>
             <li>
               <Link
-                to={`/faculty/modify-chapters?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
+                to={`/faculty/modify-chapter?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
               >
                 5. Modify chapters
               </Link>

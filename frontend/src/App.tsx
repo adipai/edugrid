@@ -34,6 +34,17 @@ import AdminContentAddActivity from "./pages/Admin/AdminContentAddActivity";
 import FacultyViewWorklistPage from "./pages/Faculty/FacultyViewWorklistPage";
 import FacultyViewStudentsPage from "./pages/Faculty/FacultyViewStudentsPage";
 import FacultyApproveEnrollmentPage from "./pages/Faculty/FacultyApproveEnrollment";
+import FacultyAddNewChapter from "./pages/Faculty/FacultyAddNewChapter";
+import FacultyAddNewSection from "./pages/Faculty/FacultyAddNewSection";
+import FacultyAddNewContentBlock from "./pages/Faculty/FacultyAddNewContentBlock";
+import FacultyContentAddActivity from "./pages/Faculty/FacultyContentAddActivity";
+import FacultyContentAddPic from "./pages/Faculty/FacultyContentAddPic";
+import FacultyContentAddText from "./pages/Faculty/FacultyContentAddText";
+import FacultyActivityAddQuestion from "./pages/Faculty/FacultyActivityAddQuestion";
+import FacultyModifyChapter from "./pages/Faculty/FacultyModifyChapter";
+import FacultyModifySection from "./pages/Faculty/FacultyModifySection";
+import FacultyModifyContentBlock from "./pages/Faculty/FacultyModifyContentBlock";
+import FacultyCreateTa from "./pages/Faculty/FacultyAddTa";
 
 function App() {
   return (
@@ -72,8 +83,18 @@ function App() {
         <Route path="/faculty/view-worklist" element={<FacultyViewWorklistPage />} />
         <Route path="/faculty/view-students" element={<FacultyViewStudentsPage />} />
         <Route path="/faculty/approve-enrollment" element={<FacultyApproveEnrollmentPage />} />
-        
-        
+        <Route path="/faculty/add-new-chapter" element={<FacultyAddNewChapter />} />
+        <Route path="/faculty/create-new-section" element={<FacultyAddNewSection />} />
+        <Route path="/faculty/create-new-block" element={<FacultyAddNewContentBlock />} />
+        <Route path="/faculty/content-add-activity" element={<FacultyContentAddActivity />} />
+        <Route path="/faculty/content-add-pic" element={<FacultyContentAddPic />} />
+        <Route path="/faculty/content-add-text" element={<FacultyContentAddText />} />
+        <Route path="/faculty/activity-add-question" element={<FacultyActivityAddQuestion />} />
+        <Route path="/faculty/modify-chapter" element={<FacultyModifyChapter />} />
+        <Route path="/faculty/modify-section" element={<FacultyModifySection />} />
+        <Route path="/faculty/modify-content" element={<FacultyModifyContentBlock />} />
+        <Route path="/faculty/add-ta" element={<FacultyCreateTa />} />
+
         {/* TA routes */}
         <Route path="/ta/login" element={<TALoginPage />} />
         <Route path="/ta/landing" element={<TALandingPage />} />
