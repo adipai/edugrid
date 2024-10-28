@@ -1385,3 +1385,79 @@ async def enroll_student(course_id: str, student_id: str):
             await transaction.rollback()
             print(f"Error enrolling student: {e}")
             return "error"
+        
+# Function for student joining a waitlist        
+async def process_enrollment(first_name: str, last_name: str, email: str, course_token: str, password: str):
+    try:
+        # Step 1: Check if the student exists in the 'user' table
+        check_student_query = "SELECT user_id FROM user WHERE email = :email;"
+        user = await database.fetch_one(query=check_student_query, values={"email": email})
+        
+        if user:
+            # Student exists, use existing user_id
+            user_id = user["user_id"]
+        else:
+            # Generate new user_id based on the template
+            current_date = datetime.now()
+            user_id = (first_name[:2] + last_name[:2] + current_date.strftime('%m%y')).capitalize()
+
+            # Insert into 'user' and 'student' tables
+            insert_user_query = """
+            INSERT INTO user (user_id, first_name, last_name, email, password, role)
+            VALUES (:user_id, :first_name, :last_name, :email, :password, 'student');
+            """
+            await database.execute(query=insert_user_query, values={
+                "user_id": user_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "password": password
+            })
+
+            insert_student_query = """
+            INSERT INTO student (student_id, full_name, password, email)
+            VALUES (:student_id, :full_name, :password, :email);
+            """
+            full_name = f"{first_name} {last_name}"
+            await database.execute(query=insert_student_query, values={
+                "student_id": user_id,
+                "full_name": full_name,
+                "password": password,
+                "email": email
+            })
+
+        # Step 2: Get course_id using the course_token
+        get_course_query = "SELECT course_id FROM course WHERE unique_token = :course_token;"
+        course = await database.fetch_one(query=get_course_query, values={"course_token": course_token})
+
+        if not course:
+            return {"status": "course_not_found"}
+
+        course_id = course["course_id"]
+
+        # Step 3: Check if student is already enrolled in the course
+        check_enrollment_query = """
+        SELECT 1 FROM enrollment WHERE unique_course_id = :course_id AND student_id = :student_id;
+        """
+        enrollment = await database.fetch_one(query=check_enrollment_query, values={
+            "course_id": course_id,
+            "student_id": user_id
+        })
+
+        if enrollment:
+            return {"status": "already_enrolled"}
+
+        # Step 4: Enroll student in the course
+        enroll_student_query = """
+        INSERT INTO enrollment (unique_course_id, student_id, status)
+        VALUES (:course_id, :student_id, 'Pending');
+        """
+        await database.execute(query=enroll_student_query, values={
+            "course_id": course_id,
+            "student_id": user_id
+        })
+
+        return {"status": "enrollment_success", "user_id": user_id, "course_id": course_id}
+
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}

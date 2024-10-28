@@ -866,3 +866,34 @@ async def enroll_student_request(request: EnrollStudentRequest):
         raise HTTPException(status_code=500, detail="An error occurred during enrollment.")
     
     return {"message": f"Student with ID {student_id} has been succesfully enrolled in course {course_id}."}, 200
+
+
+class EnrollStudentInCourseRequest(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    course_token: str
+    password: str
+
+
+@router.post('/enroll_student_in_course')
+async def enroll_student_in_course(request: EnrollStudentInCourseRequest):
+    result = await process_enrollment(
+        first_name=request.first_name,
+        last_name=request.last_name,
+        email=request.email,
+        course_token=request.course_token,
+        password=request.password
+    )
+    
+    # Handle responses based on status
+    if result["status"] == "course_not_found":
+        raise HTTPException(status_code=404, detail="Course not found.")
+    elif result["status"] == "already_enrolled":
+        raise HTTPException(status_code=400, detail="Student is already enrolled/wailisted in the course.")
+    elif result["status"] == "error":
+        raise HTTPException(status_code=500, detail="An error occurred during enrollment.")
+    
+    return {
+        "message": f"Student {result['user_id']} has been successfully added to waitlist for course {result['course_id']}, awaiting approval from faculty."
+    }
