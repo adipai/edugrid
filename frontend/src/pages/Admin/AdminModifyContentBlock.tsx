@@ -118,7 +118,7 @@ const AdminModifyContentBlock = () => {
     }else if (type === 'picture') {
       navigate(`/admin/content-add-pic?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
     } else if (type === 'activity') {
-      navigate(`/admin/content-add-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+      navigate(`/admin/modify-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
     }
   };
 

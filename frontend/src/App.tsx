@@ -45,6 +45,8 @@ import FacultyModifyChapter from "./pages/Faculty/FacultyModifyChapter";
 import FacultyModifySection from "./pages/Faculty/FacultyModifySection";
 import FacultyModifyContentBlock from "./pages/Faculty/FacultyModifyContentBlock";
 import FacultyCreateTa from "./pages/Faculty/FacultyAddTa";
+import AdminModifyContentActivity from "./pages/Admin/AdminModifyContentAcitivity";
+import AdminModifyActivityQuestion from "./pages/Admin/AdminModifyActivityQuestion";
 
 function App() {
   return (
@@ -72,6 +74,8 @@ function App() {
         <Route path="/admin/modify-chapter" element={<AdminModifyChapter />} />
         <Route path="/admin/modify-section" element={<AdminModifySection />} />
         <Route path="/admin/modify-content" element={<AdminModifyContentBlock />} />
+        <Route path="/admin/modify-activity" element={<AdminModifyContentActivity />} />
+        <Route path="/admin/modify-add-question" element={<AdminModifyActivityQuestion />} />
 
         
         {/* Faculty routes */}

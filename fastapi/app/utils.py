@@ -378,6 +378,15 @@ async def get_block_details(tb_id, chap_id, sec_id, block_id):
     values = {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
     return await database.fetch_one(query=query, values=values)
 
+async def get_activity_details(tb_id, chap_id, sec_id, block_id, activity_id):
+    query = """
+        SELECT * 
+        FROM activity 
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND unique_activity_id = :activity_id
+    """
+    values = {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "activity_id": activity_id}
+    return await database.fetch_one(query=query, values=values)
+
 async def get_active_course_details(course_id):
     query = """
         SELECT * 

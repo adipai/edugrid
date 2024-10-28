@@ -260,6 +260,16 @@ async def _get_block(tb_id:int, chap_id: str, sec_id: str, block_id: str):
         raise HTTPException(status_code=404, detail="Block not found")
     return {'block': result}
 
+@router.get('/api/v1/activity')
+async def _get_activity(tb_id:int, chap_id: str, sec_id: str, block_id: str, activity_id: str):
+    # print(tb_id,chap_id, sec_id, block_id, activity_id)
+    result = await get_activity_details(tb_id,chap_id, sec_id, block_id, activity_id)
+    
+    print(result)
+    if not result:
+        raise HTTPException(status_code=404, detail="Block not found")
+    return {'activity': result}
+
 @router.get('/api/v1/active-course')
 async def _get_active_course(course_id: int):
     
