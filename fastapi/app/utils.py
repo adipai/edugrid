@@ -2,8 +2,6 @@ import traceback
 import logging
 from app.database import database
 from datetime import datetime
-
-logger = logging.getLogger("uvicorn")
  
 async def get_user(user_id: str, password: str, role: str):
     query = """
@@ -991,7 +989,6 @@ async def modify_content_add_question(
             # If the content type is activity, remove previous activity if it exists
             if content_type == "activity":
                 prev_activity_id = content
-                logger.info("******" + prev_activity_id + "*****")
 
 
                 # Check if activity exists in the activity table
@@ -1194,54 +1191,47 @@ async def fetch_approved_enrollments(unique_course_id: str):
         return None
 
 
-def check_course_details(input_course_id: str, current_date: str, user_modifying: str):
-    """ Check if user can modify the course content - user should be associated with course and within end date. """
-    connection = get_db_connection()
-
-    try:
-        with connection.cursor() as cursor:
+async def check_course_details(input_course_id: str, current_date: str, user_modifying: str):
+    """Check if user can modify the course content - user should be associated with course and within end date."""
+    async with database.transaction():
+        try:
             # Step 1: Retrieve the role of the user from the user table
-            cursor.execute("SELECT role FROM user WHERE user_id = %s", (user_modifying,))
-            role_result = cursor.fetchone()
+            query_role = "SELECT role FROM user WHERE user_id = :user_id"
+            role_result = await database.fetch_one(query=query_role, values={"user_id": user_modifying})
             
-            role = role_result[0]
+            role = role_result["role"]
 
-            # Step 2: Check end date based on role
+            # Step 2: Check course association and end date based on role
             if role == 'faculty':
-                cursor.execute(
-                    "SELECT course_id, end_date FROM course WHERE faculty_id = %s",
-                    (user_modifying,)
-                )
+                query_course = "SELECT course_id, end_date FROM course WHERE faculty_id = :faculty_id"
+                course_data = await database.fetch_one(query=query_course, values={"faculty_id": user_modifying})
+                
             elif role == 'teaching assistant':
-                cursor.execute(
-                    """
+                query_course = """
                     SELECT c.course_id, c.end_date
                     FROM course c
                     JOIN teaching_assistant ta ON c.course_id = ta.course_id
-                    WHERE ta.ta_id = %s
-                    """,
-                    (user_modifying,)
-                )
+                    WHERE ta.ta_id = :ta_id
+                """
+                course_data = await database.fetch_one(query=query_course, values={"ta_id": user_modifying})
 
-            course_data = cursor.fetchone()
-
-            original_course_id, end_date = course_data
+            original_course_id, end_date = course_data["course_id"], course_data["end_date"]
 
             # Step 3: Validate course association and modification permission
             if input_course_id != original_course_id:
-                return "You are not associated with this course"
+                return {"message": "You are not associated with this course"}
 
-            # Convert current_date to date object
+            # Convert current_date to date object and check against end_date
             current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
             if current_date_obj <= end_date:
-                return "Modification allowed"
+                return {"message": "Modification allowed"}
             else:
-                return "Beyond the end date - can't change the course!"
+                return {"message": "Beyond the end date - can't change the course!"}
 
-    except Exception as e:
-        print("An error occurred:", e)
-        print(traceback.format_exc())
-        return "Error"
+        except Exception as e:
+            print("An error occurred:", e)
+            print(traceback.format_exc())
+            return "Error"
 
     
 async def hide_chapter(tb_id: int, chap_id: str):
