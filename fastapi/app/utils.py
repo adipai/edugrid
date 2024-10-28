@@ -1,7 +1,10 @@
 import traceback
+import logging
 from app.database import database
 from datetime import datetime
 
+logger = logging.getLogger("uvicorn")
+ 
 async def get_user(user_id: str, password: str, role: str):
     query = """
         SELECT * 
@@ -982,11 +985,14 @@ async def modify_content_add_question(
             )
             
             
-            content, content_type = content_result
+            content, content_type = content_result['content'], content_result['block_type']
+            print(content_type)
 
             # If the content type is activity, remove previous activity if it exists
             if content_type == "activity":
                 prev_activity_id = content
+                logger.info("******" + prev_activity_id + "*****")
+
 
                 # Check if activity exists in the activity table
                 count = await database.fetch_val(
@@ -1001,6 +1007,10 @@ async def modify_content_add_question(
                         values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id, "prev_activity_id": prev_activity_id}
                     )
                     print(f"Previous Activity [{prev_activity_id}] deleted.")
+                    await database.execute(
+                        query="UPDATE block SET content = :activity_id, block_type = 'activity' WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id",
+                        values={"activity_id": activity_id, "tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+                    )
                 else:
                     return "Previous Activity does not exist."
 
@@ -1023,6 +1033,7 @@ async def modify_content_add_question(
                 option_1, option_1_explanation, option_2, option_2_explanation,
                 option_3, option_3_explanation, option_4, option_4_explanation, answer
             )
+
             
             return "Modified Activity"
 
