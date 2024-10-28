@@ -87,9 +87,7 @@ const AdminContentAddPic: React.FC = () => {
       });
       console.log("Block created:", response.data);
       // Redirect to the appropriate page based on the block type
-      navigate(
-        `/admin/create-new-block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`
-      );
+      navigate(-1);
     } catch (error) {
       console.error("Error creating block:", error);
     }

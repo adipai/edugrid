@@ -112,9 +112,15 @@ const AdminModifyContentBlock = () => {
       });
   }, [tb_id, chap_id, sec_id, block_id]);
 
-  const handleAddText = () => {};
-  const handleAddPicture = () => {};
-  const handleAddActivity = () => {};
+  const handleAddContent = (type: string) => {
+    if (type === 'text') {
+      navigate(`/admin/content-add-text?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+    }else if (type === 'picture') {
+      navigate(`/admin/content-add-pic?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+    } else if (type === 'activity') {
+      navigate(`/admin/content-add-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+    }
+  };
 
   const handleBlockId = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,9 +153,9 @@ const AdminModifyContentBlock = () => {
       )}
       {!!blockDetails && (
         <>
-          <button onClick={handleAddText}>Add Text</button>
-          <button onClick={handleAddPicture}>Add Picture</button>
-          <button onClick={handleAddActivity}>Add Activity</button>
+          <button onClick={() => handleAddContent('text')}>Add Text</button>
+          <button onClick={() => handleAddContent('picture')}>Add Picture</button>
+          <button onClick={() => handleAddContent('activity')}>Add Activity</button>
         </>
       )}
       <div>
