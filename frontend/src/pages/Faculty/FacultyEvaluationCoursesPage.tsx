@@ -1,21 +1,24 @@
 import axios from "axios";
 import React, { useEffect, useState} from "react";
-import { Link } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const FacultyEvaluationCoursesPage: React.FC = () => {
-  const [searchCourseId, setSearchCourseId] = useState("");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const course_id = queryParams.get("course_id"); // Get course ID from query params
   const [courseId, setCourseId] = useState("");
   const [courseDetails, setCourseDetails] = useState<any>(null);
-//   const navigate = useNavigate();
-
-const userId = localStorage.getItem('user_id')
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('user_id')
 
 useEffect(() => {
-  if (searchCourseId) {
-    fetchCourseDetails(searchCourseId);
+  if (!course_id) {
+    setCourseDetails(null)
+    return;
   }
-}, [searchCourseId]);
+  fetchCourseDetails(course_id);
+}, [course_id]);
 
   const fetchCourseDetails = async (courseId: string) => {
     try {
@@ -33,31 +36,29 @@ useEffect(() => {
     const permissions = permission.data
     console.log(permissions.message.message)
     if (permissions.message.message === 'Modification allowed'){
-      const response = await fetch(`http://localhost:8000/api/v1/evaluation-course?course_id=${courseId}`);
+      const response = await fetch(`http://localhost:8000/api/v1/evaluation-course?course_id=${course_id}`);
       const data = await response.json();
       if (data?.course) {
         setCourseDetails(data.course);
       } else {
-        alert("Course not found");
+        console.log("Course not found");
+        throw new Error("Course not found");
       }
     }
   else{
-    window.alert(`You do not have permission to view this course: ${permissions.message.message}`)
+    window.alert(`You do not have permission to modify this course: ${permissions.message.message}`)
   }} catch (error) {
       console.error("Error fetching course data:", error);
+      window.alert("Error fetching course data");
+      navigate(-1)
     }
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Handle form submission logic here
-    console.log("Submitted course ID:", courseId);
-  };
-
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-    setSearchCourseId(courseId);
     setCourseId("");
+    navigate("/faculty/evaluation-courses?course_id=" + courseId);
   };
 
   return (
@@ -75,7 +76,7 @@ useEffect(() => {
               required
             />
           </div>
-          <button type="submit" onClick={(e) => handleSearch(e)}>
+          <button type="submit">
             Submit
           </button>
         </form>
@@ -94,7 +95,7 @@ useEffect(() => {
             </li>
             <li>
               <Link
-                to={`/faculty/modify-chapters?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
+                to={`/faculty/modify-chapter?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
               >
                 2. Modify chapters
               </Link>
@@ -105,7 +106,6 @@ useEffect(() => {
                 onClick={() => {
                   setCourseDetails('');
                   setCourseId('');
-                  setSearchCourseId('');
                 }}
               >
                 3. Go Back
@@ -116,8 +116,7 @@ useEffect(() => {
 
         {!courseDetails && (
           <li>
-            <Link to={`/faculty/landing`}
-            >3. Go Back</Link>{" "}
+            <Link to={`/faculty/landing`}>3. Go Back</Link>{" "}
           </li>
         )}
         <li>

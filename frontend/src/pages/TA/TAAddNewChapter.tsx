@@ -11,7 +11,6 @@ const TAAddNewChapter: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tb_id = queryParams.get("tb_id");
-  const courseId = queryParams.get("course_id")
   const createdBy = localStorage.getItem('user_id')
   const navigate = useNavigate();
 
@@ -80,7 +79,7 @@ const TAAddNewChapter: React.FC = () => {
             <button type="submit">Add Chapter</button>
           </li>
           <li>
-          <Link to={`/ta/active-courses?course_id=${courseId}`}>Go Back</Link>
+          <div onClick={() => navigate(-1)}>Go back</div>
           </li>
           <li>
             <Link to={`/ta/landing`}>Landing Page</Link>

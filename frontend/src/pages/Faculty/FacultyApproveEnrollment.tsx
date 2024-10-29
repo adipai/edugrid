@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState} from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const FacultyApproveEnrollmentPage: React.FC = () => {
@@ -60,7 +60,7 @@ const FacultyApproveEnrollmentPage: React.FC = () => {
         </form>
       <ul>
         <li>
-          <Link to={`/faculty/active-courses?course_id=${courseId}`}>Cancel</Link>
+        <div onClick={() => navigate(-1)}>Cancel</div>
         </li>
       </ul>
     </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ChangePasswordPage = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -58,7 +58,7 @@ const ChangePasswordPage = () => {
 
       <button type="submit">Change Password</button>
       <br />
-      <Link to="/">Go Back</Link>
+      <div onClick={() => navigate(-1)}>3. Go back</div>
     </form>
   );
 };

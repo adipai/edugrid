@@ -1202,17 +1202,17 @@ async def check_course_details(input_course_id: str, current_date: str, user_mod
 
             # Step 2: Check course association and end date based on role
             if role == 'faculty':
-                query_course = "SELECT course_id, end_date FROM course WHERE faculty_id = :faculty_id"
-                course_data = await database.fetch_one(query=query_course, values={"faculty_id": user_modifying})
+                query_course = "SELECT * FROM course WHERE faculty_id = :faculty_id AND course_id = :course_id"
+                course_data = await database.fetch_one(query=query_course, values={"faculty_id": user_modifying, "course_id": input_course_id})
                 
             elif role == 'teaching assistant':
                 query_course = """
-                    SELECT c.course_id, c.end_date
+                    SELECT *
                     FROM course c
                     JOIN teaching_assistant ta ON c.course_id = ta.course_id
-                    WHERE ta.ta_id = :ta_id
+                    WHERE ta.ta_id = :ta_id AND ta.course_id = :course_id
                 """
-                course_data = await database.fetch_one(query=query_course, values={"ta_id": user_modifying})
+                course_data = await database.fetch_one(query=query_course, values={"ta_id": user_modifying, "course_id": input_course_id})
 
             original_course_id, end_date = course_data["course_id"], course_data["end_date"]
 

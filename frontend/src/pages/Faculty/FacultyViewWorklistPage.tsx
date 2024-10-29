@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const FacultyViewWorklistPage = () => {
   const location = useLocation();
@@ -8,6 +8,7 @@ const FacultyViewWorklistPage = () => {
   const courseId =  queryParams.get("course_id");
   const [students, setStudents] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchWorklist = async () => {
@@ -65,7 +66,7 @@ const FacultyViewWorklistPage = () => {
       ) : (
         <p>No students in course Waitlist</p>
       )}
-      <Link to={`/faculty/active-courses?course_id=${courseId}`}>Go Back</Link>
+        <div onClick={() => navigate(-1)}>Go back</div>
     </div>
   );
 };
