@@ -271,7 +271,7 @@ async def _get_activity(tb_id:int, chap_id: str, sec_id: str, block_id: str, act
     return {'activity': result}
 
 @router.get('/api/v1/active-course')
-async def _get_active_course(course_id: int):
+async def _get_active_course(course_id: str):
     
     result = await get_active_course_details(course_id)
     
@@ -291,7 +291,7 @@ async def _get_eval_course(course_id: int):
     return {'course': result}
 
 class ViewWorklistRequest(BaseModel):
-    course_id: int
+    course_id: str
 
 @router.post('/view_worklist')
 async def _view_worklist(view_worklist_request: ViewWorklistRequest):
