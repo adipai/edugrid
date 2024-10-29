@@ -1496,3 +1496,126 @@ async def fetch_student_activity_summary(student_id: str, course_id: str):
     except Exception as e:
         print(f"Error retrieving activity summary: {e}")
         return "error"  
+
+
+
+async def fetch_text_picture_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
+    """Fetch content for text or picture block types based on the provided IDs."""
+    try:
+        content_result = await database.fetch_one(
+            """
+            SELECT content 
+            FROM block 
+            WHERE textbook_id = :tb_id 
+              AND chapter_id = :chap_id 
+              AND section_id = :sec_id 
+              AND block_id = :block_id
+            """,
+            {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+        )
+
+        if content_result:
+            return content_result
+
+        return "No content found for the specified block."
+
+    except Exception as e:
+        print("An error occurred:", e)
+        return "Error retrieving content"
+
+
+async def fetch_activity_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
+    """Fetch questions for activity block types based on the provided IDs."""
+    try:
+        # Step 1: Fetch unique activity identifier (block_content)
+        block_content = await database.fetch_one(
+            """
+            SELECT content
+            FROM block 
+            WHERE textbook_id = :tb_id 
+              AND chapter_id = :chap_id 
+              AND section_id = :sec_id 
+              AND block_id = :block_id
+            """,
+            {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
+        )
+
+        if not block_content:
+            return "Block content not found."
+
+        # Step 2: Fetch questions related to the unique activity ID
+        questions = await database.fetch_all(
+            """
+            SELECT question_id, question_text, option_1, opt_1_explanation, 
+                   option_2, opt_2_explanation, option_3, opt_3_explanation, 
+                   option_4, opt_4_explanation, answer 
+            FROM question 
+            WHERE textbook_id = :tb_id 
+              AND chapter_id = :chap_id 
+              AND section_id = :sec_id 
+              AND block_id = :block_id 
+              AND unique_activity_id = :unique_activity_id
+            ORDER BY question_id
+            """,
+            {
+                "tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, 
+                "block_id": block_id, "unique_activity_id": block_content[0]
+            }
+        )
+
+        return questions if questions else "No questions found for the specified block."
+
+    except Exception as e:
+        print("An error occurred:", e)
+        return "Error retrieving questions"
+
+async def fetch_content(tb_id: int, chap_id: str, sec_id: str):
+    """Fetch block_id and block_type from block table with hidden_status as 'no' and ordered by sequence_no."""
+    try:
+        # Step 1: Check if the chapter exists and is not hidden
+        chapter_result = await database.fetch_one(
+            """
+            SELECT hidden_status 
+            FROM chapter 
+            WHERE textbook_id = :tb_id AND chapter_id = :chap_id
+            """,
+            {"tb_id": tb_id, "chap_id": chap_id}
+        )
+        if not chapter_result:
+            return "Chapter does not exist."
+        if chapter_result["hidden_status"] == 'yes':
+            return "Chapter is hidden."
+
+        # Step 2: Check if the section exists and is not hidden
+        section_result = await database.fetch_one(
+            """
+            SELECT hidden_status 
+            FROM section 
+            WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
+            """,
+            {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+        )
+        if not section_result:
+            return "Section does not exist."
+        if section_result["hidden_status"] == 'yes':
+            return "Section is hidden."
+
+        # Step 3: Fetch block_id and block_type with hidden_status as 'no' ordered by sequence_no
+        blocks = await database.fetch_all(
+            """
+            SELECT block_id, block_type 
+            FROM block 
+            WHERE textbook_id = :tb_id 
+              AND chapter_id = :chap_id 
+              AND section_id = :sec_id 
+              AND hidden_status = 'no' 
+            ORDER BY sequence_no
+            """,
+            {"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id}
+        )
+
+        return blocks if blocks else "No visible blocks found in the specified section."
+
+    except Exception as e:
+        print("An error occurred:", e)
+        return "Error retrieving content."

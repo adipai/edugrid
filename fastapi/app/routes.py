@@ -922,3 +922,69 @@ async def get_student_activity_summary(input_data: StudentCourseInput):
     
     # Return the successful result if no errors
     return result
+
+
+class FetchContentRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+
+@router.post("/fetch_content")
+async def fetch_content_request(request: FetchContentRequest):
+    """Endpoint to fetch block_id and block_type based on the provided IDs."""
+    result = await fetch_content(request.tb_id, request.chap_id, request.sec_id)
+
+    if result == "Error retrieving content":
+        raise HTTPException(status_code=500, detail="Error retrieving content")
+    elif result == "Chapter does not exist.":
+        raise HTTPException(status_code=404, detail="Chapter does not exist")
+    elif result == "Chapter is hidden.":
+        raise HTTPException(status_code=404, detail="Chapter is hidden")
+    elif result == "Section does not exist.":
+        raise HTTPException(status_code=404, detail="Section does not exist")
+    elif result == "Section is hidden.":
+        raise HTTPException(status_code=404, detail="Section is hidden")
+    elif result == "No visible blocks found in the specified section.":
+        raise HTTPException(status_code=404, detail="No visible blocks found in the specified section")
+
+    return result
+
+
+class ViewContentRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+
+@router.post("/student/view_content")
+async def view_text_picture_block(request: ViewContentRequest):
+    """Endpoint to fetch content for text or picture block types based on the provided IDs."""
+    result = await fetch_text_picture_block(request.tb_id, request.chap_id, request.sec_id, request.block_id)
+    
+    if result == "Error retrieving content":
+        raise HTTPException(status_code=500, detail="Error retrieving content")
+    elif result == "No content found for the specified block.":
+        raise HTTPException(status_code=404, detail="Content not found for the specified block")
+
+    return {"content": result}
+
+
+class ViewActivityRequest(BaseModel):
+    tb_id: int
+    chap_id: str
+    sec_id: str
+    block_id: str
+
+@router.post("/student/view_activity_block")
+async def view_activity_block(request: ViewActivityRequest):
+    """Endpoint to fetch questions for activity block types based on the provided IDs."""
+    result = await fetch_activity_block(request.tb_id, request.chap_id, request.sec_id, request.block_id)
+
+    if result == "Error retrieving questions":
+        raise HTTPException(status_code=500, detail="Error retrieving questions")
+    elif result == "Block content not found.":
+        raise HTTPException(status_code=404, detail="Block content not found")
+    elif result == "No questions found for the specified block.":
+        raise HTTPException(status_code=404, detail="No questions found for the specified block")
+
+    return result
