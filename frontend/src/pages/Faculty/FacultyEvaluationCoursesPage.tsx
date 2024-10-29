@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 // import { useNavigate } from "react-router-dom";
@@ -8,27 +9,44 @@ const FacultyEvaluationCoursesPage: React.FC = () => {
   const [courseDetails, setCourseDetails] = useState<any>(null);
 //   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch textbook data here
-    if (!searchCourseId) {
-      return;
+const userId = localStorage.getItem('user_id')
+
+useEffect(() => {
+  if (searchCourseId) {
+    fetchCourseDetails(searchCourseId);
+  }
+}, [searchCourseId]);
+
+  const fetchCourseDetails = async (courseId: string) => {
+    try {
+      const currentDate: string = new Date().toISOString().split('T')[0];
+      const body = {
+        input_course_id: courseId,
+        current_date: currentDate,
+        user_modifying: userId,
+      };
+    const permission = await axios.post('http://localhost:8000/check_course_details', 
+        body, 
+        {headers: {
+      'Content-Type': 'application/json',
+    }, withCredentials: false});
+    const permissions = permission.data
+    console.log(permissions.message.message)
+    if (permissions.message.message === 'Modification allowed'){
+      const response = await fetch(`http://localhost:8000/api/v1/evaluation-course?course_id=${courseId}`);
+      const data = await response.json();
+      if (data?.course) {
+        setCourseDetails(data.course);
+      } else {
+        alert("Course not found");
+      }
     }
-    console.log(`http://localhost:8000/api/v1/evaluation-course?course_id=${searchCourseId}`);
-    fetch(`http://localhost:8000/api/v1/evaluation-course?course_id=${searchCourseId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the fetched textbook data here
-        console.log(data);
-        if (data?.course) {
-          setCourseDetails(data.course);
-        } else {
-          window.alert("Course not found");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching course data:", error);
-      });
-  }, [searchCourseId]);
+  else{
+    window.alert(`You do not have permission to view this course: ${permissions.message.message}`)
+  }} catch (error) {
+      console.error("Error fetching course data:", error);
+    }
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
