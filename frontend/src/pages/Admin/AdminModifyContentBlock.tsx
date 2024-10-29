@@ -146,6 +146,7 @@ const AdminModifyContentBlock = () => {
               id="chapterId"
               value={contentBlockId}
               onChange={(e) => setContentBlockId(e.target.value)}
+              required
             />
           </div>
           <button type="submit">Submit</button>

@@ -51,7 +51,7 @@ const AdminModifyTextbook: React.FC = () => {
           <div>
             <label htmlFor="textbookId">Unique E-Textbook ID:</label>
             <input
-              type="text"
+              type="number"
               id="textbookId"
               value={textbookId}
               onChange={(e) => setTextbookId(e.target.value)}

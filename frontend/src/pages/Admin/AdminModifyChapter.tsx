@@ -61,7 +61,8 @@ const AdminModifyChapter: React.FC = () => {
       });
   }, [tb_id, chap_id]);
 
-  const handleChapterId = () => {
+  const handleChapterId = (e: any) => {
+    e.preventDefault();
     // Logic to add a new section
     console.log("Add new section for Chapter ID:", chapterId);
     setChapterId("");
@@ -73,7 +74,7 @@ const AdminModifyChapter: React.FC = () => {
       <h1>Modify Chapter</h1>
       {textbookDetails && <h2>Textbook: {textbookDetails?.title}</h2>}
       {!chapDetails && (
-        <>
+        <form onSubmit={handleChapterId}>
           <div>
             <label htmlFor="chapterId">Chapter ID:</label>
             <input
@@ -81,10 +82,11 @@ const AdminModifyChapter: React.FC = () => {
               id="chapterId"
               value={chapterId}
               onChange={(e) => setChapterId(e.target.value)}
+              required
             />
           </div>
-          <button onClick={handleChapterId}>Submit</button>
-        </>
+          <button type="submit">Submit</button>
+        </form>
       )}
       {chapDetails && (
         <>

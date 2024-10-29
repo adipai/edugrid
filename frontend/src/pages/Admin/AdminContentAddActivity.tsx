@@ -75,7 +75,8 @@ const AdminContentAddActivity: React.FC = () => {
     fetchBlockDetails();
   }, [tb_id, chap_id, sec_id, block_id]);
 
-  const handleAddClick = async () => {
+  const handleAddClick = async (e: any) => {
+    e.preventDefault();
     if (activity_id) {
       navigate(
         `/admin/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
@@ -111,22 +112,24 @@ const AdminContentAddActivity: React.FC = () => {
       <h3>Chapter Name: {chapDetails?.title}</h3>
       <h3>Section Name: {secDetails?.title}</h3>
       <h3>Block Name: {blockDetails?.block_id}</h3>
-      <div>
-        <label htmlFor="addText">Unique Acitivity ID:</label>
-
-        {activity_id && (
-          <input type="text" id="addText" value={activity_id} disabled={true} />
-        )}
-        {!activity_id && (
-          <input
-            type="text"
-            id="addText"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-        )}
-      </div>
-      <button onClick={handleAddClick}>Add Question</button>
+      <form onSubmit={handleAddClick}>
+        <div>
+          <label htmlFor="addText">Unique Acitivity ID:</label>
+          {activity_id && (
+            <input type="text" id="addText" value={activity_id} disabled={true} />
+          )}
+          {!activity_id && (
+            <input
+              type="text"
+              id="addText"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              required
+            />
+          )}
+        </div>
+        <button type="submit">Add Question</button>
+      </form>
       <div>
         {/* <Link to="/admin/">Go Back</Link> */}
         <div onClick={() => navigate(-1)}>Go Back</div>

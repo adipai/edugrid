@@ -108,6 +108,7 @@ const AdminModifySection: React.FC = () => {
               type="text"
               value={sectionId}
               onChange={(e) => setSectionId(e.target.value)}
+              required
             />
           </div>
           <div>
