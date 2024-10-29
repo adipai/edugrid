@@ -67,6 +67,10 @@ const AdminAddNewContentBlock: React.FC = () => {
   };
 
   const handleCreateBlock = async (action: string) => {
+    if (!tb_id || !chap_id || !sec_id || !blockId) {
+      window.alert("Invalid input");
+      return;
+    }
     try {
       const response = await axios.post("http://localhost:8000/create_block", {
         tb_id,

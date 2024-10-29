@@ -101,18 +101,20 @@ const AdminContentAddText: React.FC = () => {
       <h3>Chapter Name: {chapDetails?.title}</h3>
       <h3>Section Name: {secDetails?.title}</h3>
       <h3>Block Name: {blockDetails?.block_id}</h3>
+      <form onSubmit={handleAddClick}>
+        <div>
+          <label htmlFor="addText">Add text:</label>
+          <input
+            type="text"
+            id="addText"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            required
+          />
+        </div>
+        <button type='submit'>Add</button>
+      </form>
       <div>
-        <label htmlFor="addText">Add text:</label>
-        <input
-          type="text"
-          id="addText"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-      </div>
-      <button onClick={handleAddClick}>Add</button>
-      <div>
-        {/* <Link to="/admin">Go Back</Link> */}
         <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
       <div>
