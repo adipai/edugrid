@@ -8,7 +8,8 @@ const AdminCreateTextbook: React.FC = () => {
     const navigate = useNavigate();
     const createdBy = localStorage.getItem('user_id')
 
-    const handleCreateTextbook = async () => {
+    const handleCreateTextbook = async (e: any) => {
+        e.preventDefault();
         try {
             const response = await axios.post('http://localhost:8000/create_textbook', {
                 tb_id: textbookId,
@@ -25,27 +26,31 @@ const AdminCreateTextbook: React.FC = () => {
     return (
         <div>
             <h1>Create Textbook</h1>
-            <div>
-                <label>
-                    Textbook ID:
-                    <input
-                        type="text"
-                        value={textbookId}
-                        onChange={(e) => setTextbookId(e.target.value)}
-                    />
-                </label>
-            </div>
-            <div>
-                <label>
-                    Textbook Name:
-                    <input
-                        type="text"
-                        value={textbookName}
-                        onChange={(e) => setTextbookName(e.target.value)}
-                    />
-                </label>
-            </div>
-            <button onClick={handleCreateTextbook}>Create Textbook</button>
+            <form onSubmit={(e) => handleCreateTextbook(e)}>
+                <div>
+                    <label>
+                        Textbook ID:
+                        <input
+                            type="number"
+                            value={textbookId}
+                            onChange={(e) => setTextbookId(e.target.value)}
+                            required
+                        />
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Textbook Name:
+                        <input
+                            type="text"
+                            value={textbookName}
+                            onChange={(e) => setTextbookName(e.target.value)}
+                            required
+                        />
+                    </label>
+                </div>
+                <button type='submit'>Create Textbook</button>
+            </form>
             <div>
                 <Link to="/admin/landing">Go Back</Link>
             </div>
