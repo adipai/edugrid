@@ -1,4 +1,4 @@
-// import axios from "axios";
+import axios from "axios";
 import React, { useEffect, useState} from "react";
 import { Link, useLocation } from "react-router-dom";
 // import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ const TAActiveCoursesPage: React.FC = () => {
   const [courseId, setCourseId] = useState("");
   const [courseDetails, setCourseDetails] = useState<any>(null);
 //   const navigate = useNavigate();
-  // const userId = localStorage.getItem('user_id')
+  const userId = localStorage.getItem('user_id')
 
 useEffect(() => {
   if (searchCourseId) {
@@ -19,31 +19,36 @@ useEffect(() => {
   }
 }, [searchCourseId]);
 
-  const fetchCourseDetails = async (courseId: string) => {
-    try {
-    //   const currentDate = new Date().toLocaleDateString();
-    //   const body = {
-    //     input_course_id: courseId,
-    //     current_date: currentDate,
-    //     user_modifying: userId,
-    //   };
-    // const permission = await axios.post('http://localhost:8000/check_course_details', 
-    //     body, 
-    //     {headers: {
-    //   'Content-Type': 'application/json',
-    // }, withCredentials: false});
-    // console.log(permission.data)
-      const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${courseId}`);
-      const data = await response.json();
-      if (data?.course) {
-        setCourseDetails(data.course);
-      } else {
-        alert("Course not found");
-      }
-    } catch (error) {
-      console.error("Error fetching course data:", error);
+const fetchCourseDetails = async (courseId: string) => {
+  try {
+    const currentDate: string = new Date().toISOString().split('T')[0];
+    const body = {
+      input_course_id: courseId,
+      current_date: currentDate,
+      user_modifying: userId,
+    };
+  const permission = await axios.post('http://localhost:8000/check_course_details', 
+      body, 
+      {headers: {
+    'Content-Type': 'application/json',
+  }, withCredentials: false});
+  const permissions = permission.data
+  console.log(permissions.message.message)
+  if (permissions.message.message === 'Modification allowed'){
+    const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${courseId}`);
+    const data = await response.json();
+    if (data?.course) {
+      setCourseDetails(data.course);
+    } else {
+      alert("Course not found");
     }
-  };
+  }
+else{
+  window.alert(`You do not have permission to modify this course: ${permissions.message.message}`)
+}} catch (error) {
+    console.error("Error fetching course data:", error);
+  }
+};
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

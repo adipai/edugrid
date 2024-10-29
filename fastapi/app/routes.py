@@ -787,8 +787,8 @@ class CourseDetailsRequest(BaseModel):
     user_modifying: str
 
 @router.post("/check_course_details")
-def check_course_details_request(request: CourseDetailsRequest):
-    result = check_course_details(
+async def check_course_details_request(request: CourseDetailsRequest):
+    result = await check_course_details(
         request.input_course_id,
         request.current_date,
         request.user_modifying

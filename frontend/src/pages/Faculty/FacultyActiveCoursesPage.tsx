@@ -21,7 +21,7 @@ useEffect(() => {
 
   const fetchCourseDetails = async (courseId: string) => {
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate: string = new Date().toISOString().split('T')[0];
       const body = {
         input_course_id: courseId,
         current_date: currentDate,
@@ -32,7 +32,9 @@ useEffect(() => {
         {headers: {
       'Content-Type': 'application/json',
     }, withCredentials: false});
-    console.log(permission.data)
+    const permissions = permission.data
+    console.log(permissions.message.message)
+    if (permissions.message.message === 'Modification allowed'){
       const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${courseId}`);
       const data = await response.json();
       if (data?.course) {
@@ -40,7 +42,10 @@ useEffect(() => {
       } else {
         alert("Course not found");
       }
-    } catch (error) {
+    }
+  else{
+    window.alert(`You do not have permission to modify this course: ${permissions.message.message}`)
+  }} catch (error) {
       console.error("Error fetching course data:", error);
     }
   };
