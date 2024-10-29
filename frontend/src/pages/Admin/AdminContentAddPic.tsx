@@ -74,7 +74,8 @@ const AdminContentAddPic: React.FC = () => {
     fetchBlockDetails();
   }, [tb_id, chap_id, sec_id, block_id]);
 
-  const handleAddClick = async () => {
+  const handleAddClick = async (e: any) => {
+    e.preventDefault()
     try {
       const response = await axios.post("http://localhost:8000/add_content", {
         tb_id,
@@ -100,16 +101,19 @@ const AdminContentAddPic: React.FC = () => {
       <h3>Chapter Name: {chapDetails?.title}</h3>
       <h3>Section Name: {secDetails?.title}</h3>
       <h3>Block Name: {blockDetails?.block_id}</h3>
-      <div>
-        <label htmlFor="addPic">Add pic:</label>
-        <input
-          type="text"
-          id="addPic"
-          value={pic}
-          onChange={(e) => setPic(e.target.value)}
-        />
-      </div>
-      <button onClick={handleAddClick}>Add</button>
+      <form onSubmit={handleAddClick}>
+        <div>
+          <label htmlFor="addPic">Add pic:</label>
+          <input
+            type="text"
+            id="addPic"
+            value={pic}
+            onChange={(e) => setPic(e.target.value)}
+            required
+          />
+        </div>
+        <button type='submit'>Add</button>
+      </form>
       <div>
         <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
