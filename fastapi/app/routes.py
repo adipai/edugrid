@@ -897,3 +897,28 @@ async def enroll_student_in_course(request: EnrollStudentInCourseRequest):
     return {
         "message": f"Student {result['user_id']} has been successfully added to waitlist for course {result['course_id']}, awaiting approval from faculty."
     }
+
+
+# Student : view activity participation summary
+class StudentCourseInput(BaseModel):
+    student_id: str
+    course_id: str
+
+@router.post("/student/activity_summary")
+async def get_student_activity_summary(input_data: StudentCourseInput):
+    """Retrieve student activity summary"""
+    # Destructure input data
+    student_id = input_data.student_id
+    course_id = input_data.course_id
+    
+    # Call the utility function to fetch activity summary
+    result = await fetch_student_activity_summary(student_id, course_id)
+    
+    # Handle responses based on the result from the utility function
+    if result == "no_records":
+        raise HTTPException(status_code=404, detail="No participation records found for the specified student and course.")
+    elif result == "error":
+        raise HTTPException(status_code=500, detail="An error occurred while retrieving the activity summary.")
+    
+    # Return the successful result if no errors
+    return result

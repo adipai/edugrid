@@ -1460,3 +1460,39 @@ async def process_enrollment(first_name: str, last_name: str, email: str, course
 
     except Exception as e:
         return {"status": "error", "detail": str(e)}
+    
+    
+async def fetch_student_activity_summary(student_id: str, course_id: str):
+    """Retrieve total points and total activities attempted for a student in a course."""
+    try:
+        # SQL query to get activity summary
+        activity_summary_query = """
+        SELECT 
+            course_id,
+            SUM(point) AS total_points,
+            COUNT(DISTINCT unique_activity_id) AS total_activities_attempted
+        FROM 
+            participation
+        WHERE 
+            student_id = :student_id AND course_id = :course_id
+        GROUP BY 
+            student_id, 
+            course_id;
+        """
+
+        # Execute query with provided student_id and course_id
+        result = await database.fetch_one(query=activity_summary_query, values={"student_id": student_id, "course_id": course_id})
+
+        # If result exists, return it as a dictionary
+        if result:
+            return {
+                "course_id": result["course_id"],
+                "total_points": result["total_points"],
+                "total_activities_attempted": result["total_activities_attempted"]
+            }
+        else:
+            return "no_records"  # No records found
+
+    except Exception as e:
+        print(f"Error retrieving activity summary: {e}")
+        return "error"  
