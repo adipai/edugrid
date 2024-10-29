@@ -871,6 +871,142 @@ def hide_block(connection, tb_id, chap_id, sec_id, block_id):
         return "Error"
 
 
+def view_text_picture_block(connection, tb_id, chap_id, sec_id, block_id):
+    """Fetch content for text or picture block types based on the provided IDs."""
+    try:
+        with connection.cursor() as cursor:
+            # Fetch the content for text or picture block types
+            cursor.execute(
+                """
+                SELECT content 
+                FROM block 
+                WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s
+                """,
+                (tb_id, chap_id, sec_id, block_id)
+            )
+            content_result = cursor.fetchone()
+
+            if content_result:
+                return content_result
+
+    except Exception as e:
+        print("An error occurred:", e)
+        return "Error retrieving content."
+
+
+def view_activity_block(connection, tb_id, chap_id, sec_id, block_id):
+    """Fetch questions for activity block types based on the provided IDs."""
+    try:
+        with connection.cursor() as cursor:
+            # Fetch questions from the question table based on these IDs
+            cursor.execute(
+                """
+                SELECT content
+                FROM block 
+                WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s AND block_id = %s
+                """,
+                (tb_id, chap_id, sec_id, block_id)
+            )
+            block_content = cursor.fetchone()[0]
+
+            cursor.execute(
+                """
+                SELECT question_id, question_text, option_1, opt_1_explanation, 
+                       option_2, opt_2_explanation, option_3, opt_3_explanation, 
+                       option_4, opt_4_explanation, answer 
+                FROM question 
+                WHERE textbook_id = %s 
+                  AND chapter_id = %s 
+                  AND section_id = %s 
+                  AND block_id = %s 
+                  AND unique_activity_id = %s
+                ORDER BY question_id
+                """,
+                (tb_id, chap_id, sec_id, block_id, block_content)
+            )
+            questions = cursor.fetchall()
+
+            if questions:
+                return questions  # Return all rows for the specified combination of IDs, ordered by question_id
+
+    except Exception as e:
+        print("An error occurred:", e)
+        return "Error retrieving questions."
+
+
+
+def fetch_content(connection, tb_id, chap_id, sec_id):
+    """Fetch block_id and block_type from block table with hidden_status as 'no' and order by sequence_no."""
+    try:
+        with connection.cursor() as cursor:
+            # Step 1: Check if the chapter exists
+            cursor.execute(
+                """
+                SELECT hidden_status 
+                FROM chapter 
+                WHERE textbook_id = %s AND chapter_id = %s
+                """,
+                (tb_id, chap_id)
+            )
+            chapter_result = cursor.fetchone()
+            if not chapter_result:
+                return "Chapter does not exist."
+            if chapter_result[0] == 'yes':
+                return "Chapter is hidden."
+
+            # Step 2: Check if the section exists
+            cursor.execute(
+                """
+                SELECT hidden_status 
+                FROM section 
+                WHERE textbook_id = %s AND chapter_id = %s AND section_id = %s
+                """,
+                (tb_id, chap_id, sec_id)
+            )
+            section_result = cursor.fetchone()
+            if not section_result:
+                return "Section does not exist."
+            if section_result[0] == 'yes':
+                return "Section is hidden."
+
+            # Step 3: Fetch block_id and block_type with hidden_status as 'no' ordered by sequence_no
+            cursor.execute(
+                """
+                SELECT block_id, block_type 
+                FROM block 
+                WHERE textbook_id = %s 
+                  AND chapter_id = %s 
+                  AND section_id = %s 
+                  AND hidden_status = 'no' 
+                ORDER BY sequence_no
+                """,
+                (tb_id, chap_id, sec_id)
+            )
+
+            # Fetch all results
+            blocks = cursor.fetchall()
+
+            return blocks
+
+    except Exception as e:
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error retrieving content."
+
+
+def check_fetch_content(connection):
+
+    print(fetch_content(connection, 1, "1", "1"))
+    print(fetch_content(connection, 2, "1", "1"))
+    print(fetch_content(connection, 1, "2", "1"))
+
+
+def check_view_text_picture_block(connection):
+
+    print(view_text_picture_block(connection, 1, "1", "1", "2"))
+    print(view_text_picture_block(connection, 1, "1", "1", "3"))
+    print(view_activity_block(connection, 1, "1", "1", "1"))
+
 def check_hide_block_func(connection):
 
     print(hide_block(connection, 1, "1", "1", "1"))
@@ -1189,10 +1325,11 @@ def delete_func(connection):
 
 def main():
     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"], help="1: Create Textbook, \
-                                    2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
+    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"], \
+                                    help="1: Create Textbook, 2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
                                     5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases, 10: Delete operations, \
-                                    11: check course details, 12: Hiding textbook entities")
+                                    11: check course details, 12: Hiding textbook entities, 13: Check fetch content \
+                                    14: view content, 15: view activity")
     
     # Parse the arguments
     args = parser.parse_args()
@@ -1233,6 +1370,15 @@ def main():
     
     elif(args.action == "12"):
         check_hide_block_func(connection)
+    
+    elif(args.action == "13"):
+        check_fetch_content(connection)
+    
+    elif(args.action == "14"):
+        check_view_text_picture_block(connection)
+    
+    elif(args.action == "15"):
+        check_view_text_picture_block(connection)
 
 if __name__ == "__main__":
     main()
