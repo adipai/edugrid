@@ -69,23 +69,11 @@ const AdminModifyContentActivity: React.FC = () => {
         console.error("Error fetching section details:", error);
       }
     };
-
-    // const fetchActivityDetails = async () => {
-    //   try {
-    //     const response = await axios.get(
-    //       `http://localhost:8000/api/v1/activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
-    //     );
-    //     setActivityDetails(response.data.activity);
-    //   } catch (error) {
-    //     console.error("Error fetching section details:", error);
-    //   }
-    // };
-
+    
     fetchChapterDetails();
     fetchTbDetails();
     fetchSectionDetails();
     fetchBlockDetails();
-    // fetchActivityDetails();
   }, [tb_id, chap_id, sec_id, block_id]);
 
   const handleAddClick = async () => {
@@ -94,21 +82,9 @@ const AdminModifyContentActivity: React.FC = () => {
         `/admin/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
       );
     } else {
-      try {
-        const response = await axios.get(
-          `http://localhost:8000/api/v1/activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
-        );
-        console.log("Block created:", response);
-
-        // TODO: Check for permissions here
-        if (response.status === 200) {
-          navigate(
-            `/admin/modify-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
-          );
-        }
-      } catch (error) {
-        console.error("Finding activity:", error);
-      }
+      navigate(
+        `/admin/modify-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
+      );
     }
   };
 
