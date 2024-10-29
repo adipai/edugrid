@@ -1,9 +1,9 @@
-import axios from "axios";
+// import axios from "axios";
 import React, { useEffect, useState} from "react";
 import { Link, useLocation } from "react-router-dom";
 // import { useNavigate } from "react-router-dom";
 
-const FacultyActiveCoursesPage: React.FC = () => {
+const TAActiveCoursesPage: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialCourseId = queryParams.get("course_id"); // Get course ID from query params
@@ -11,7 +11,7 @@ const FacultyActiveCoursesPage: React.FC = () => {
   const [courseId, setCourseId] = useState("");
   const [courseDetails, setCourseDetails] = useState<any>(null);
 //   const navigate = useNavigate();
-  const userId = localStorage.getItem('user_id')
+  // const userId = localStorage.getItem('user_id')
 
 useEffect(() => {
   if (searchCourseId) {
@@ -21,18 +21,18 @@ useEffect(() => {
 
   const fetchCourseDetails = async (courseId: string) => {
     try {
-      const currentDate = new Date().toLocaleDateString();
-      const body = {
-        input_course_id: courseId,
-        current_date: currentDate,
-        user_modifying: userId,
-      };
-    const permission = await axios.post('http://localhost:8000/check_course_details', 
-        body, 
-        {headers: {
-      'Content-Type': 'application/json',
-    }, withCredentials: false});
-    console.log(permission.data)
+    //   const currentDate = new Date().toLocaleDateString();
+    //   const body = {
+    //     input_course_id: courseId,
+    //     current_date: currentDate,
+    //     user_modifying: userId,
+    //   };
+    // const permission = await axios.post('http://localhost:8000/check_course_details', 
+    //     body, 
+    //     {headers: {
+    //   'Content-Type': 'application/json',
+    // }, withCredentials: false});
+    // console.log(permission.data)
       const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${courseId}`);
       const data = await response.json();
       if (data?.course) {
@@ -84,56 +84,35 @@ useEffect(() => {
           <>
             <li>
               <Link
-                to={`/faculty/view-worklist?course_id=${courseDetails.course_id}`}
+                to={`/ta/view-students?course_id=${courseDetails.course_id}`}
               >
-                1. View Worklist
+                1. View Students
               </Link>
             </li>
             <li>
               <Link
-                to={`/faculty/approve-enrollment?course_id=${courseDetails.course_id}`}
+                to={`/ta/add-new-chapter?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
               >
-                2. Approve Enrollment
+                2. Add new chapter
               </Link>
             </li>
             <li>
               <Link
-                to={`/faculty/view-students?course_id=${courseDetails.course_id}`}
+                to={`/ta/modify-chapter?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
               >
-                3. View Students
+                3. Modify chapters
               </Link>
             </li>
             <li>
               <Link
-                to={`/faculty/add-new-chapter?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
-              >
-                4. Add new chapter
-              </Link>
-            </li>
-            <li>
-              <Link
-                to={`/faculty/modify-chapter?course_id=${courseDetails.course_id}&tb_id=${courseDetails.textbook_id}`}
-              >
-                5. Modify chapters
-              </Link>
-            </li>
-            <li>
-              <Link
-                to={`/faculty/add-ta?course_id=${courseDetails.course_id}`}
-              >
-                6. Add TA
-              </Link>
-            </li>
-            <li>
-              <Link
-                to={`/faculty/active-courses`}
+                to={`/ta/active-courses`}
                 onClick={() => {
                   setCourseDetails('');
                   setCourseId('');
                   setSearchCourseId('');
                 }}
               >
-                7. Go Back
+                4. Go Back
               </Link>
             </li>
           </>
@@ -141,15 +120,15 @@ useEffect(() => {
 
         {!courseDetails && (
           <li>
-            <Link to={`/faculty/landing`}>7. Go Back</Link>{" "}
+            <Link to={`/ta/landing`}>4. Go Back</Link>{" "}
           </li>
         )}
         <li>
-          <Link to={`/faculty/landing`}>8. Landing Page</Link>
+          <Link to={`/ta/landing`}>5. Landing Page</Link>
         </li>
       </ul>
     </div>
   );
 };
 
-export default FacultyActiveCoursesPage;
+export default TAActiveCoursesPage;

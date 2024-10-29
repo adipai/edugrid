@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const FacultyModifySection: React.FC = () => {
+const TAModifySection: React.FC = () => {
   const [sectionId, setSectionId] = useState("");
 
   const [textbookDetails, setTextbookDetails] = useState<any>(null);
@@ -20,7 +20,7 @@ const FacultyModifySection: React.FC = () => {
     event.preventDefault();
     setSecDetails("");
     navigate(
-      `/faculty/modify-section?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sectionId}`
+      `/ta/modify-section?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sectionId}`
     );
   };
 
@@ -96,7 +96,7 @@ const FacultyModifySection: React.FC = () => {
 
   return (
     <div>
-      <h1>Faculty Modify Section</h1>
+      <h1>Teaching Assistant Modify Section</h1>
       {textbookDetails && <h3>Textbook: {textbookDetails?.title}</h3>}
       {chapDetails && <h3>Chapter: {chapDetails?.title}</h3>}
       {secDetails && <h3>Section: {secDetails?.title}</h3>}
@@ -119,14 +119,14 @@ const FacultyModifySection: React.FC = () => {
         <>
           <div>
             <Link
-              to={`/faculty/create-new-block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
+              to={`/ta/create-new-block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
             >
               1. Add New Content Block
             </Link>
           </div>
           <div>
             <Link
-              to={`/faculty/modify-content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
+              to={`/ta/modify-content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
             >
               2. Modify Content Block
             </Link>
@@ -143,8 +143,8 @@ const FacultyModifySection: React.FC = () => {
   );
 };
 
-// const FacultyModifySection: React.FC = () => {
+// const taModifySection: React.FC = () => {
 //     return <h1>Hello world</h1>
 // };
 
-export default FacultyModifySection;
+export default TAModifySection;

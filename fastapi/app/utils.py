@@ -319,7 +319,7 @@ async def view_courses_faculty(faculty_id):
     
 async def view_courses_ta(ta_id):
     # Query to view courses exists
-    courses_query = """SELECT c.course_id, c.course_name FROM course c
+    courses_query = """SELECT * FROM course c
       JOIN teaching_assistant ta ON c.course_id = ta.course_id
       WHERE ta.ta_id = :ta_id"""
     # Start a transaction

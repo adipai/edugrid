@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const FacultyModifySection: React.FC = () => {
-  const [sectionId, setSectionId] = useState("");
+const TAModifyContentBlock = () => {
+  const [contentBlockId, setContentBlockId] = React.useState("");
 
   const [textbookDetails, setTextbookDetails] = useState<any>(null);
   const [chapDetails, setChapDetails] = useState<any>({});
   const [secDetails, setSecDetails] = useState<any>({});
+  const [blockDetails, setBlockDetails] = useState<any>({});
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,14 +16,7 @@ const FacultyModifySection: React.FC = () => {
   const tb_id = queryParams.get("tb_id");
   const chap_id = queryParams.get("chap_id");
   const sec_id = queryParams.get("sec_id");
-
-  const handleSectionId = (event: React.FormEvent) => {
-    event.preventDefault();
-    setSecDetails("");
-    navigate(
-      `/faculty/modify-section?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sectionId}`
-    );
-  };
+  const block_id = queryParams.get("block_id");
 
   useEffect(() => {
     if (!tb_id) {
@@ -90,61 +84,88 @@ const FacultyModifySection: React.FC = () => {
       .catch((error) => {
         console.error("Error fetching section data:", error);
         window.alert("Section not found");
-        navigate(-1);
       });
   }, [tb_id, chap_id, sec_id]);
 
+  useEffect(() => {
+    if (!tb_id || !chap_id || !sec_id || !block_id) {
+      setBlockDetails(null);
+      return;
+    }
+    fetch(
+      `http://localhost:8000/api/v1/block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the fetched block data here
+        if (data?.block) {
+          setBlockDetails(data.block);
+        } else {
+          console.log("Block not found");
+          throw new Error("Block not found");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching block data:", error);
+        window.alert("Block not found");
+        navigate(-1);
+      });
+  }, [tb_id, chap_id, sec_id, block_id]);
+
+  const handleAddContent = (type: string) => {
+    if (type === 'text') {
+      navigate(`/ta/content-add-text?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+    }else if (type === 'picture') {
+      navigate(`/ta/content-add-pic?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+    } else if (type === 'activity') {
+      navigate(`/ta/modify-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+    }
+  };
+
+  const handleBlockId = (e: React.FormEvent) => {
+    e.preventDefault();
+    setContentBlockId("");
+    navigate(
+      `/ta/modify-content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${contentBlockId}`
+    );
+  };
+
   return (
     <div>
-      <h1>Faculty Modify Section</h1>
+      <h1>Modify Content Block</h1>
       {textbookDetails && <h3>Textbook: {textbookDetails?.title}</h3>}
       {chapDetails && <h3>Chapter: {chapDetails?.title}</h3>}
       {secDetails && <h3>Section: {secDetails?.title}</h3>}
-      {!secDetails && (
-        <form onSubmit={handleSectionId}>
+      {blockDetails && <h3>Block: {blockDetails?.block_id}</h3>}
+      {!blockDetails && (
+        <form onSubmit={handleBlockId}>
           <div>
-            <label>Section ID:</label>
+            <label htmlFor="chapterId">Content Block ID:</label>
             <input
               type="text"
-              value={sectionId}
-              onChange={(e) => setSectionId(e.target.value)}
+              id="chapterId"
+              value={contentBlockId}
+              onChange={(e) => setContentBlockId(e.target.value)}
             />
           </div>
-          <div>
-            <button type="submit">Submit</button>
-          </div>
+          <button type="submit">Submit</button>
         </form>
       )}
-      {secDetails && (
+      {!!blockDetails && (
         <>
-          <div>
-            <Link
-              to={`/faculty/create-new-block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
-            >
-              1. Add New Content Block
-            </Link>
-          </div>
-          <div>
-            <Link
-              to={`/faculty/modify-content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
-            >
-              2. Modify Content Block
-            </Link>
-          </div>
+          <button onClick={() => handleAddContent('text')}>Add Text</button>
+          <button onClick={() => handleAddContent('picture')}>Add Picture</button>
+          <button onClick={() => handleAddContent('activity')}>Add Activity</button>
         </>
       )}
       <div>
         <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
       <div>
-        <Link to="/">Landing Page</Link>
+        <Link to="/ta/landing">Landing Page</Link>
       </div>
     </div>
   );
 };
 
-// const FacultyModifySection: React.FC = () => {
-//     return <h1>Hello world</h1>
-// };
-
-export default FacultyModifySection;
+export default TAModifyContentBlock;

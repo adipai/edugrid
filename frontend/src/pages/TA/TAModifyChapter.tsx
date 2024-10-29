@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const FacultyModifyChapter: React.FC = () => {
+const TAModifyChapter: React.FC = () => {
   const [chapterId, setChapterId] = useState("");
   const [textbookDetails, setTextbookDetails] = useState<any>(null);
   const [chapDetails, setChapDetails] = useState<any>({});
@@ -65,7 +65,7 @@ const FacultyModifyChapter: React.FC = () => {
     // Logic to add a new section
     console.log("Add new section for Chapter ID:", chapterId);
     setChapterId("");
-    navigate("/faculty/modify-chapter?tb_id=" + tb_id + "&chap_id=" + chapterId);
+    navigate("/ta/modify-chapter?tb_id=" + tb_id + "&chap_id=" + chapterId);
   };
 
   return (
@@ -91,14 +91,14 @@ const FacultyModifyChapter: React.FC = () => {
           <h3>Chapter: {chapDetails?.title}</h3>
           <div>
             <Link
-              to={`/faculty/create-new-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
+              to={`/ta/create-new-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
             >
               1. Add new section
             </Link>
           </div>
           <div>
             <Link
-              to={`/faculty/modify-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
+              to={`/ta/modify-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
             >
               2. Modify section
             </Link>
@@ -109,10 +109,10 @@ const FacultyModifyChapter: React.FC = () => {
         <div onClick={() => navigate(-1)}>3. Go back</div>
       </div>
       <div>
-        <Link to="/faculty/landing">4.Landing page</Link>
+        <Link to="/ta/landing">4.Landing page</Link>
       </div>
     </div>
   );
 };
 
-export default FacultyModifyChapter;
+export default TAModifyChapter;

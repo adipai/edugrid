@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const AdminModifyContentActivity: React.FC = () => {
+const TAContentAddActivity: React.FC = () => {
   const [text, setText] = useState("");
 
   const navigate = useNavigate();
@@ -13,14 +13,13 @@ const AdminModifyContentActivity: React.FC = () => {
   const chap_id = queryParams.get("chap_id");
   const sec_id = queryParams.get("sec_id");
   const block_id = queryParams.get("block_id");
-  // const user_id = localStorage.getItem("user_id");
+  const user_id = localStorage.getItem("user_id");
   const activity_id = queryParams.get("activity_id");
 
   const [chapDetails, setChapDetails] = useState<any>({});
   const [tbDetails, setTbDetails] = useState<any>({});
   const [secDetails, setSecDetails] = useState<any>({});
   const [blockDetails, setBlockDetails] = useState<any>({});
-  //   const [activityDetails, setActivityDetails] = useState<any>({});
 
   useEffect(() => {
     if (!tb_id || !chap_id || !sec_id || !block_id) {
@@ -70,51 +69,44 @@ const AdminModifyContentActivity: React.FC = () => {
       }
     };
 
-    // const fetchActivityDetails = async () => {
-    //   try {
-    //     const response = await axios.get(
-    //       `http://localhost:8000/api/v1/activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
-    //     );
-    //     setActivityDetails(response.data.activity);
-    //   } catch (error) {
-    //     console.error("Error fetching section details:", error);
-    //   }
-    // };
-
     fetchChapterDetails();
     fetchTbDetails();
     fetchSectionDetails();
     fetchBlockDetails();
-    // fetchActivityDetails();
   }, [tb_id, chap_id, sec_id, block_id]);
 
   const handleAddClick = async () => {
     if (activity_id) {
       navigate(
-        `/admin/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
+        `/ta/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
       );
     } else {
       try {
-        const response = await axios.get(
-          `http://localhost:8000/api/v1/activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
+        const response = await axios.post(
+          "http://localhost:8000/create_activity",
+          {
+            tb_id,
+            chap_id,
+            sec_id,
+            block_id,
+            created_by: user_id,
+            activity_id: text,
+          }
         );
-        console.log("Block created:", response);
-
-        // TODO: Check for permissions here
-        if (response.status === 200) {
-          navigate(
-            `/admin/modify-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
-          );
-        }
+        console.log("Block created:", response.data);
+        // Redirect to the appropriate page based on the block type
+        navigate(
+          `/ta/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
+        );
       } catch (error) {
-        console.error("Finding activity:", error);
+        console.error("Error creating block:", error);
       }
     }
   };
 
   return (
     <div>
-      <h1>Modify Activity</h1>
+      <h1>Add Activity</h1>
       <h3>Textbook Name: {tbDetails?.title}</h3>
       <h3>Chapter Name: {chapDetails?.title}</h3>
       <h3>Section Name: {secDetails?.title}</h3>
@@ -136,14 +128,14 @@ const AdminModifyContentActivity: React.FC = () => {
       </div>
       <button onClick={handleAddClick}>Add Question</button>
       <div>
-        {/* <Link to="/admin/">Go Back</Link> */}
+        {/* <Link to="/ta/">Go Back</Link> */}
         <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
       <div>
-        <Link to="/admin/landing">Landing Page</Link>
+        <Link to="/ta/landing">Landing Page</Link>
       </div>
     </div>
   );
 };
 
-export default AdminModifyContentActivity;
+export default TAContentAddActivity;

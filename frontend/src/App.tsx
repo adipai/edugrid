@@ -47,6 +47,23 @@ import FacultyModifyContentBlock from "./pages/Faculty/FacultyModifyContentBlock
 import FacultyCreateTa from "./pages/Faculty/FacultyAddTa";
 import AdminModifyContentActivity from "./pages/Admin/AdminModifyContentAcitivity";
 import AdminModifyActivityQuestion from "./pages/Admin/AdminModifyActivityQuestion";
+import FacultyModifyActivityQuestion from "./pages/Faculty/FacultyModifyActivityQuestion";
+import FacultyModifyContentActivity from "./pages/Faculty/FacultyModifyContentActivity";
+import TAActiveCoursesPage from "./pages/TA/TAActiveCourses";
+import TACoursesPage from "./pages/TA/TACoursesPage";
+import TAViewStudentsPage from "./pages/TA/TAViewStudentsPage";
+import TAActivityAddQuestion from "./pages/TA/TAActivityAddQuestion";
+import TAAddNewChapter from "./pages/TA/TAAddNewChapter";
+import TAAddNewContentBlock from "./pages/TA/TAAddNewContentBlock";
+import TAAddNewSection from "./pages/TA/TAAddNewSection";
+import TAContentAddActivity from "./pages/TA/TAContentAddActivity";
+import TAContentAddPic from "./pages/TA/TAContentAddPic";
+import TAContentAddText from "./pages/TA/TAContentAddText";
+import TAModifyActivityQuestion from "./pages/TA/TAModifyActivityQuestion";
+import TAModifyChapter from "./pages/TA/TAModifyChapter";
+import TAModifyContentActivity from "./pages/TA/TAModifyContentActivity";
+import TAModifyContentBlock from "./pages/TA/TAModifyContentBlock";
+import TAModifySection from "./pages/TA/TAModifySection";
 
 function App() {
   return (
@@ -98,10 +115,29 @@ function App() {
         <Route path="/faculty/modify-section" element={<FacultyModifySection />} />
         <Route path="/faculty/modify-content" element={<FacultyModifyContentBlock />} />
         <Route path="/faculty/add-ta" element={<FacultyCreateTa />} />
+        <Route path ="faculty/modify-add-question" element={<FacultyModifyActivityQuestion/>} />
+        <Route path="/faculty/modify-activity" element={<FacultyModifyContentActivity />} />
+
 
         {/* TA routes */}
         <Route path="/ta/login" element={<TALoginPage />} />
         <Route path="/ta/landing" element={<TALandingPage />} />
+        <Route path="/ta/active-courses" element={<TAActiveCoursesPage />} />
+        <Route path="/ta/courses" element={<TACoursesPage />} />
+        <Route path="/ta/view-students" element={<TAViewStudentsPage />} />
+        <Route path="/ta/activity-add-question" element={<TAActivityAddQuestion />} />
+        <Route path="/ta/add-new-chapter" element={<TAAddNewChapter />} />
+        <Route path="/ta/create-new-section" element={<TAAddNewSection />} />
+        <Route path="/ta/create-new-block" element={<TAAddNewContentBlock />} />
+        <Route path="/ta/content-add-activity" element={<TAContentAddActivity />} />
+        <Route path="/ta/content-add-pic" element={<TAContentAddPic />} />
+        <Route path="/ta/content-add-text" element={<TAContentAddText />} />
+        <Route path="/ta/modify-chapter" element={<TAModifyChapter />} />
+        <Route path="/ta/modify-section" element={<TAModifySection />} />
+        <Route path="/ta/modify-content" element={<TAModifyContentBlock />} />
+        <Route path="/ta/modify-add-question" element={<TAModifyActivityQuestion />} />
+        <Route path="/ta/modify-activity" element={<TAModifyContentActivity />} />
+
         
         {/* Student routes */}
         <Route path="/student/landing" element={<StudentLandingPage />} />

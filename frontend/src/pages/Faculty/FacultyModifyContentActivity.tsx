@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const AdminModifyContentActivity: React.FC = () => {
+const FacultyModifyContentActivity: React.FC = () => {
   const [text, setText] = useState("");
 
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const AdminModifyContentActivity: React.FC = () => {
   const chap_id = queryParams.get("chap_id");
   const sec_id = queryParams.get("sec_id");
   const block_id = queryParams.get("block_id");
-  // const user_id = localStorage.getItem("user_id");
+//   const user_id = localStorage.getItem("user_id");
   const activity_id = queryParams.get("activity_id");
 
   const [chapDetails, setChapDetails] = useState<any>({});
@@ -91,7 +91,7 @@ const AdminModifyContentActivity: React.FC = () => {
   const handleAddClick = async () => {
     if (activity_id) {
       navigate(
-        `/admin/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
+        `/faculty/activity-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${activity_id}`
       );
     } else {
       try {
@@ -103,7 +103,7 @@ const AdminModifyContentActivity: React.FC = () => {
         // TODO: Check for permissions here
         if (response.status === 200) {
           navigate(
-            `/admin/modify-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
+            `/faculty/modify-add-question?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&activity_id=${text}`
           );
         }
       } catch (error) {
@@ -136,14 +136,14 @@ const AdminModifyContentActivity: React.FC = () => {
       </div>
       <button onClick={handleAddClick}>Add Question</button>
       <div>
-        {/* <Link to="/admin/">Go Back</Link> */}
+        {/* <Link to="/faculty/">Go Back</Link> */}
         <div onClick={() => navigate(-1)}>Go Back</div>
       </div>
       <div>
-        <Link to="/admin/landing">Landing Page</Link>
+        <Link to="/faculty/landing">Landing Page</Link>
       </div>
     </div>
   );
 };
 
-export default AdminModifyContentActivity;
+export default FacultyModifyContentActivity;
