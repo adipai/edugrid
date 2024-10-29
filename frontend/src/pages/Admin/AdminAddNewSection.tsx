@@ -79,6 +79,7 @@ const AdminAddNewSection: React.FC = () => {
             id="sectionNumber"
             value={sectionNumber}
             onChange={(e) => setSectionNumber(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -88,9 +89,10 @@ const AdminAddNewSection: React.FC = () => {
             id="sectionTitle"
             value={sectionTitle}
             onChange={(e) => setSectionTitle(e.target.value)}
+            required
           />
         </div>
-        <button type="submit" onClick={(e) => handleSubmit(e)}>
+        <button type="submit">
           Add new section
         </button>
       </form>

@@ -63,6 +63,7 @@ const AdminAddNewChapter: React.FC = () => {
             id="chapterId"
             value={chapterId}
             onChange={(e) => setChapterId(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -72,6 +73,7 @@ const AdminAddNewChapter: React.FC = () => {
             id="chapterTitle"
             value={chapterTitle}
             onChange={(e) => setChapterTitle(e.target.value)}
+            required
           />
         </div>
         <ul>
