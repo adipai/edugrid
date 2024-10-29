@@ -709,7 +709,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
     """
     update_query = """
         UPDATE block SET content = :content, block_type = :block_type 
-        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id AND created_by = :created_by
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
     """
     
     async with database.transaction() as transaction:
@@ -721,7 +721,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
             )
 
             if current_data:
-                current_content, current_block_type = current_data
+                current_content, current_block_type = current_data['content'], current_data['block_type']
                 if current_block_type == "activity":
                     await database.execute(
                         query=delete_activity_query, 
@@ -737,8 +737,7 @@ async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block
                     "tb_id": tb_id, 
                     "chap_id": chap_id, 
                     "sec_id": sec_id, 
-                    "block_id": block_id,
-                    "created_by": created_by
+                    "block_id": block_id
                 }
             )
 
