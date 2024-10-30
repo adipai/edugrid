@@ -67,6 +67,14 @@ import TAModifySection from "./pages/TA/TAModifySection";
 import StudentEnrollPage from "./pages/Student/StudentEnrollPage";
 import StudentParticipationMarks from "./pages/Student/StudentPariticipationMarks";
 import StudentViewBlock from "./pages/Student/StudentViewBlock";
+import QueryLanding from "./pages/AdditionalQueries/QueryLanding";
+import QuerySectionsFirstChapter from "./pages/AdditionalQueries/QuerySectionsFirstChapter";
+import QueryFacultyAndTas from "./pages/AdditionalQueries/QueryFacultyAndTas";
+import QueryActiveCourses from "./pages/AdditionalQueries/QueryActiveCourses";
+import QueryLongestWaitingList from "./pages/AdditionalQueries/QueryLongestWaitingList";
+import QueryAct0Q2IncorrectAnswers from "./pages/AdditionalQueries/QueryAct0Q2IncorrectAnswers";
+import QueryChap2Contents from "./pages/AdditionalQueries/QueryChap2Contents";
+import QueryBookStatus from "./pages/AdditionalQueries/QueryBookStatus";
 
 function App() {
   return (
@@ -149,6 +157,16 @@ function App() {
         <Route path="/student/enroll" element={<StudentEnrollPage />} />
         <Route path="/student/participation" element={<StudentParticipationMarks />} />
         <Route path="/student/view-section" element={<StudentViewBlock />} />
+
+        {/* Additional Queries */}
+        <Route path="/queires" element={<QueryLanding />} />
+        <Route path="/queries/sections-of-first-chapter" element={<QuerySectionsFirstChapter />} />
+        <Route path="/queries/faculty-and-tas" element={<QueryFacultyAndTas/>} />
+        <Route path="/queries/active-courses" element={<QueryActiveCourses/>} />
+        <Route path="/queries/largest-waiting-list" element={<QueryLongestWaitingList/>} />
+        <Route path="/queries/chapter-02-contents" element={<QueryChap2Contents/>} />
+        <Route path="/queries/activity0-q2-incorrect-answers" element={<QueryAct0Q2IncorrectAnswers/>} />
+        <Route path="/queries/book-status" element={<QueryBookStatus/>} />
         
         <Route path="/change-password-page" element={<ChangePasswordPage />} />
         <Route path="*" element={<div>404 Not Found</div>} />
