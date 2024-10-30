@@ -64,6 +64,9 @@ import TAModifyChapter from "./pages/TA/TAModifyChapter";
 import TAModifyContentActivity from "./pages/TA/TAModifyContentActivity";
 import TAModifyContentBlock from "./pages/TA/TAModifyContentBlock";
 import TAModifySection from "./pages/TA/TAModifySection";
+import StudentEnrollPage from "./pages/Student/StudentEnrollPage";
+import StudentParticipationMarks from "./pages/Student/StudentPariticipationMarks";
+import StudentViewBlock from "./pages/Student/StudentViewBlock";
 
 function App() {
   return (
@@ -143,6 +146,9 @@ function App() {
         <Route path="/student/landing" element={<StudentLandingPage />} />
         <Route path="/student/prelogin" element={<StudentPreLogin />} />
         <Route path="/student/login" element={<StudentLoginPage />} />
+        <Route path="/student/enroll" element={<StudentEnrollPage />} />
+        <Route path="/student/participation" element={<StudentParticipationMarks />} />
+        <Route path="/student/view-section" element={<StudentViewBlock />} />
         
         <Route path="/change-password-page" element={<ChangePasswordPage />} />
         <Route path="*" element={<div>404 Not Found</div>} />

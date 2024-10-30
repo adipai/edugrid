@@ -929,7 +929,7 @@ class FetchContentRequest(BaseModel):
     chap_id: str
     sec_id: str
 
-@router.post("/fetch_content")
+@router.get("/fetch_content")
 async def fetch_content_request(request: FetchContentRequest):
     """Endpoint to fetch block_id and block_type based on the provided IDs."""
     result = await fetch_content(request.tb_id, request.chap_id, request.sec_id)
@@ -956,7 +956,7 @@ class ViewContentRequest(BaseModel):
     sec_id: str
     block_id: str
 
-@router.post("/student/view_content")
+@router.get("/student/view_content")
 async def view_text_picture_block(request: ViewContentRequest):
     """Endpoint to fetch content for text or picture block types based on the provided IDs."""
     result = await fetch_text_picture_block(request.tb_id, request.chap_id, request.sec_id, request.block_id)
