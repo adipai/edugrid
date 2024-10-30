@@ -1039,3 +1039,154 @@ async def view_notifications_request(view_notifications_request: ViewNotificatio
         return {"status": "success", "notifications": notifications}
     else:
         raise HTTPException(status_code=404, detail="No notifications found for this user.")
+
+
+"""
+Additional queries begin here
+"""
+
+# 1. Number of sections in the first chapter of a textbook
+class TextbookSectionCountRequest(BaseModel):
+    textbook_id: int
+
+@router.post("/sections_in_first_chapter")
+async def sections_in_first_chapter(request: TextbookSectionCountRequest):
+    query = """
+        SELECT COUNT(*) AS number_of_sections
+        FROM section
+        WHERE chapter_id = '1' AND textbook_id = :textbook_id
+    """
+    values = {"textbook_id": request.textbook_id}
+    result = await database.fetch_one(query=query, values=values)
+    if result:
+        return {"number_of_sections": result["number_of_sections"]}
+    else:
+        raise HTTPException(status_code=404, detail="No sections found")
+
+
+# 2. Names of faculty and TAs of all courses, with roles
+@router.get("/faculty_and_tas")
+async def get_faculty_and_tas():
+    query = """
+        SELECT u.first_name, u.last_name, u.role, c.course_id
+        FROM user u
+        JOIN course c ON u.user_id = c.faculty_id
+        UNION
+        SELECT u.first_name, u.last_name, 'teaching assistant' AS role, ta.course_id
+        FROM user u
+        JOIN teaching_assistant ta ON u.user_id = ta.ta_id
+    """
+    result = await database.fetch_all(query=query)
+    if result:
+        return {"faculty_and_tas": [dict(row) for row in result]}
+    else:
+        raise HTTPException(status_code=404, detail="No faculty or TAs found")
+    
+
+# 3. Active courses with course ID, faculty member, and total number of students
+@router.get("/active_courses_with_students")
+async def active_courses_with_students():
+    query = """
+        SELECT c.course_id, CONCAT(u.first_name, ' ', u.last_name) AS faculty_name, COUNT(e.student_id) AS total_students
+        FROM course c
+        JOIN user u ON c.faculty_id = u.user_id
+        JOIN enrollment e ON c.course_id = e.unique_course_id
+        WHERE c.course_type = 'Active'
+        GROUP BY c.course_id, faculty_name
+    """
+    result = await database.fetch_all(query=query)
+    if result:
+        return {"active_courses": [dict(row) for row in result]}
+    else:
+        raise HTTPException(status_code=404, detail="No active courses found")
+
+
+# 4. Course with the largest waiting list
+@router.get("/course_with_largest_waitlist")
+async def course_with_largest_waitlist():
+    query = """
+        SELECT e.unique_course_id AS course_id, COUNT(*) AS waiting_list_count
+        FROM enrollment e
+        WHERE e.status = 'Pending'
+        GROUP BY e.unique_course_id
+        ORDER BY waiting_list_count DESC
+        LIMIT 1
+    """
+    result = await database.fetch_one(query=query)
+    if result:
+        return {"course_with_largest_waitlist": dict(result)}
+    else:
+        raise HTTPException(status_code=404, detail="No courses with waitlists found")
+
+
+# 5. Contents of Chapter 02 of textbook 101 in sequence
+class ChapterContentRequest(BaseModel):
+    textbook_id: int
+    chapter_id: str
+
+@router.post("/chapter_contents")
+async def chapter_contents(request: ChapterContentRequest):
+    query = """
+        SELECT b.content
+        FROM block b
+        WHERE b.textbook_id = :textbook_id AND b.chapter_id = :chapter_id
+        ORDER BY b.sequence_no
+    """
+    values = {"textbook_id": request.textbook_id, "chapter_id": request.chapter_id}
+    result = await database.fetch_all(query=query, values=values)
+    if result:
+        return {"chapter_contents": [row["content"] for row in result]}
+    else:
+        raise HTTPException(status_code=404, detail="No content found for specified chapter")
+
+
+# 6. Incorrect answers for question 2 of Activity0 and their explanations
+class IncorrectAnswersRequest(BaseModel):
+    textbook_id: int
+    chapter_id: str
+    section_id: str
+    block_id: str
+    correct_answer: str
+
+@router.post("/incorrect_answers")
+async def incorrect_answers(request: IncorrectAnswersRequest):
+    query = """
+        SELECT q.option_1, q.opt_1_explanation, q.option_2, q.opt_2_explanation, 
+               q.option_3, q.opt_3_explanation, q.option_4, q.opt_4_explanation
+        FROM question q
+        WHERE q.textbook_id = :textbook_id 
+            AND q.chapter_id = :chapter_id
+            AND q.section_id = :section_id
+            AND q.block_id = :block_id
+            AND q.unique_activity_id = 'Activity0'
+            AND q.question_id = 'Q2'
+            AND answer <> :correct_answer
+    """
+    values = {
+        "textbook_id": request.textbook_id,
+        "chapter_id": request.chapter_id,
+        "section_id": request.section_id,
+        "block_id": request.block_id,
+        "correct_answer": request.correct_answer
+    }
+    result = await database.fetch_all(query=query, values=values)
+    if result:
+        return {"incorrect_answers": [dict(row) for row in result]}
+    else:
+        raise HTTPException(status_code=404, detail="No incorrect answers found")
+
+
+# 7. Book in active status by one instructor and evaluation status by a different instructor
+@router.get("/book_different_status_instructors")
+async def book_different_status_instructors():
+    query = """
+        SELECT c1.textbook_id, c1.faculty_id AS active_faculty, c2.faculty_id AS evaluation_faculty
+        FROM course c1
+        JOIN course c2 ON c1.textbook_id = c2.textbook_id AND c1.faculty_id <> c2.faculty_id
+        WHERE c1.course_type = 'Active' AND c2.course_type = 'Evaluation'
+    """
+    result = await database.fetch_all(query=query)
+    if result:
+        return {"books_with_different_status_instructors": [dict(row) for row in result]}
+    else:
+        raise HTTPException(status_code=404, detail="No books found with different status instructors")
