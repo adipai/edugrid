@@ -1042,7 +1042,7 @@ async def view_notifications_request(view_notifications_request: ViewNotificatio
 
 
 """
-Additional queries begin here
+Endpoint for additional adhoc queries begin here
 """
 
 # 1. Number of sections in the first chapter of a textbook
