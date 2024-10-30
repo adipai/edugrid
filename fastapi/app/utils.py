@@ -1619,3 +1619,30 @@ async def fetch_content(tb_id: int, chap_id: str, sec_id: str):
     except Exception as e:
         print("An error occurred:", e)
         return "Error retrieving content."
+    
+
+async def get_student_courses_and_textbooks(student_id: str):
+    
+    """Fetch a list of course IDs and associated textbook IDs for a given student."""
+
+    query = """
+    SELECT 
+        enrollment.unique_course_id AS course_id,
+        course.textbook_id
+    FROM 
+        enrollment
+    JOIN 
+        course ON enrollment.unique_course_id = course.course_id
+    WHERE 
+        enrollment.student_id = :student_id 
+        AND enrollment.status = 'Enrolled';
+    """
+    
+    values = {"student_id": student_id}
+    results = await database.fetch_all(query=query, values=values)
+
+    # Format results as a list of dictionaries
+    if results:
+        return [{"course_id": result["course_id"], "textbook_id": result["textbook_id"]} for result in results]
+    else:
+        return None

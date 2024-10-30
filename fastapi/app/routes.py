@@ -988,3 +988,16 @@ async def view_activity_block(request: ViewActivityRequest):
         raise HTTPException(status_code=404, detail="No questions found for the specified block")
 
     return result
+
+class GetStudentCoursesRequest(BaseModel):
+    student_id: str
+
+@router.get('/api/v1/student-courses')
+async def _get_student_courses(request: GetStudentCoursesRequest):
+    """Fetch a list of course IDs and associated textbook IDs for a given student."""
+    
+    result = await get_student_courses_and_textbooks(request.student_id)
+
+    if not result:
+        raise HTTPException(status_code=404, detail="No courses found for the specified student.")
+    return {'courses': result}
