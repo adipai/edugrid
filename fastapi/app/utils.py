@@ -1686,3 +1686,42 @@ async def insert_participation_record(entry):
     except Exception as e:
         print(f"Error inserting participation record: {e}")
         return False
+    
+class NotificationResponse(BaseModel):
+    notification_message: str
+    timestamp: datetime
+
+# Utility function to fetch notifications
+async def fetch_notifications(user_id: str):
+    query = """
+        SELECT notification_message, timestamp
+        FROM notification
+        WHERE user_id = :user_id
+        ORDER BY timestamp DESC
+    """
+    values = {"user_id": user_id}
+
+    # Start a transaction
+    transaction = await database.transaction()
+
+    try:
+        notifications = await database.fetch_all(query=query, values=values)
+        await transaction.commit()
+
+        if notifications:
+            return [
+                NotificationResponse(
+                    notification_message=notification["notification_message"],
+                    timestamp=notification["timestamp"]
+                )
+                for notification in notifications
+            ]
+        else:
+            print(f"No notifications found for user ID '{user_id}'.")
+            return []
+
+    except Exception as e:
+        # Rollback transaction in case of error
+        await transaction.rollback()
+        print(f"Error retrieving notifications for user ID '{user_id}': {e}")
+        return []

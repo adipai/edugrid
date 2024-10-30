@@ -216,6 +216,8 @@ async def view_courses_request(view_courses_request: ViewCoursesRequest):
         return {"status": "success", "courses": courses}
     else:
         raise HTTPException(status_code=404, detail="Not found")
+    
+
 class GetTextBookRequest(BaseModel):
     tb_id: int
 
@@ -1023,3 +1025,17 @@ async def add_participation(entry: ParticipationEntry):
         raise HTTPException(status_code=500, detail=f"Failed to mark the question {entry.question_id}")
     
     return {"detail": f"Marks recorded for question {entry.question_id} successfully."}
+
+
+class ViewNotificationsRequest(BaseModel):
+    user_id: str
+
+@router.post("/view_notifications", status_code=200)
+async def view_notifications_request(view_notifications_request: ViewNotificationsRequest):
+    user_id = view_notifications_request.user_id
+    notifications = await fetch_notifications(user_id)
+
+    if notifications:
+        return {"status": "success", "notifications": notifications}
+    else:
+        raise HTTPException(status_code=404, detail="No notifications found for this user.")
