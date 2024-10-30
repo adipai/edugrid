@@ -1001,3 +1001,25 @@ async def _get_student_courses(request: GetStudentCoursesRequest):
     if not result:
         raise HTTPException(status_code=404, detail="No courses found for the specified student.")
     return {'courses': result}
+
+class ParticipationEntry(BaseModel):
+    student_id: str
+    course_id: str
+    textbook_id: int
+    section_id: str
+    chapter_id: str
+    block_id: str
+    unique_activity_id: str
+    question_id: str
+    correct: bool
+
+@router.post('/api/v1/participation')
+async def add_participation(entry: ParticipationEntry):
+    """Insert a participation record."""
+
+    success = await insert_participation_record(entry)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail=f"Failed to mark the question {entry['question_id']}")
+    
+    return {"detail": f"Marks recorded for question {entry['question_id']} successfully."}

@@ -1637,7 +1637,7 @@ async def get_student_courses_and_textbooks(student_id: str):
         enrollment.student_id = :student_id 
         AND enrollment.status = 'Enrolled';
     """
-    
+
     values = {"student_id": student_id}
     results = await database.fetch_all(query=query, values=values)
 
@@ -1646,3 +1646,40 @@ async def get_student_courses_and_textbooks(student_id: str):
         return [{"course_id": result["course_id"], "textbook_id": result["textbook_id"]} for result in results]
     else:
         return None
+
+
+async def insert_participation_record(entry):
+    """Insert a participation record into the database."""
+    
+    point = 3 if entry.correct else 1
+
+    query = """
+    INSERT INTO participation (
+        student_id, course_id, textbook_id, section_id, chapter_id, 
+        block_id, unique_activity_id, question_id, point, timestamp
+    )
+    VALUES (
+        :student_id, :course_id, :textbook_id, :section_id, :chapter_id, 
+        :block_id, :unique_activity_id, :question_id, :point, :timestamp
+    )
+    """
+
+    values = {
+        "student_id": entry.student_id,
+        "course_id": entry.course_id,
+        "textbook_id": entry.textbook_id,
+        "section_id": entry.section_id,
+        "chapter_id": entry.chapter_id,
+        "block_id": entry.block_id,
+        "unique_activity_id": entry.unique_activity_id,
+        "question_id": entry.question_id,
+        "point": point,
+        "timestamp": datetime.now()
+    }
+
+    try:
+        await database.execute(query=query, values=values)
+        return True
+    except Exception as e:
+        print(f"Error inserting participation record: {e}")
+        return False
