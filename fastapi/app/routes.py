@@ -930,9 +930,9 @@ class FetchContentRequest(BaseModel):
     sec_id: str
 
 @router.get("/fetch_content")
-async def fetch_content_request(request: FetchContentRequest):
+async def fetch_content_request(tb_id: int, chap_id: str, sec_id: str):
     """Endpoint to fetch block_id and block_type based on the provided IDs."""
-    result = await fetch_content(request.tb_id, request.chap_id, request.sec_id)
+    result = await fetch_content(tb_id, chap_id, sec_id)
 
     if result == "Error retrieving content":
         raise HTTPException(status_code=500, detail="Error retrieving content")
@@ -957,9 +957,9 @@ class ViewContentRequest(BaseModel):
     block_id: str
 
 @router.get("/student/view_content")
-async def view_text_picture_block(request: ViewContentRequest):
+async def view_text_picture_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
     """Endpoint to fetch content for text or picture block types based on the provided IDs."""
-    result = await fetch_text_picture_block(request.tb_id, request.chap_id, request.sec_id, request.block_id)
+    result = await fetch_text_picture_block(tb_id, chap_id, sec_id, block_id)
     
     if result == "Error retrieving content":
         raise HTTPException(status_code=500, detail="Error retrieving content")
@@ -975,10 +975,10 @@ class ViewActivityRequest(BaseModel):
     sec_id: str
     block_id: str
 
-@router.post("/student/view_activity_block")
-async def view_activity_block(request: ViewActivityRequest):
+@router.get("/student/view_activity_block")
+async def view_activity_block(tb_id: int, chap_id: str, sec_id: str, block_id: str):
     """Endpoint to fetch questions for activity block types based on the provided IDs."""
-    result = await fetch_activity_block(request.tb_id, request.chap_id, request.sec_id, request.block_id)
+    result = await fetch_activity_block(tb_id, chap_id, sec_id, block_id)
 
     if result == "Error retrieving questions":
         raise HTTPException(status_code=500, detail="Error retrieving questions")

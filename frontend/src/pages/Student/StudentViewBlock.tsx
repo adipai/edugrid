@@ -45,7 +45,7 @@ const TextPicBlock = ({ block }: { block: BlockDetails }) => {
         `http://localhost:8000/student/view_content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block.block_id}`
       );
       if (response.status === 200) {
-        setContent(response.data.content);
+        setContent(response.data.content.content);
       }
     } catch (error) {
       console.error("Error fetching section details:", error);
@@ -57,11 +57,12 @@ const TextPicBlock = ({ block }: { block: BlockDetails }) => {
     fetchContentBlock();
   }, []);
 
-  return <>{content && content}</>;
+  return <div key={content}>{content && content}</div>;
 };
 
 const ActivityBlock = ({ block }: { block: BlockDetails }) => {
   const [activity, setActivity] = useState<ActivityDetails[]>([]);
+  const [activityId, setActivityId] = useState<string>("");
   const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswer>({});
   const [explanations, setExplanations] = useState<Explanation>({});
   const [disabledQuestions, setDisabledQuestions] = useState<{
@@ -71,14 +72,17 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
+  const course_id = queryParams.get("course_id");
   const tb_id = queryParams.get("tb_id");
   const chap_id = queryParams.get("chap_id");
   const sec_id = queryParams.get("sec_id");
 
+  const user_id = localStorage.getItem("user_id");
+
   const fetchActivityBlock = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/student/view_content`,
+        `http://localhost:8000/student/view_activity_block`,
         {
           params: {
             tb_id,
@@ -89,7 +93,8 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
         }
       );
       if (response.status === 200) {
-        setActivity(response.data.content);
+        setActivityId(response.data.activity_id);
+        setActivity(response.data.questions);
       }
     } catch (error) {
       console.error("Error fetching section details:", error);
@@ -101,6 +106,7 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
   }, [tb_id, chap_id, sec_id, block.block_id]);
 
   const handleOptionChange = async (
+    // activityId: string,
     questionId: string,
     selectedOption: number
   ) => {
@@ -115,14 +121,17 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/student/submit_answer`,
+        `http://localhost:8000/api/v1/participation`,
         {
+          student_id: user_id,
+          course_id,
           tb_id,
           chap_id,
           sec_id,
           block_id: block.block_id,
+          activity_id: activityId,
           question_id: questionId,
-          selected_option: selectedOption,
+          selected_option: selectedOption, // Change to correct or incorrect
         }
       );
 
@@ -258,7 +267,7 @@ const StudentViewBlock = () => {
       const response = await axios.get(
         `http://localhost:8000/fetch_content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`
       );
-      setContentDetails(response.data.block);
+      setContentDetails(response.data);
     } catch (error) {
       console.error("Error fetching section details:", error);
     }
@@ -274,14 +283,14 @@ const StudentViewBlock = () => {
   return (
     <div>
       <h1>Details</h1>
-      {contentDetails.map((block) => {
-        switch (block.block_type) {
+      {contentDetails && contentDetails.map((block, i) => {
+        switch (block.block_type ) {
           case "text":
-            return <TextPicBlock key={block.block_id} block={block} />;
+            return <TextPicBlock key={i} block={block} />;
           case "picture":
-            return <TextPicBlock key={block.block_id} block={block} />;
+            return <TextPicBlock key={i} block={block} />;
           case "activity":
-            return <ActivityBlock key={block.block_id} block={block} />;
+            return <ActivityBlock key={i} block={block} />;
           default:
             return null;
         }

@@ -1542,6 +1542,8 @@ async def fetch_activity_block(tb_id: int, chap_id: str, sec_id: str, block_id: 
 
         if not block_content:
             return "Block content not found."
+        
+        activity_id = block_content[0]
 
         # Step 2: Fetch questions related to the unique activity ID
         questions = await database.fetch_all(
@@ -1559,11 +1561,12 @@ async def fetch_activity_block(tb_id: int, chap_id: str, sec_id: str, block_id: 
             """,
             {
                 "tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, 
-                "block_id": block_id, "unique_activity_id": block_content[0]
+                "block_id": block_id, "unique_activity_id": activity_id
             }
         )
-
-        return questions if questions else "No questions found for the specified block."
+        if questions:
+            return {"activity_id": activity_id, "questions":questions}
+        return "No questions found for the specified block."
 
     except Exception as e:
         print("An error occurred:", e)
