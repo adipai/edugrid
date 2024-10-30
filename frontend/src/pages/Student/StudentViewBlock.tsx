@@ -113,6 +113,10 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
     // Prevent multiple selections
     if (disabledQuestions[questionId]) return;
 
+    // Find the question in the activity
+    const question = activity.find((q) => q.question_id === questionId);
+    const isCorrect = selectedOption === question?.answer;
+
     // Update selected answers
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
 
@@ -125,13 +129,13 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
         {
           student_id: user_id,
           course_id,
-          tb_id,
-          chap_id,
-          sec_id,
+          textbook_id: tb_id,
+          chapter_id: chap_id,
+          section_id: sec_id,
           block_id: block.block_id,
-          activity_id: activityId,
+          unique_activity_id: activityId,
           question_id: questionId,
-          selected_option: selectedOption, // Change to correct or incorrect
+          correct: isCorrect, // Change to correct or incorrect
         }
       );
 
@@ -147,7 +151,7 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
         }
 
         // Set the explanation based on the selected option
-        const question = activity.find((q) => q.question_id === questionId);
+        // const question = activity.find((q) => q.question_id === questionId);
         if (question) {
           let explanation = "";
           switch (selectedOption) {
@@ -172,7 +176,8 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
     } catch (error) {
       console.error("Error submitting answer:", error);
       // Optionally, re-enable the question if there's an error
-      setDisabledQuestions((prev) => ({ ...prev, [questionId]: false }));
+    //   setDisabledQuestions((prev) => ({ ...prev, [questionId]: false }));
+        window.alert("This question was already answered");
     }
   };
 
@@ -292,7 +297,7 @@ const StudentViewBlock = () => {
           case "activity":
             return <ActivityBlock key={i} block={block} />;
           default:
-            return null;
+            return <></>;
         }
       })}
     </div>

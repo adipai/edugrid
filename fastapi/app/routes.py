@@ -1020,6 +1020,6 @@ async def add_participation(entry: ParticipationEntry):
     success = await insert_participation_record(entry)
     
     if not success:
-        raise HTTPException(status_code=500, detail=f"Failed to mark the question {entry['question_id']}")
+        raise HTTPException(status_code=500, detail=f"Failed to mark the question {entry.question_id}")
     
-    return {"detail": f"Marks recorded for question {entry['question_id']} successfully."}
+    return {"detail": f"Marks recorded for question {entry.question_id} successfully."}

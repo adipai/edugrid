@@ -1659,7 +1659,7 @@ async def insert_participation_record(entry):
     query = """
     INSERT INTO participation (
         student_id, course_id, textbook_id, section_id, chapter_id, 
-        block_id, unique_activity_id, question_id, point, timestamp
+        block_id, unique_activity_id, question_id, point, attempted_timestamp
     )
     VALUES (
         :student_id, :course_id, :textbook_id, :section_id, :chapter_id, 
