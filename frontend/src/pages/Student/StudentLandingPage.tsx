@@ -28,6 +28,7 @@ type HierarcySection = {
 type HierarcyBlock = {
   block_id: string;
   block_name: string;
+  block_type: string;
 };
 
 const CourseHierarchyView = (props: any) => {
@@ -52,6 +53,29 @@ const CourseHierarchyView = (props: any) => {
     fetchCourseHierarchy(tb_id);
   }, [tb_id]);
 
+  useEffect(() => {
+    if (!courseHierarchy) {
+      return;
+    }
+    // Read the courseHierarchy and set the session storage in the this format, "course_id-chapter_id-section_id-block_id": "course_id-tb_id-chapter_id-sec_id-block_id"
+    let courseHierarchyMap: { [key: string]: string } = {};
+    courseHierarchy.forEach((textbook) => {
+      textbook.chapters.forEach((chapter, j) => {
+        chapter.sections.forEach((section, k) => {
+          section.blocks.forEach((block) => {
+            courseHierarchyMap[
+              `${course_id}-${j + 1}-${k + 1}-${block.block_id}`
+            ] = `${course_id}-${textbook.tb_id}-${chapter.chapter_id}-${section.section_id}-${block.block_id}-${block.block_type}`;
+          });
+        });
+      });
+    });
+    sessionStorage.setItem(
+      course_id,
+      JSON.stringify(courseHierarchyMap)
+    );
+  }, [courseHierarchy]);
+
   return (
     <div>
       {courseHierarchy &&
@@ -73,9 +97,13 @@ const CourseHierarchyView = (props: any) => {
                     key={`${section.section_id}-${j}`}
                     style={{ paddingLeft: "8px" }}
                   >
-                    <h4 className="zero-spaces" style={{ padding: "2px" }}>
+                    <Link
+                      className="zero-spaces"
+                      style={{ padding: "2px" }}
+                      to={`/student/view-section?course_id=${course_id}&tb_id=${textbook.tb_id}&chap_id=${chapter.chapter_id}&sec_id=${section.section_id}`}
+                    >
                       {`${i + 1}.${j + 1}`} {section.section_name}
-                    </h4>
+                    </Link>
                     {section.blocks.map((block, k) => (
                       <div
                         key={`${block.block_id}-${k}`}
@@ -84,7 +112,7 @@ const CourseHierarchyView = (props: any) => {
                         <Link
                           className="zero-spaces"
                           style={{ padding: "2px" }}
-                          to={`/student/view-section?course_id=${course_id}&tb_id=${textbook.tb_id}&chap_id=${chapter.chapter_id}&sec_id=${section.section_id}`}
+                          to={`/student/view-block?course_id=${course_id}&chap_num=${i+1}&sec_num=${j+1}&block_id=${block.block_id}`}
                         >
                           {block.block_id}
                         </Link>
@@ -127,12 +155,15 @@ const StudentLandingPage = () => {
       {courseData &&
         courseData.map((course, i) => (
           <div key={`${course.course_id}-${course.textbook_id}-${i}`}>
-            <CourseHierarchyView tb_id={course.textbook_id} />
+            <CourseHierarchyView
+              tb_id={course.textbook_id}
+              course_id={course.course_id}
+            />
           </div>
         ))}
       <ul>
         <li>
-          <Link to="/student/view-section">1. View a Section</Link>
+          <Link to="/student/view-block">1. View a Block</Link>
         </li>
         <li>
           <Link to="/student/participation">

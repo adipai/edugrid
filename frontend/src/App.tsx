@@ -66,6 +66,7 @@ import TAModifyContentBlock from "./pages/TA/TAModifyContentBlock";
 import TAModifySection from "./pages/TA/TAModifySection";
 import StudentEnrollPage from "./pages/Student/StudentEnrollPage";
 import StudentParticipationMarks from "./pages/Student/StudentPariticipationMarks";
+import StudentViewSection from "./pages/Student/StudentViewSection";
 import StudentViewBlock from "./pages/Student/StudentViewBlock";
 import QueryLanding from "./pages/AdditionalQueries/QueryLanding";
 import QuerySectionsFirstChapter from "./pages/AdditionalQueries/QuerySectionsFirstChapter";
@@ -157,7 +158,8 @@ function App() {
         <Route path="/student/login" element={<StudentLoginPage />} />
         <Route path="/student/enroll" element={<StudentEnrollPage />} />
         <Route path="/student/participation" element={<StudentParticipationMarks />} />
-        <Route path="/student/view-section" element={<StudentViewBlock />} />
+        <Route path="/student/view-section" element={<StudentViewSection />} />
+        <Route path="/student/view-block" element={<StudentViewBlock />} />
 
         {/* Additional Queries */}
         <Route path="/queires" element={<QueryLanding />} />

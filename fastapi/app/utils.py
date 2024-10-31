@@ -1892,7 +1892,8 @@ async def fetch_textbook_hierarchy(tb_id: int):
                 c.title AS chapter_name,
                 s.section_id AS section,
                 s.title AS section_name,
-                b.block_id AS block
+                b.block_id AS block,
+                b.block_type AS block_type
             FROM 
                 textbook t
             LEFT JOIN 
@@ -1923,6 +1924,7 @@ async def fetch_textbook_hierarchy(tb_id: int):
             sec_name = row['section_name']
             block_id = row['block']
             block_name = ""  # Assuming block_name is not provided
+            block_type = row['block_type']
 
             # Check if the textbook is already added
             if tb_id not in textbook_dict:
@@ -1970,7 +1972,8 @@ async def fetch_textbook_hierarchy(tb_id: int):
             if block_id not in blocks_dict:
                 block_entry = {
                     "block_id": block_id,
-                    "block_name": block_name
+                    "block_name": block_name,
+                    "block_type": block_type
                 }
                 blocks_dict[block_id] = block_entry
                 section_entry['blocks'].append(block_entry)
