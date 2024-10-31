@@ -10,7 +10,8 @@ const StudentViewBlock = () => {
   const course_id = queryParams.get("course_id");
   const chap_num = queryParams.get("chap_num");
   const sec_num = queryParams.get("sec_num");
-  const block_num: number | null = parseInt(queryParams.get("block_num") as string) || null;
+  const block_num: number | null =
+    parseInt(queryParams.get("block_num") as string) || null;
 
   const [courseId, setCourseId] = useState("");
   const [chapterNumber, setChapterNumber] = useState("");
@@ -32,16 +33,17 @@ const StudentViewBlock = () => {
     if (!courseData || !block_num) {
       return;
     }
-    console.log(courseData)
+    console.log(courseData);
     if (`${course_id}-${chap_num}-${sec_num}-${block_num}` in courseData) {
-    setBlockData(
-      courseData[`${course_id}-${chap_num}-${sec_num}-${block_num}`]?.split("-")
-    );
-  }
-  else{
-    console.error("Should navigate");
-    navigate('/student/landing')
-  }
+      setBlockData(
+        courseData[`${course_id}-${chap_num}-${sec_num}-${block_num}`]?.split(
+          "-"
+        )
+      );
+    } else {
+      console.error("Should navigate");
+      navigate("/student/landing");
+    }
   }, [courseData, block_num]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -129,12 +131,21 @@ const StudentViewBlock = () => {
           course_id={course_id || ""}
         />
       )}
-
+      {!!blockData && (
+        <div>
+          <Link
+            to={`/student/view-block?course_id=${course_id}&chap_num=${chap_num}&sec_num=${sec_num}&block_num=${
+              (block_num || 0) + 1
+            }`}
+          >
+            Next
+          </Link>
+        </div>
+      )}
       <div>
-        <Link to={`/student/view-block?course_id=${course_id}&chap_num=${chap_num}&sec_num=${sec_num}&block_num=${(block_num || 0)+ 1}`}>Next</Link>
-      </div>
-      <div>
-        <div style={{"margin":"4px"}} onClick={() => navigate(-1)}>Go Back</div>
+        <div style={{ margin: "4px" }} onClick={() => navigate(-1)}>
+          Go Back
+        </div>
       </div>
     </div>
   );
