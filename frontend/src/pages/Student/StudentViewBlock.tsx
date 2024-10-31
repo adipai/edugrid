@@ -22,12 +22,12 @@ type ActivityDetails = {
 };
 
 type SelectedAnswer = {
-    [key: string]: number; // key is question_id, value is selected option number
-  };
-  
-  type Explanation = {
-    [key: string]: string; // key is question_id, value is explanation text
-  };
+  [key: string]: number; // key is question_id, value is selected option number
+};
+
+type Explanation = {
+  [key: string]: string; // key is question_id, value is explanation text
+};
 
 const TextPicBlock = ({ block }: { block: BlockDetails }) => {
   const [content, setContent] = useState("");
@@ -65,9 +65,7 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
   const [activityId, setActivityId] = useState<string>("");
   const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswer>({});
   const [explanations, setExplanations] = useState<Explanation>({});
-  const [disabledQuestions, setDisabledQuestions] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [status, setStatus] = useState<{ [key: string]: string }>({});
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -105,79 +103,56 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
     fetchActivityBlock();
   }, [tb_id, chap_id, sec_id, block.block_id]);
 
-  const handleOptionChange = async (
-    // activityId: string,
-    questionId: string,
-    selectedOption: number
-  ) => {
-    // Prevent multiple selections
-    if (disabledQuestions[questionId]) return;
-
-    // Find the question in the activity
-    const question = activity.find((q) => q.question_id === questionId);
-    const isCorrect = selectedOption === question?.answer;
-
-    // Update selected answers
+  const handleOptionChange = (questionId: string, selectedOption: number) => {
+    // Update selected answers without disabling the question
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
+  };
 
-    // Disable the question to prevent changes
-    setDisabledQuestions((prev) => ({ ...prev, [questionId]: true }));
+  const handleSubmit = async () => {
+    // Loop through each question and submit the answer status
+    for (const question of activity) {
+      const selectedOption = selectedAnswers[question.question_id];
+      const isCorrect = selectedOption === question.answer;
+      const feedback = selectedOption
+        ? isCorrect
+          ? "correct"
+          : "incorrect"
+        : "unanswered";
 
-    try {
-      const response = await axios.post(
-        `http://localhost:8000/api/v1/participation`,
-        {
-          student_id: user_id,
-          course_id,
-          textbook_id: tb_id,
-          chapter_id: chap_id,
-          section_id: sec_id,
-          block_id: block.block_id,
-          unique_activity_id: activityId,
-          question_id: questionId,
-          correct: isCorrect, // Change to correct or incorrect
-        }
-      );
-
-      if (response.status === 200) {
-        const data = response.data;
-
-        // Assuming the API returns whether the answer was correct and the explanation
-        if (data.correct) {
-          // Handle correct answer case
-          console.log("Correct answer selected.");
-        } else {
-          console.log("Incorrect answer selected.");
-        }
-
-        // Set the explanation based on the selected option
-        // const question = activity.find((q) => q.question_id === questionId);
-        if (question) {
-          let explanation = "";
-          switch (selectedOption) {
-            case 1:
-              explanation = question.opt_1_explaination;
-              break;
-            case 2:
-              explanation = question.opt_2_explaination;
-              break;
-            case 3:
-              explanation = question.opt_3_explaination;
-              break;
-            case 4:
-              explanation = question.opt_4_explaination;
-              break;
-            default:
-              explanation = "";
+      // Call the API
+      try {
+        const response = await axios.post(
+          `http://localhost:8000/api/v1/participation`,
+          {
+            student_id: user_id,
+            course_id,
+            textbook_id: tb_id,
+            chapter_id: chap_id,
+            section_id: sec_id,
+            block_id: block.block_id,
+            unique_activity_id: activityId,
+            question_id: question.question_id,
+            correct: feedback,
           }
-          setExplanations((prev) => ({ ...prev, [questionId]: explanation }));
+        );
+
+        if (response.status === 200) {
+          // Set explanation text based on the selected option
+          if (selectedOption) {
+            // @ts-ignore
+            const explanation = question[`opt_${selectedOption}_explaination` as keyof ActivityDetails] || "";
+            // @ts-ignore
+            setExplanations((prev) => ({
+              ...prev,
+              [question.question_id]: explanation,
+            }));
+          }
+          setStatus((prev) => ({ ...prev, [question.question_id]: feedback }));
         }
+      } catch (error) {
+        console.error("Error submitting answer:", error);
+        window.alert("An error occurred while submitting your answers.");
       }
-    } catch (error) {
-      console.error("Error submitting answer:", error);
-      // Optionally, re-enable the question if there's an error
-    //   setDisabledQuestions((prev) => ({ ...prev, [questionId]: false }));
-        window.alert("This question was already answered");
     }
   };
 
@@ -195,7 +170,6 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
                     type="radio"
                     value="1"
                     name={act.question_id}
-                    disabled={disabledQuestions[act.question_id]}
                     checked={selectedAnswers[act.question_id] === 1}
                     onChange={() => handleOptionChange(act.question_id, 1)}
                   />
@@ -206,7 +180,6 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
                     type="radio"
                     value="2"
                     name={act.question_id}
-                    disabled={disabledQuestions[act.question_id]}
                     checked={selectedAnswers[act.question_id] === 2}
                     onChange={() => handleOptionChange(act.question_id, 2)}
                   />
@@ -217,7 +190,6 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
                     type="radio"
                     value="3"
                     name={act.question_id}
-                    disabled={disabledQuestions[act.question_id]}
                     checked={selectedAnswers[act.question_id] === 3}
                     onChange={() => handleOptionChange(act.question_id, 3)}
                   />
@@ -228,7 +200,6 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
                     type="radio"
                     value="4"
                     name={act.question_id}
-                    disabled={disabledQuestions[act.question_id]}
                     checked={selectedAnswers[act.question_id] === 4}
                     onChange={() => handleOptionChange(act.question_id, 4)}
                   />
@@ -247,8 +218,27 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
                     {explanations[act.question_id]}
                   </div>
                 )}
+                {/* Display Status */}
+                {status[act.question_id] && (
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      color:
+                        status[act.question_id] === "correct"
+                          ? "green"
+                          : status[act.question_id] === "incorrect"
+                          ? "red"
+                          : "grey",
+                    }}
+                  >
+                    {status[act.question_id]}
+                  </div>
+                )}
               </div>
             ))}
+            <button onClick={handleSubmit} style={{ marginTop: "20px" }}>
+              Submit
+            </button>
           </div>
         </div>
       )}
@@ -288,18 +278,19 @@ const StudentViewBlock = () => {
   return (
     <div>
       <h1>Details</h1>
-      {contentDetails && contentDetails.map((block, i) => {
-        switch (block.block_type ) {
-          case "text":
-            return <TextPicBlock key={i} block={block} />;
-          case "picture":
-            return <TextPicBlock key={i} block={block} />;
-          case "activity":
-            return <ActivityBlock key={i} block={block} />;
-          default:
-            return <></>;
-        }
-      })}
+      {contentDetails &&
+        contentDetails.map((block, i) => {
+          switch (block.block_type) {
+            case "text":
+              return <TextPicBlock key={i} block={block} />;
+            case "picture":
+              return <TextPicBlock key={i} block={block} />;
+            case "activity":
+              return <ActivityBlock key={i} block={block} />;
+            default:
+              return <></>;
+          }
+        })}
     </div>
   );
 };

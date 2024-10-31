@@ -1013,7 +1013,7 @@ class ParticipationEntry(BaseModel):
     block_id: str
     unique_activity_id: str
     question_id: str
-    correct: bool
+    correct: str
 
 @router.post('/api/v1/participation')
 async def add_participation(entry: ParticipationEntry):
