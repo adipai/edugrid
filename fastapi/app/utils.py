@@ -1725,3 +1725,75 @@ async def fetch_notifications(user_id: str):
         await transaction.rollback()
         print(f"Error retrieving notifications for user ID '{user_id}': {e}")
         return []
+
+
+async def fetch_textbook_hierarchy(connection, tb_id: int):
+    """Fetch the hierarchy of textbook chapters, sections, and blocks for a given textbook ID."""
+    try:
+        async with connection.cursor() as cursor:
+            # Execute the query to fetch the hierarchy including textbook_name, chapter_name, and section_name
+            await cursor.execute(
+                """
+                SELECT 
+                    t.textbook_id AS textbook,
+                    t.title AS textbook_name,
+                    c.chapter_id AS chapter,
+                    c.title AS chapter_name,
+                    s.section_id AS section,
+                    s.title AS section_name,
+                    b.block_id AS block
+                FROM 
+                    textbook t
+                LEFT JOIN 
+                    chapter c ON t.textbook_id = c.textbook_id AND c.hidden_status = 'no'
+                LEFT JOIN 
+                    section s ON c.textbook_id = s.textbook_id AND c.chapter_id = s.chapter_id AND s.hidden_status = 'no'
+                LEFT JOIN 
+                    block b ON s.textbook_id = b.textbook_id AND s.chapter_id = b.chapter_id AND s.section_id = b.section_id AND b.hidden_status = 'no'
+                WHERE 
+                    t.textbook_id = :tb_id
+                ORDER BY 
+                    t.textbook_id, c.chapter_id, s.section_id, b.block_id
+                """,
+                {"tb_id": tb_id}
+            )
+            rows = await cursor.fetchall()
+
+            # Build the hierarchy dictionary
+            hierarchy = {}
+            for row in rows:
+                textbook = row[0]  # Index for textbook
+                textbook_name = row[1]  # Index for textbook name
+                chapter = row[2]   # Index for chapter
+                chapter_name = row[3]  # Index for chapter name
+                section = row[4]   # Index for section
+                section_name = row[5]  # Index for section name
+                block = row[6]     # Index for block
+
+                # Build nested dictionary structure
+                if textbook not in hierarchy:
+                    hierarchy[textbook] = {
+                        "textbook_name": textbook_name,
+                        "chapters": {}
+                    }
+                if chapter not in hierarchy[textbook]["chapters"]:
+                    hierarchy[textbook]["chapters"][chapter] = {
+                        "chapter_name": chapter_name,
+                        "sections": {}
+                    }
+                if section not in hierarchy[textbook]["chapters"][chapter]["sections"]:
+                    hierarchy[textbook]["chapters"][chapter]["sections"][section] = {
+                        "section_name": section_name,
+                        "blocks": []
+                    }
+
+                # Append block only if it exists
+                if block is not None:
+                    hierarchy[textbook]["chapters"][chapter]["sections"][section]["blocks"].append(block)
+
+            return hierarchy if hierarchy else "No content found."
+
+    except Exception as e:
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error retrieving textbook hierarchy."

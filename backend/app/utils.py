@@ -994,6 +994,83 @@ def fetch_content(connection, tb_id, chap_id, sec_id):
         return "Error retrieving content."
 
 
+def display_textbook(connection, tb_id):
+    """Display the hierarchy of textbook chapters, sections, and blocks for a given textbook ID."""
+    try:
+        with connection.cursor() as cursor:
+            # Execute the query to fetch the hierarchy including textbook_name, chapter_name, and section_name
+            cursor.execute(
+                """
+                SELECT 
+                    t.textbook_id AS textbook,
+                    t.title AS textbook_name,
+                    c.chapter_id AS chapter,
+                    c.title AS chapter_name,
+                    s.section_id AS section,
+                    s.title AS section_name,
+                    b.block_id AS block
+                FROM 
+                    textbook t
+                LEFT JOIN 
+                    chapter c ON t.textbook_id = c.textbook_id AND c.hidden_status = 'no'
+                LEFT JOIN 
+                    section s ON c.textbook_id = s.textbook_id AND c.chapter_id = s.chapter_id AND s.hidden_status = 'no'
+                LEFT JOIN 
+                    block b ON s.textbook_id = b.textbook_id AND s.chapter_id = b.chapter_id AND s.section_id = b.section_id AND b.hidden_status = 'no'
+                WHERE 
+                    t.textbook_id = %s
+                ORDER BY 
+                    t.textbook_id, c.chapter_id, s.section_id, b.block_id
+                """,
+                (tb_id,)
+            )
+            rows = cursor.fetchall()
+
+            # Build the hierarchy dictionary
+            hierarchy = {}
+            for row in rows:
+                textbook = row[0]  # Index for textbook
+                textbook_name = row[1]  # Index for textbook name
+                chapter = row[2]   # Index for chapter
+                chapter_name = row[3]  # Index for chapter name
+                section = row[4]   # Index for section
+                section_name = row[5]  # Index for section name
+                block = row[6]     # Index for block
+
+                # Build nested dictionary structure
+                if textbook not in hierarchy:
+                    hierarchy[textbook] = {
+                        "textbook_name": textbook_name,
+                        "chapters": {}
+                    }
+                if chapter not in hierarchy[textbook]["chapters"]:
+                    hierarchy[textbook]["chapters"][chapter] = {
+                        "chapter_name": chapter_name,
+                        "sections": {}
+                    }
+                if section not in hierarchy[textbook]["chapters"][chapter]["sections"]:
+                    hierarchy[textbook]["chapters"][chapter]["sections"][section] = {
+                        "section_name": section_name,
+                        "blocks": []
+                    }
+
+                # Append block only if it exists
+                if block is not None:
+                    hierarchy[textbook]["chapters"][chapter]["sections"][section]["blocks"].append(block)
+
+            return hierarchy if hierarchy else "No content found."
+
+    except Exception as e:
+        print("An error occurred:", e)
+        print(traceback.format_exc())
+        return "Error retrieving textbook hierarchy."
+
+
+
+def check_display_textbook(connection):
+
+    print(display_textbook(connection, 1))
+
 def check_fetch_content(connection):
 
     print(fetch_content(connection, 1, "1", "1"))
@@ -1325,11 +1402,11 @@ def delete_func(connection):
 
 def main():
     parser = argparse.ArgumentParser(description="Textbook CLI Tool")
-    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"], \
+    parser.add_argument("--action", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"], \
                                     help="1: Create Textbook, 2: Modify Textbook, 3: Modify Chapter, 4: Modify Section, \
                                     5: Modify Block, 6: Add block, 7: Create Activity, 8: Modify Activity, 9: Edge cases, 10: Delete operations, \
                                     11: check course details, 12: Hiding textbook entities, 13: Check fetch content \
-                                    14: view content, 15: view activity")
+                                    14: view content, 15: view activity, 16: Display Textbook")
     
     # Parse the arguments
     args = parser.parse_args()
@@ -1379,6 +1456,8 @@ def main():
     
     elif(args.action == "15"):
         check_view_text_picture_block(connection)
-
+    
+    elif(args.action == "16"):
+        check_display_textbook(connection)
 if __name__ == "__main__":
     main()

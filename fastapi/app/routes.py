@@ -1190,3 +1190,16 @@ async def book_different_status_instructors():
         return {"books_with_different_status_instructors": [dict(row) for row in result]}
     else:
         raise HTTPException(status_code=404, detail="No books found with different status instructors")
+
+
+class TextbookRequest(BaseModel):
+    tb_id: int
+
+@router.post("/display_textbook")
+async def display_textbook_endpoint(textbook_request: TextbookRequest, connection):
+    """Endpoint to display the textbook hierarchy."""
+    hierarchy = await fetch_textbook_hierarchy(connection, textbook_request.tb_id)
+
+    if (hierarchy == "Error retrieving textbook hierarchy."):
+        raise HTTPException(status_code=500, detail = "Error retrieving textbook hierarchy")
+    return hierarchy
