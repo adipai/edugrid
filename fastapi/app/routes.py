@@ -995,10 +995,10 @@ class GetStudentCoursesRequest(BaseModel):
     student_id: str
 
 @router.get('/api/v1/student-courses')
-async def _get_student_courses(request: GetStudentCoursesRequest):
+async def _get_student_courses(student_id: str):
     """Fetch a list of course IDs and associated textbook IDs for a given student."""
     
-    result = await get_student_courses_and_textbooks(request.student_id)
+    result = await get_student_courses_and_textbooks(student_id)
 
     if not result:
         raise HTTPException(status_code=404, detail="No courses found for the specified student.")
@@ -1013,7 +1013,7 @@ class ParticipationEntry(BaseModel):
     block_id: str
     unique_activity_id: str
     question_id: str
-    correct: bool
+    correct: str
 
 @router.post('/api/v1/participation')
 async def add_participation(entry: ParticipationEntry):
@@ -1190,3 +1190,16 @@ async def book_different_status_instructors():
         return {"books_with_different_status_instructors": [dict(row) for row in result]}
     else:
         raise HTTPException(status_code=404, detail="No books found with different status instructors")
+
+
+class TextbookRequest(BaseModel):
+    tb_id: int
+
+@router.post("/display_textbook")
+async def display_textbook_endpoint(textbook_request: TextbookRequest, connection):
+    """Endpoint to display the textbook hierarchy."""
+    hierarchy = await fetch_textbook_hierarchy(connection, textbook_request.tb_id)
+
+    if (hierarchy == "Error retrieving textbook hierarchy."):
+        raise HTTPException(status_code=500, detail = "Error retrieving textbook hierarchy")
+    return hierarchy
