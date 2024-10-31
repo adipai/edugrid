@@ -112,6 +112,14 @@ const StudentViewBlock = () => {
           sec_id={blockData[3]}
         />
       )}
+      {blockData && blockData[5] === "picture" && (
+        <TextPicBlock
+          block={{ block_id: blockData[4], block_type: blockData[5] }}
+          tb_id={blockData[1]}
+          chap_id={blockData[2]}
+          sec_id={blockData[3]}
+        />
+      )}
       {blockData && blockData[5] === "activity" && (
         <ActivityBlock
           block={{ block_id: blockData[4], block_type: blockData[5] }}
