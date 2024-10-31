@@ -1841,9 +1841,9 @@ async def insert_participation_record(entry):
         print(f"Error inserting participation record: {e}")
         return False
     
-# class NotificationResponse(BaseModel):
-#     notification_message: str
-#     timestamp: datetime
+class NotificationResponse(BaseModel):
+    notification_message: str
+    timestamp: datetime
 
 # Utility function to fetch notifications
 async def fetch_notifications(user_id: str):
@@ -1881,71 +1881,102 @@ async def fetch_notifications(user_id: str):
         return []
 
 
-async def fetch_textbook_hierarchy(connection, tb_id: int):
+async def fetch_textbook_hierarchy(tb_id: int):
     """Fetch the hierarchy of textbook chapters, sections, and blocks for a given textbook ID."""
     try:
-        async with connection.cursor() as cursor:
-            # Execute the query to fetch the hierarchy including textbook_name, chapter_name, and section_name
-            await cursor.execute(
-                """
-                SELECT 
-                    t.textbook_id AS textbook,
-                    t.title AS textbook_name,
-                    c.chapter_id AS chapter,
-                    c.title AS chapter_name,
-                    s.section_id AS section,
-                    s.title AS section_name,
-                    b.block_id AS block
-                FROM 
-                    textbook t
-                LEFT JOIN 
-                    chapter c ON t.textbook_id = c.textbook_id AND c.hidden_status = 'no'
-                LEFT JOIN 
-                    section s ON c.textbook_id = s.textbook_id AND c.chapter_id = s.chapter_id AND s.hidden_status = 'no'
-                LEFT JOIN 
-                    block b ON s.textbook_id = b.textbook_id AND s.chapter_id = b.chapter_id AND s.section_id = b.section_id AND b.hidden_status = 'no'
-                WHERE 
-                    t.textbook_id = :tb_id
-                ORDER BY 
-                    t.textbook_id, c.chapter_id, s.section_id, b.block_id
-                """,
-                {"tb_id": tb_id}
-            )
-            rows = await cursor.fetchall()
+        query = """
+            SELECT 
+                t.textbook_id AS textbook,
+                t.title AS textbook_name,
+                c.chapter_id AS chapter,
+                c.title AS chapter_name,
+                s.section_id AS section,
+                s.title AS section_name,
+                b.block_id AS block
+            FROM 
+                textbook t
+            LEFT JOIN 
+                chapter c ON t.textbook_id = c.textbook_id AND c.hidden_status = 'no'
+            LEFT JOIN 
+                section s ON c.textbook_id = s.textbook_id AND c.chapter_id = s.chapter_id AND s.hidden_status = 'no'
+            LEFT JOIN 
+                block b ON s.textbook_id = b.textbook_id AND s.chapter_id = b.chapter_id AND s.section_id = b.section_id AND b.hidden_status = 'no'
+            WHERE 
+                t.textbook_id = :tb_id
+            ORDER BY 
+                t.textbook_id, c.chapter_id, s.section_id, b.block_id
+            """
 
-            # Build the hierarchy dictionary
-            hierarchy = {}
-            for row in rows:
-                textbook = row[0]  # Index for textbook
-                textbook_name = row[1]  # Index for textbook name
-                chapter = row[2]   # Index for chapter
-                chapter_name = row[3]  # Index for chapter name
-                section = row[4]   # Index for section
-                section_name = row[5]  # Index for section name
-                block = row[6]     # Index for block
+        # Correctly fetch the data without unnecessary transaction
+        rows = await database.fetch_all(query=query, values={"tb_id": tb_id})
+        
+        result = []
+        textbook_dict = {}
 
-                # Build nested dictionary structure
-                if textbook not in hierarchy:
-                    hierarchy[textbook] = {
-                        "textbook_name": textbook_name,
-                        "chapters": {}
-                    }
-                if chapter not in hierarchy[textbook]["chapters"]:
-                    hierarchy[textbook]["chapters"][chapter] = {
-                        "chapter_name": chapter_name,
-                        "sections": {}
-                    }
-                if section not in hierarchy[textbook]["chapters"][chapter]["sections"]:
-                    hierarchy[textbook]["chapters"][chapter]["sections"][section] = {
-                        "section_name": section_name,
-                        "blocks": []
-                    }
+        # Build the hierarchy dictionary
+        for row in rows:
+            tb_id = str(row['textbook'])
+            tb_name = row['textbook_name']
+            chap_id = row['chapter']
+            chap_name = row['chapter_name']
+            sec_id = row['section']
+            sec_name = row['section_name']
+            block_id = row['block']
+            block_name = ""  # Assuming block_name is not provided
 
-                # Append block only if it exists
-                if block is not None:
-                    hierarchy[textbook]["chapters"][chapter]["sections"][section]["blocks"].append(block)
+            # Check if the textbook is already added
+            if tb_id not in textbook_dict:
+                textbook_entry = {
+                    "tb_id": tb_id,
+                    "textbook_title": tb_name,
+                    "chapters": []
+                }
+                textbook_dict[tb_id] = textbook_entry
+                result.append(textbook_entry)
+            else:
+                textbook_entry = textbook_dict[tb_id]
 
-            return hierarchy if hierarchy else "No content found."
+            # Use a dictionary to keep track of chapters
+            chapters_dict = {chapter['chapter_id']: chapter for chapter in textbook_entry['chapters']}
+
+            if chap_id not in chapters_dict:
+                chapter_entry = {
+                    "chapter_id": chap_id,
+                    "chapter_name": chap_name,
+                    "sections": []
+                }
+                chapters_dict[chap_id] = chapter_entry
+                textbook_entry['chapters'].append(chapter_entry)
+            else:
+                chapter_entry = chapters_dict[chap_id]
+
+            # Use a dictionary to keep track of sections
+            sections_dict = {section['section_id']: section for section in chapter_entry['sections']}
+
+            if sec_id not in sections_dict:
+                section_entry = {
+                    "section_id": sec_id,
+                    "section_name": sec_name,
+                    "blocks": []
+                }
+                sections_dict[sec_id] = section_entry
+                chapter_entry['sections'].append(section_entry)
+            else:
+                section_entry = sections_dict[sec_id]
+
+            # Use a dictionary to keep track of blocks
+            blocks_dict = {block['block_id']: block for block in section_entry['blocks']}
+
+            if block_id not in blocks_dict:
+                block_entry = {
+                    "block_id": block_id,
+                    "block_name": block_name
+                }
+                blocks_dict[block_id] = block_entry
+                section_entry['blocks'].append(block_entry)
+
+
+        return result if result else "No content found."
 
     except Exception as e:
         print("An error occurred:", e)

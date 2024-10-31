@@ -1195,10 +1195,10 @@ async def book_different_status_instructors():
 class TextbookRequest(BaseModel):
     tb_id: int
 
-@router.post("/display_textbook")
-async def display_textbook_endpoint(textbook_request: TextbookRequest, connection):
+@router.get("/display_textbook")
+async def display_textbook_endpoint(tb_id: int):
     """Endpoint to display the textbook hierarchy."""
-    hierarchy = await fetch_textbook_hierarchy(connection, textbook_request.tb_id)
+    hierarchy = await fetch_textbook_hierarchy(tb_id)
 
     if (hierarchy == "Error retrieving textbook hierarchy."):
         raise HTTPException(status_code=500, detail = "Error retrieving textbook hierarchy")
