@@ -1,5 +1,6 @@
 import traceback
 import logging
+from typing import List
 from app.database import database
 from datetime import datetime
 from pydantic import BaseModel
@@ -1612,7 +1613,7 @@ async def process_enrollment(first_name: str, last_name: str, email: str, course
         return {"status": "error", "detail": str(e)}
     
     
-async def fetch_student_activity_summary(student_id: str, course_id: str):
+async def fetch_student_activity_summary(student_id: str, course_ids: List[str]):
     """Retrieve total points and total activities attempted for a student in a course."""
     try:
         # SQL query to get activity summary
@@ -1629,22 +1630,29 @@ async def fetch_student_activity_summary(student_id: str, course_id: str):
             student_id, 
             course_id;
         """
+        results = []
+        for course_id in course_ids:
+            print(course_id)
+            values = {"student_id": student_id, "course_id": course_id}
 
-        # Execute query with provided student_id and course_id
-        result = await database.fetch_one(query=activity_summary_query, values={"student_id": student_id, "course_id": course_id})
+            # Execute query with provided student_id and course_id
+            result = await database.fetch_one(query=activity_summary_query, values=values)
 
         # If result exists, return it as a dictionary
-        if result:
-            return {
-                "course_id": result["course_id"],
-                "total_points": result["total_points"],
-                "total_activities_attempted": result["total_activities_attempted"]
-            }
-        else:
+            if result:
+                results.append( {
+                    "course_id": result["course_id"],
+                    "total_points": result["total_points"],
+                    "total_activities_attempted": result["total_activities_attempted"]
+                })
+        if len(results) == 0:
             return "no_records"  # No records found
+        
+        return results
 
     except Exception as e:
         print(f"Error retrieving activity summary: {e}")
+        traceback.print_exc()
         return "error"  
 
 
@@ -1923,7 +1931,6 @@ async def fetch_textbook_hierarchy(tb_id: int):
             sec_id = row['section']
             sec_name = row['section_name']
             block_id = row['block']
-            block_name = ""  # Assuming block_name is not provided
             block_type = row['block_type']
 
             # Check if the textbook is already added
@@ -1972,7 +1979,6 @@ async def fetch_textbook_hierarchy(tb_id: int):
             if block_id not in blocks_dict:
                 block_entry = {
                     "block_id": block_id,
-                    "block_name": block_name,
                     "block_type": block_type
                 }
                 blocks_dict[block_id] = block_entry

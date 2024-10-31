@@ -904,17 +904,17 @@ async def enroll_student_in_course(request: EnrollStudentInCourseRequest):
 # Student : view activity participation summary
 class StudentCourseInput(BaseModel):
     student_id: str
-    course_id: str
+    course_ids: List[str]
 
 @router.post("/student/activity_summary")
 async def get_student_activity_summary(input_data: StudentCourseInput):
     """Retrieve student activity summary"""
     # Destructure input data
     student_id = input_data.student_id
-    course_id = input_data.course_id
+    course_ids = input_data.course_ids
     
     # Call the utility function to fetch activity summary
-    result = await fetch_student_activity_summary(student_id, course_id)
+    result = await fetch_student_activity_summary(student_id, course_ids)
     
     # Handle responses based on the result from the utility function
     if result == "no_records":
