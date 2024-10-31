@@ -2,6 +2,7 @@ import traceback
 import logging
 from app.database import database
 from datetime import datetime
+from pydantic import BaseModel
  
 async def get_user(user_id: str, password: str, role: str):
     query = """

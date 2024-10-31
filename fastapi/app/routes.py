@@ -995,10 +995,10 @@ class GetStudentCoursesRequest(BaseModel):
     student_id: str
 
 @router.get('/api/v1/student-courses')
-async def _get_student_courses(request: GetStudentCoursesRequest):
+async def _get_student_courses(student_id: str):
     """Fetch a list of course IDs and associated textbook IDs for a given student."""
     
-    result = await get_student_courses_and_textbooks(request.student_id)
+    result = await get_student_courses_and_textbooks(student_id)
 
     if not result:
         raise HTTPException(status_code=404, detail="No courses found for the specified student.")
