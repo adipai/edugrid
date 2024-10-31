@@ -11,13 +11,13 @@ type ActivityDetails = {
   question_id: string;
   question_text: string;
   option_1: string;
-  opt_1_explaination: string;
+  opt_1_explanation: string;
   option_2: string;
-  opt_2_explaination: string;
+  opt_2_explanation: string;
   option_3: string;
-  opt_3_explaination: string;
+  opt_3_explanation: string;
   option_4: string;
-  opt_4_explaination: string;
+  opt_4_explanation: string;
   answer: number;
 };
 
@@ -104,7 +104,6 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
   }, [tb_id, chap_id, sec_id, block.block_id]);
 
   const handleOptionChange = (questionId: string, selectedOption: number) => {
-    // Update selected answers without disabling the question
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
   };
 
@@ -118,6 +117,38 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
           ? "correct"
           : "incorrect"
         : "unanswered";
+
+      // Determine the explanation text
+      let explanation = "";
+      if (selectedOption) {
+        debugger;
+        if (isCorrect) {
+          // Correct answer selected, show the correct option's explanation
+          const kk = `opt_${selectedOption}_explanation`;
+          // @ts-ignore
+          const option: any = question[kk];
+          explanation = `${option || "Test"}`;
+        } else {
+          // Incorrect answer selected, show selected option's explanation and correct answer
+          explanation = `${
+            // @ts-ignore
+            question[`opt_${selectedOption}_explanation`] || ""
+          }.`;
+        }
+      } else {
+        // No answer selected, show the correct option's explanation
+        explanation = `No option selected. The correct answer is Option ${
+          question.answer
+          // @ts-ignore
+        }: ${question[`opt_${question.answer}_explanation`] || ""}`;
+      }
+
+      // Update explanations and status
+      setExplanations((prev) => ({
+        ...prev,
+        [question.question_id]: explanation,
+      }));
+      setStatus((prev) => ({ ...prev, [question.question_id]: feedback }));
 
       // Call the API
       try {
@@ -136,22 +167,11 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
           }
         );
 
-        if (response.status === 200) {
-          // Set explanation text based on the selected option
-          if (selectedOption) {
-            // @ts-ignore
-            const explanation = question[`opt_${selectedOption}_explaination` as keyof ActivityDetails] || "";
-            // @ts-ignore
-            setExplanations((prev) => ({
-              ...prev,
-              [question.question_id]: explanation,
-            }));
-          }
-          setStatus((prev) => ({ ...prev, [question.question_id]: feedback }));
+        if (response.status !== 200) {
+          window.alert("An error occurred while submitting your answers.");
         }
       } catch (error) {
         console.error("Error submitting answer:", error);
-        window.alert("An error occurred while submitting your answers.");
       }
     }
   };
@@ -223,6 +243,7 @@ const ActivityBlock = ({ block }: { block: BlockDetails }) => {
                   <div
                     style={{
                       marginTop: "5px",
+                      textTransform: 'capitalize',
                       color:
                         status[act.question_id] === "correct"
                           ? "green"
