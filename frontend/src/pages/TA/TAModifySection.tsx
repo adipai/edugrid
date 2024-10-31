@@ -117,18 +117,32 @@ const TAModifySection: React.FC = () => {
       )}
       {secDetails && (
         <>
+        <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=hide_section`}
+            >
+              1. Hide Section
+            </Link>
+        </div>
+        <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=delete_section`}
+            >
+              2. Delete Section
+            </Link>
+        </div>
           <div>
             <Link
               to={`/ta/create-new-block?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
             >
-              1. Add New Content Block
+              3. Add New Content Block
             </Link>
           </div>
           <div>
             <Link
               to={`/ta/modify-content?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}`}
             >
-              2. Modify Content Block
+              4. Modify Content Block
             </Link>
           </div>
         </>

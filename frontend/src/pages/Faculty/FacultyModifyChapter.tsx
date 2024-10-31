@@ -90,26 +90,40 @@ const FacultyModifyChapter: React.FC = () => {
         <>
           <h3>Chapter: {chapDetails?.title}</h3>
           <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=hide_chapter`}
+            >
+              1. Hide Chapter
+            </Link>
+        </div>
+        <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=delete_chapter`}
+            >
+              2. Delete Chapter
+            </Link>
+        </div>
+          <div>
             <Link
               to={`/faculty/create-new-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
             >
-              1. Add new section
+              3. Add new section
             </Link>
           </div>
           <div>
             <Link
               to={`/faculty/modify-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
             >
-              2. Modify section
+              4. Modify section
             </Link>
           </div>
         </>
       )}
       <div>
-        <div onClick={() => navigate(-1)}>3. Go back</div>
+        <div onClick={() => navigate(-1)}>5. Go back</div>
       </div>
       <div>
-        <Link to="/faculty/landing">4.Landing page</Link>
+        <Link to="/faculty/landing">6.Landing page</Link>
       </div>
     </div>
   );

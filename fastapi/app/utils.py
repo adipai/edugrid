@@ -1096,6 +1096,56 @@ async def delete_chapter_async(connection, tb_id, chap_id, user_modifying):
         print(traceback.format_exc())
         return "An error occurred while deleting the chapter."
 
+async def delete_chapter(tb_id: int, chap_id: str, user_modifying: str) -> str:
+    """Delete chapter asynchronously."""
+    try:
+        # Check if the chapter exists and get the creator's user ID
+        chapter_query = """
+        SELECT COUNT(*) AS count, created_by
+        FROM chapter
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id
+        """
+        chapter_result = await database.fetch_one(query=chapter_query, values={"tb_id": tb_id, "chap_id": chap_id})
+        
+        if chapter_result["count"] == 0:
+            return "Chapter doesn't exist, so can't delete"
+        
+        created_by = chapter_result["created_by"]
+        
+        # Get roles of modifying user and chapter creator
+        user_role_query = """
+        SELECT role
+        FROM user
+        WHERE user_id = :user_id
+        """
+        
+        modifying_user_role = await database.fetch_one(query=user_role_query, values={"user_id": user_modifying})
+        if modifying_user_role is None:
+            return "Modifying user does not exist"
+
+        creator_user_role = await database.fetch_one(query=user_role_query, values={"user_id": created_by})
+        if creator_user_role is None:
+            return "Creator user doesn't exist"
+        
+        # Role-based permission checks
+        if creator_user_role["role"] == "admin" and modifying_user_role["role"] != "admin":
+            return "Don't have permission to delete"
+        elif creator_user_role["role"] == "faculty" and modifying_user_role["role"] == "teaching assistant":
+            return "Don't have permission to delete"
+        
+        # Perform delete operation
+        delete_query = """
+        DELETE FROM chapter
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id
+        """
+        await database.execute(query=delete_query, values={"tb_id": tb_id, "chap_id": chap_id})
+        
+        return "Chapter deleted successfully"
+    
+    except Exception as e:
+        print(f"Error deleting chapter: {e}")
+        return "An error occurred while deleting the chapter."
+
 async def delete_section_async(connection, tb_id, chap_id, sec_id, user_modifying):
     """ Deleting section asynchronously. """
     try:
@@ -1125,6 +1175,56 @@ async def delete_section_async(connection, tb_id, chap_id, sec_id, user_modifyin
         print(f"Error deleting section: {e}")
         await connection.rollback()
         print(traceback.format_exc())
+        return "An error occurred while deleting the section."
+
+async def delete_section(tb_id: int, chap_id: str, sec_id: str, user_modifying: str) -> str:
+    """Delete chapter asynchronously."""
+    try:
+        # Check if the chapter exists and get the creator's user ID
+        section_query = """
+        SELECT COUNT(*) AS count, created_by
+        FROM section
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
+        """
+        section_result = await database.fetch_one(query=section_query, values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id})
+        
+        if section_result["count"] == 0:
+            return "Section doesn't exist, so can't delete"
+        
+        created_by = section_result["created_by"]
+        
+        # Get roles of modifying user and chapter creator
+        user_role_query = """
+        SELECT role
+        FROM user
+        WHERE user_id = :user_id
+        """
+        
+        modifying_user_role = await database.fetch_one(query=user_role_query, values={"user_id": user_modifying})
+        if modifying_user_role is None:
+            return "Modifying user does not exist"
+
+        creator_user_role = await database.fetch_one(query=user_role_query, values={"user_id": created_by})
+        if creator_user_role is None:
+            return "Creator user doesn't exist"
+        
+        # Role-based permission checks
+        if creator_user_role["role"] == "admin" and modifying_user_role["role"] != "admin":
+            return "Don't have permission to delete"
+        elif creator_user_role["role"] == "faculty" and modifying_user_role["role"] == "teaching assistant":
+            return "Don't have permission to delete"
+        
+        # Perform delete operation
+        delete_query = """
+        DELETE FROM section
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id
+        """
+        await database.execute(query=delete_query, values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id})
+        
+        return "Section deleted successfully"
+    
+    except Exception as e:
+        print(f"Error deleting section: {e}")
         return "An error occurred while deleting the section."
 
 async def delete_block_async(connection, tb_id, chap_id, sec_id, block_id, user_modifying):
@@ -1158,6 +1258,55 @@ async def delete_block_async(connection, tb_id, chap_id, sec_id, block_id, user_
         print(traceback.format_exc())
         return "An error occurred while deleting the block."
 
+async def delete_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, user_modifying: str) -> str:
+    """Delete chapter asynchronously."""
+    try:
+        # Check if the chapter exists and get the creator's user ID
+        block_query = """
+        SELECT COUNT(*) AS count, created_by
+        FROM block
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+        """
+        block_result = await database.fetch_one(query=block_query, values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id})
+        
+        if block_result["count"] == 0:
+            return "Block doesn't exist, so can't delete"
+        
+        created_by = block_result["created_by"]
+        
+        # Get roles of modifying user and chapter creator
+        user_role_query = """
+        SELECT role
+        FROM user
+        WHERE user_id = :user_id
+        """
+        
+        modifying_user_role = await database.fetch_one(query=user_role_query, values={"user_id": user_modifying})
+        if modifying_user_role is None:
+            return "Modifying user does not exist"
+
+        creator_user_role = await database.fetch_one(query=user_role_query, values={"user_id": created_by})
+        if creator_user_role is None:
+            return "Creator user doesn't exist"
+        
+        # Role-based permission checks
+        if creator_user_role["role"] == "admin" and modifying_user_role["role"] != "admin":
+            return "don't have permission to delete"
+        elif creator_user_role["role"] == "faculty" and modifying_user_role["role"] == "teaching assistant":
+            return "don't have permission to delete"
+        
+        # Perform delete operation
+        delete_query = """
+        DELETE FROM block
+        WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
+        """
+        await database.execute(query=delete_query, values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id})
+        
+        return "Block deleted successfully"
+    
+    except Exception as e:
+        print(f"Error deleting block: {e}")
+        return "An error occurred while deleting the block."
 
 async def fetch_pending_enrollments(unique_course_id: str):
     
@@ -1687,9 +1836,9 @@ async def insert_participation_record(entry):
         print(f"Error inserting participation record: {e}")
         return False
     
-class NotificationResponse(BaseModel):
-    notification_message: str
-    timestamp: datetime
+# class NotificationResponse(BaseModel):
+#     notification_message: str
+#     timestamp: datetime
 
 # Utility function to fetch notifications
 async def fetch_notifications(user_id: str):

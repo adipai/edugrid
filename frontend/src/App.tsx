@@ -75,6 +75,7 @@ import QueryLongestWaitingList from "./pages/AdditionalQueries/QueryLongestWaiti
 import QueryAct0Q2IncorrectAnswers from "./pages/AdditionalQueries/QueryAct0Q2IncorrectAnswers";
 import QueryChap2Contents from "./pages/AdditionalQueries/QueryChap2Contents";
 import QueryBookStatus from "./pages/AdditionalQueries/QueryBookStatus";
+import SaveCancelPage from "./pages/SaveCancelPage";
 
 function App() {
   return (
@@ -169,6 +170,7 @@ function App() {
         <Route path="/queries/book-status" element={<QueryBookStatus/>} />
         
         <Route path="/change-password-page" element={<ChangePasswordPage />} />
+        <Route path="/save-cancel" element={<SaveCancelPage />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>

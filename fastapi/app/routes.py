@@ -690,7 +690,7 @@ class DeleteChapterRequest(BaseModel):
 
 @router.post("/delete_chapter")
 async def delete_chapter_request(delete_chapter_request: DeleteChapterRequest):
-    result = await delete_chapter_async(
+    result = await delete_chapter(
         delete_chapter_request.tb_id,
         delete_chapter_request.chap_id,
         delete_chapter_request.user_modifying
@@ -712,7 +712,7 @@ class DeleteSectionRequest(BaseModel):
 
 @router.post("/delete_section")
 async def delete_section_request(delete_section_request: DeleteSectionRequest):
-    result = await delete_section_async(
+    result = await delete_section(
         delete_section_request.tb_id,
         delete_section_request.chap_id,
         delete_section_request.sec_id,
@@ -737,14 +737,14 @@ class DeleteBlockRequest(BaseModel):
 
 @router.post("/delete_block")
 async def delete_block_request(delete_block_request: DeleteBlockRequest):
-    result = await delete_block_async(
+    result = await delete_block(
         delete_block_request.tb_id,
         delete_block_request.chap_id,
         delete_block_request.sec_id,
         delete_block_request.block_id,
         delete_block_request.user_modifying
     )
-    
+    print(result)
     if "don't have permission" in result or "doesn't exist" in result:
         raise HTTPException(status_code=400, detail=result)
     elif "error" in result.lower():

@@ -153,6 +153,20 @@ const FacultyModifyContentBlock = () => {
       )}
       {!!blockDetails && (
         <>
+        <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&endpoint=hide_block`}
+            >
+              1. Hide Content Block
+            </Link>
+        </div>
+        <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&endpoint=delete_block`}
+            >
+              2. Delete Content Block
+            </Link>
+        </div>
           <button onClick={() => handleAddContent('text')}>Add Text</button>
           <button onClick={() => handleAddContent('picture')}>Add Picture</button>
           <button onClick={() => handleAddContent('activity')}>Add Activity</button>

@@ -90,17 +90,31 @@ const TAModifyChapter: React.FC = () => {
         <>
           <h3>Chapter: {chapDetails?.title}</h3>
           <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=hide_chapter`}
+            >
+              1. Hide Chapter
+            </Link>
+        </div>
+        <div>
+        <Link
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=delete_chapter`}
+            >
+              2. Delete Chapter
+            </Link>
+        </div>
+          <div>
             <Link
               to={`/ta/create-new-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
             >
-              1. Add new section
+              3. Add new section
             </Link>
           </div>
           <div>
             <Link
               to={`/ta/modify-section?tb_id=${tb_id}&chap_id=${chapDetails?.chapter_id}`}
             >
-              2. Modify section
+              4. Modify section
             </Link>
           </div>
         </>
