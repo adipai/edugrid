@@ -2,6 +2,7 @@ import traceback
 import logging
 from app.database import database
 from datetime import datetime
+from pydantic import BaseModel
  
 async def get_user(user_id: str, password: str, role: str):
     query = """
@@ -1654,7 +1655,11 @@ async def get_student_courses_and_textbooks(student_id: str):
 async def insert_participation_record(entry):
     """Insert a participation record into the database."""
     
-    point = 3 if entry.correct else 1
+    point = 0
+    if entry.correct == 'correct':
+        point = 3
+    elif entry.correct == 'incorrect':
+        point = 1
 
     query = """
     INSERT INTO participation (
