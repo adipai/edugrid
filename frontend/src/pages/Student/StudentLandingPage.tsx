@@ -62,9 +62,9 @@ const CourseHierarchyView = (props: any) => {
     courseHierarchy.forEach((textbook) => {
       textbook.chapters.forEach((chapter, j) => {
         chapter.sections.forEach((section, k) => {
-          section.blocks.forEach((block) => {
+          section.blocks.forEach((block, l) => {
             courseHierarchyMap[
-              `${course_id}-${j + 1}-${k + 1}-${block.block_id}`
+              `${course_id}-${j + 1}-${k + 1}-${l + 1}`
             ] = `${course_id}-${textbook.tb_id}-${chapter.chapter_id}-${section.section_id}-${block.block_id}-${block.block_type}`;
           });
         });
@@ -112,7 +112,7 @@ const CourseHierarchyView = (props: any) => {
                         <Link
                           className="zero-spaces"
                           style={{ padding: "2px" }}
-                          to={`/student/view-block?course_id=${course_id}&chap_num=${i+1}&sec_num=${j+1}&block_id=${block.block_id}`}
+                          to={`/student/view-block?course_id=${course_id}&chap_num=${i+1}&sec_num=${j+1}&block_num=${k+1}`}
                         >
                           {block.block_id}
                         </Link>

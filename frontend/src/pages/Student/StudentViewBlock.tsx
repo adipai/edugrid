@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import {TextPicBlock ,ActivityBlock } from "./StudentViewSection";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { TextPicBlock, ActivityBlock } from "./StudentViewSection";
 
 const StudentViewBlock = () => {
   const navigate = useNavigate();
@@ -10,12 +10,12 @@ const StudentViewBlock = () => {
   const course_id = queryParams.get("course_id");
   const chap_num = queryParams.get("chap_num");
   const sec_num = queryParams.get("sec_num");
-  const block_id = queryParams.get("block_id");
+  const block_num: number | null = parseInt(queryParams.get("block_num") as string) || null;
 
   const [courseId, setCourseId] = useState("");
   const [chapterNumber, setChapterNumber] = useState("");
   const [secNumber, setSectionNumber] = useState("");
-  const [blockId, setBlockId] = useState("");
+  const [blockNum, setBlockNum] = useState("");
 
   const [courseData, setCourseData] = useState<any>(null);
   const [blockData, setBlockData] = useState<any>(null);
@@ -29,11 +29,20 @@ const StudentViewBlock = () => {
   }, [course_id, chap_num, sec_num]);
 
   useEffect(() => {
-    if (!courseData) {
-        return;
+    if (!courseData || !block_num) {
+      return;
     }
-    setBlockData(courseData[`${course_id}-${chap_num}-${sec_num}-${block_id}`].split('-'));
-  }, [courseData]);
+    console.log(courseData)
+    if (`${course_id}-${chap_num}-${sec_num}-${block_num}` in courseData) {
+    setBlockData(
+      courseData[`${course_id}-${chap_num}-${sec_num}-${block_num}`]?.split("-")
+    );
+  }
+  else{
+    console.error("Should navigate");
+    navigate('/student/landing')
+  }
+  }, [courseData, block_num]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,9 +50,9 @@ const StudentViewBlock = () => {
     setCourseId("");
     setChapterNumber("");
     setSectionNumber("");
-    setBlockId("");
+    setBlockNum("");
     navigate(
-      `/student/view-block?course_id=${courseId}&chap_num=${chapterNumber}&sec_num=${secNumber}&block_id=${blockId}`
+      `/student/view-block?course_id=${courseId}&chap_num=${chapterNumber}&sec_num=${secNumber}&block_num=${blockNum}`
     );
   };
 
@@ -87,16 +96,38 @@ const StudentViewBlock = () => {
             <input
               type="text"
               id="section_num"
-              value={blockId}
-              onChange={(e) => setBlockId(e.target.value)}
+              value={blockNum}
+              onChange={(e) => setBlockNum(e.target.value)}
               required
             />
           </div>
           <button type="submit">Submit</button>
         </form>
       )}
-      {blockData && blockData[5] === 'text' && <TextPicBlock block={{ block_id: blockData[4], block_type: blockData[5] }} tb_id={blockData[1]} chap_id={blockData[2]} sec_id={blockData[3]} />}
-      {blockData && blockData[5] === 'activity' && <ActivityBlock block={{ block_id: blockData[4], block_type: blockData[5] }} tb_id={blockData[1]} chap_id={blockData[2]} sec_id={blockData[3]} course_id={course_id || ""}/>}
+      {blockData && blockData[5] === "text" && (
+        <TextPicBlock
+          block={{ block_id: blockData[4], block_type: blockData[5] }}
+          tb_id={blockData[1]}
+          chap_id={blockData[2]}
+          sec_id={blockData[3]}
+        />
+      )}
+      {blockData && blockData[5] === "activity" && (
+        <ActivityBlock
+          block={{ block_id: blockData[4], block_type: blockData[5] }}
+          tb_id={blockData[1]}
+          chap_id={blockData[2]}
+          sec_id={blockData[3]}
+          course_id={course_id || ""}
+        />
+      )}
+
+      <div>
+        <Link to={`/student/view-block?course_id=${course_id}&chap_num=${chap_num}&sec_num=${sec_num}&block_num=${(block_num || 0)+ 1}`}>Next</Link>
+      </div>
+      <div>
+        <div style={{"margin":"4px"}} onClick={() => navigate(-1)}>Go Back</div>
+      </div>
     </div>
   );
 };
