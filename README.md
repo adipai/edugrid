@@ -1,4 +1,4 @@
-# Edugrid - the learning management system
+# Edugrid
 
 This is a comprehensive educational platform designed to enhance the management and participation in academic courses. It supports various roles, including Admin, Faculty, Student, and Teaching Assistant, each with tailored functionalities (built from scratch and maintained as a part of the CSC 540 - DBMS course at NC State University). 
 
