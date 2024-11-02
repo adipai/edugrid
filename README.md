@@ -39,7 +39,7 @@ This is a comprehensive educational platform designed to enhance the management 
 
 
 ## Future Enhancements 
-- (Currently on-prem, running on NCSU cluster): migrate to cloud for auto-scale and high availability
+- (Currently on-prem, running on NCSU servers): migrate to cloud for auto-scale and high availability
 - Enhanced UI
 - Security layer integration
 
