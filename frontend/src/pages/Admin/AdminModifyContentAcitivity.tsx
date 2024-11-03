@@ -66,7 +66,7 @@ const AdminModifyContentActivity: React.FC = () => {
         );
         setBlockDetails(response.data.block);
       } catch (error) {
-        console.error("Error fetching section details:", error);
+        console.error("Error fetching block details:", error);
       }
     };
     
