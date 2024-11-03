@@ -1,7 +1,3 @@
-
-ALTER TABLE course DROP CONSTRAINT course_ibfk_1;
-ALTER TABLE course DROP COLUMN ta_id;
-
 CREATE TABLE IF NOT EXISTS enrollment (
     unique_course_id VARCHAR(30),
     student_id VARCHAR(8),
