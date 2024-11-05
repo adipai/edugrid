@@ -34,8 +34,8 @@ useEffect(() => {
       'Content-Type': 'application/json',
     }, withCredentials: false});
     const permissions = permission.data
-    console.log(permissions.message.message)
-    if (permissions.message.message === 'Modification allowed'){
+    console.log(permissions.message)
+    if (permissions.message === 'Modification allowed'){
       const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${course_id}`);
       const data = await response.json();
       if (data?.course) {

@@ -1377,14 +1377,14 @@ async def check_course_details(input_course_id: str, current_date: str, user_mod
 
             # Step 3: Validate course association and modification permission
             if input_course_id != original_course_id:
-                return {"message": "You are not associated with this course"}
+                return "You are not associated with this course"
 
             # Convert current_date to date object and check against end_date
             current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
             if current_date_obj <= end_date:
-                return {"message": "Modification allowed"}
+                return "Modification allowed"
             else:
-                return {"message": "Beyond the end date - can't change the course!"}
+                return "Beyond the end date - can't change the course!"
 
         except Exception as e:
             print("An error occurred:", e)

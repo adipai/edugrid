@@ -37,8 +37,10 @@ const AdminCreateEvaluationCourse = () => {
           } catch (error: any) {
             if (error.response) {
               console.error('Login failed:', error.response.data.message);
+              window.alert(error.response.data.message);
             } else {
               console.error('An error occurred:', error.message);
+              window.alert(error.message);
             }
           }
     };
