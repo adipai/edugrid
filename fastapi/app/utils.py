@@ -265,6 +265,9 @@ async def add_student(first_name, last_name, email, password, current_date, user
 async def create_course(course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity):
     # Query to check if course exists
     check_query = """SELECT * FROM course WHERE course_id = :course_id"""
+
+    # Query to check if faculty exists
+    check_faculty_query = """SELECT * FROM user WHERE user_id = :faculty_id AND role = 'faculty'"""
     
     # Query to insert course
     insert_query = """
@@ -279,6 +282,11 @@ async def create_course(course_id, course_name, textbook_id, course_type, facult
         existing_course = await database.fetch_one(query=check_query, values={"course_id": course_id})
         if existing_course:
             return "course_exists"
+        
+        # Check if the specified faculty exists
+        existing_faculty = await database.fetch_one(query=check_faculty_query, values={"faculty_id": faculty_id})
+        if not existing_faculty:
+            return "faculty_not_found"
         
         # Insert textbook
         await database.execute(query=insert_query, values={"course_id": course_id, "course_name": course_name, "textbook_id": textbook_id, "course_type": course_type, "faculty_id": faculty_id, "start_date": start_date, "end_date": end_date, "unique_token": unique_token, "capacity": capacity})

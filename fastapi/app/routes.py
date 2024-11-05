@@ -195,6 +195,8 @@ async def create_course_request(create_course_request: CreateCourseRequest):
     
     if result == 'course_exists':
         return {'error': 'Course already exists'}, 400
+    elif result == 'faculty_not_found':
+        return {'error': 'Facult not found'}, 400
     elif result == 'error':
         return {'error': 'Error creating course'}, 500
     return {'message': 'Course created successfully'}
