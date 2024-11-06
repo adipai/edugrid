@@ -422,8 +422,28 @@ async def get_worklist(course_id):
         FROM enrollment
         WHERE unique_course_id = :course_id AND status = "pending"
     """
+    check_capacity_query = """
+    SELECT c.capacity, COUNT(e.student_id) AS enrolled_count
+    FROM course AS c
+    LEFT JOIN enrollment AS e ON c.course_id = e.unique_course_id AND e.status = 'Enrolled'
+    WHERE c.course_id = :course_id
+    GROUP BY c.capacity
+    HAVING enrolled_count < c.capacity;
+    """
+    
     values = {"course_id": course_id}
     try:
+        capacity_available = await database.fetch_one(
+                query=check_capacity_query,
+                values={"course_id": course_id}
+            )
+        
+        if not capacity_available:
+            drop_query = """
+                DELETE FROM enrollment WHERE unique_course_id = :course_id AND status = "pending"
+            """
+            await database.execute(query=drop_query, values={"course_id": course_id})
+        
         worklist = await database.fetch_all(query=query, values=values)
         if not worklist:
             print("no_students_found")
