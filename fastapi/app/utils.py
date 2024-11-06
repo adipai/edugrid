@@ -1373,6 +1373,9 @@ async def check_course_details(input_course_id: str, current_date: str, user_mod
                 """
                 course_data = await database.fetch_one(query=query_course, values={"ta_id": user_modifying, "course_id": input_course_id})
 
+            
+            if(course_data is None):
+                return "Course not found"
             original_course_id, end_date = course_data["course_id"], course_data["end_date"]
 
             # Step 3: Validate course association and modification permission

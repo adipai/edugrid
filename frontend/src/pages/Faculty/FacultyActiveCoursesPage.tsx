@@ -46,10 +46,11 @@ useEffect(() => {
       }
     }
   else{
-    window.alert(`You do not have permission to modify this course: ${permissions.message.message}`)
+    window.alert(`You do not have permission to modify this course: ${permissions.message}`)
+    throw new Error(`You do not have permission to modify this course: ${permissions.message}`);
   }} catch (error) {
       console.error("Error fetching course data:", error);
-      window.alert("Error fetching course data");
+      window.alert(error);
       navigate(-1)
     }
   };
