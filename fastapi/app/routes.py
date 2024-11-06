@@ -194,11 +194,11 @@ async def create_course_request(create_course_request: CreateCourseRequest):
     result = await create_course(course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity)
     
     if result == 'course_exists':
-        return {'error': 'Course already exists'}, 400
+        raise HTTPException(status_code=400, detail="Course already exists")
     elif result == 'faculty_not_found':
-        return {'error': 'Facult not found'}, 400
+        raise HTTPException(status_code=400, detail="Faculty not found")
     elif result == 'error':
-        return {'error': 'Error creating course'}, 500
+        raise HTTPException(status_code=500, detail="Error creating course")
     return {'message': 'Course created successfully'}
 
 class ViewCoursesRequest(BaseModel):
