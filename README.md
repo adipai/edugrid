@@ -36,6 +36,44 @@ This is a comprehensive educational platform designed to enhance the management 
 - **Resource Sharing**: Share and manage course materials.
 
 ## Installation and Setup
+### Backend Setup
+To run the backend, follow the instruction below
+1. Change directory to run the backend
+```sh
+cd fastapi
+```
+2. Install packages
+```sh
+pip install -r requirements.txt
+```
+3. Setup `.env` file. Add the appropriate uri for to locate the database.
+```
+DATABASE_URL=<DB_URI>
+```
+4. Run the backend
+```sh
+sh run.sh
+```
+On windows systems
+```sh
+fastapi dev main.py
+```
+Now the backend is running on port 8000
+
+### Frontend Setup
+To run the frontend, follow the instructions below
+1. Change directory to run frontend
+```sh
+cd frontend
+```
+2. Install packages
+```sh
+npm install
+```
+3. Run frontend
+```sh
+npm run dev
+```
 
 
 ## Future Enhancements 
