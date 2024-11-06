@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -10,48 +10,62 @@ const FacultyActiveCoursesPage: React.FC = () => {
   const [courseId, setCourseId] = useState("");
   const [courseDetails, setCourseDetails] = useState<any>(null);
   const navigate = useNavigate();
-  const userId = localStorage.getItem('user_id')
+  const userId = localStorage.getItem("user_id");
 
-useEffect(() => {
-  if (!course_id) {
-    setCourseDetails(null)
-    return;
-  }
-  fetchCourseDetails(course_id);
-}, [course_id]);
+  useEffect(() => {
+    if (!course_id) {
+      setCourseDetails(null);
+      return;
+    }
+    fetchCourseDetails(course_id);
+  }, [course_id]);
 
   const fetchCourseDetails = async (courseId: string) => {
     try {
-      const currentDate: string = new Date().toISOString().split('T')[0];
+      const currentDate: string = new Date().toISOString().split("T")[0];
       const body = {
         input_course_id: courseId,
         current_date: currentDate,
         user_modifying: userId,
       };
-    const permission = await axios.post('http://localhost:8000/check_course_details', 
-        body, 
-        {headers: {
-      'Content-Type': 'application/json',
-    }, withCredentials: false});
-    const permissions = permission.data
-    console.log(permissions.message)
-    if (permissions.message === 'Modification allowed'){
-      const response = await fetch(`http://localhost:8000/api/v1/active-course?course_id=${course_id}`);
-      const data = await response.json();
-      if (data?.course) {
-        setCourseDetails(data.course);
-      } else {
-        console.log("Course not found");
-        throw new Error("Course not found");
+      const permission = await axios.post(
+        "http://localhost:8000/check_course_details",
+        body,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: false,
+        }
+      );
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/v1/active-course?course_id=${course_id}`
+        );
+        const data = await response.json();
+        if (data?.course) {
+          setCourseDetails(data.course);
+        } else {
+          console.log("Course not found");
+          throw new Error("Course not found");
+        }
+      } catch (error) {
+        alert("Course not found");
       }
-    }
-  else{
-    window.alert(`You do not have permission to modify this course: ${permissions.message}`)
-    throw new Error(`You do not have permission to modify this course: ${permissions.message}`);
-  }} catch (error) {
+    } catch (error: any) {
+      if (error.response.status === 403) {
+        window.alert(
+          `You do not have permission to modify this course: ${error.response.data.detail}`
+        );
+      } else if (error.response.status === 500) {
+        console.error(JSON.stringify(error.response));
+        window.alert(
+          error.response.data.detail
+        );
+      }
       console.error("Error fetching course data:", error);
-      window.alert(error);
-      navigate(-1)
+      // window.alert("Error fetching course data");
+      navigate(-1);
     }
   };
 
@@ -77,9 +91,7 @@ useEffect(() => {
               required
             />
           </div>
-          <button type="submit">
-            Submit
-          </button>
+          <button type="submit">Submit</button>
         </form>
       )}
 
@@ -123,9 +135,7 @@ useEffect(() => {
               </Link>
             </li>
             <li>
-              <Link
-                to={`/faculty/add-ta?course_id=${courseDetails.course_id}`}
-              >
+              <Link to={`/faculty/add-ta?course_id=${courseDetails.course_id}`}>
                 6. Add TA
               </Link>
             </li>
@@ -133,8 +143,8 @@ useEffect(() => {
               <Link
                 to={`/faculty/active-courses`}
                 onClick={() => {
-                  setCourseDetails('');
-                  setCourseId('');
+                  setCourseDetails("");
+                  setCourseId("");
                 }}
               >
                 7. Go Back

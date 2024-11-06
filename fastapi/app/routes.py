@@ -285,7 +285,7 @@ async def _get_active_course(course_id: str):
     return {'course': result}
 
 @router.get('/api/v1/evaluation-course')
-async def _get_eval_course(course_id: int):
+async def _get_eval_course(course_id: str):
     
     result = await get_eval_course_details(course_id)
     
@@ -797,11 +797,10 @@ async def check_course_details_request(request: CourseDetailsRequest):
         request.current_date,
         request.user_modifying
     )
-
     if result == "You are not associated with this course":
         raise HTTPException(status_code=403, detail="You are not associated with this course")
     elif result == "Course not found":
-        raise HTTPException(status_code=403, detail="Course not found")
+        raise HTTPException(status_code=500, detail="Course not found")
     elif result == "Beyond the end date - can't change the course!":
         raise HTTPException(status_code=403, detail="Beyond the end date - can't change the course!")
     elif result == "Error":

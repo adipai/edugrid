@@ -708,9 +708,9 @@ async def create_activity(tb_id: int, chap_id: str, sec_id: str, block_id: str, 
         return 'error'
 
 
-async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str, created_by: str):
+async def add_content(tb_id: int, chap_id: str, sec_id: str, content: str, block_id: str, block_type: str, modifying_user: str):
     check_query = """
-        SELECT content, block_type FROM block 
+        SELECT content, block_type, created_by FROM block 
         WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
     """
     delete_activity_query = """
@@ -936,7 +936,7 @@ async def modify_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, use
     """Check if the block exists for modification and verify user permissions."""
     
     check_query = """
-        SELECT COUNT(*), created_by FROM block 
+        SELECT COUNT(*) AS count, created_by FROM block 
         WHERE textbook_id = :tb_id AND chapter_id = :chap_id AND section_id = :sec_id AND block_id = :block_id
     """
     role_query = "SELECT role FROM user WHERE user_id = :user_id"
@@ -948,11 +948,14 @@ async def modify_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, use
                 query=check_query,
                 values={"tb_id": tb_id, "chap_id": chap_id, "sec_id": sec_id, "block_id": block_id}
             )
-            count, created_by = result if result else (0, None)
+            count = 0
+            if result:
+                count = result['count']
+                created_by = result['created_by']
             
             if count == 0:
                 return "Block doesn't exist, so can't modify."
-
+            
             # Fetch the roles of both the user modifying and the block creator
             modifying_user_role = await database.fetch_val(query=role_query, values={"user_id": user_modifying})
             creator_user_role = await database.fetch_val(query=role_query, values={"user_id": created_by})
@@ -1299,6 +1302,8 @@ async def delete_block(tb_id: int, chap_id: str, sec_id: str, block_id: str, use
         if creator_user_role is None:
             return "Creator user doesn't exist"
         
+        print(modifying_user_role, creator_user_role)
+        
         # Role-based permission checks
         if creator_user_role["role"] == "admin" and modifying_user_role["role"] != "admin":
             return "don't have permission to delete"
@@ -1361,26 +1366,40 @@ async def check_course_details(input_course_id: str, current_date: str, user_mod
 
             # Step 2: Check course association and end date based on role
             if role == 'faculty':
-                query_course = "SELECT * FROM course WHERE faculty_id = :faculty_id AND course_id = :course_id"
-                course_data = await database.fetch_one(query=query_course, values={"faculty_id": user_modifying, "course_id": input_course_id})
+                query_course = "SELECT * FROM course WHERE course_id = :course_id"
+                course_data = await database.fetch_one(query=query_course, values={"course_id": input_course_id})
+                if(course_data is None):
+                    return "Course not found"
+                if course_data['faculty_id'] != user_modifying:
+                    return "You are not associated with this course"
                 
             elif role == 'teaching assistant':
                 query_course = """
                     SELECT *
                     FROM course c
                     JOIN teaching_assistant ta ON c.course_id = ta.course_id
-                    WHERE ta.ta_id = :ta_id AND ta.course_id = :course_id
+                    WHERE ta.course_id = :course_id
                 """
-                course_data = await database.fetch_one(query=query_course, values={"ta_id": user_modifying, "course_id": input_course_id})
+                course_data = await database.fetch_all(query=query_course, values={"course_id": input_course_id})
+                print(course_data)
+                
+                if(course_data is None or len(course_data) == 0):
+                    return "Course not found"
+                found = False
+                for course_ta_row in course_data:
+                    if course_ta_row['ta_id'] == user_modifying:
+                        course_data = course_ta_row
+                        found = True
+                        break
+                
+                if not found:
+                    return "You are not associated with this course"
 
-            
-            if(course_data is None):
-                return "Course not found"
-            original_course_id, end_date = course_data["course_id"], course_data["end_date"]
+            end_date = course_data["end_date"]
 
             # Step 3: Validate course association and modification permission
-            if input_course_id != original_course_id:
-                return "You are not associated with this course"
+            # if input_course_id != original_course_id:
+            #     return "You are not associated with this course"
 
             # Convert current_date to date object and check against end_date
             current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
