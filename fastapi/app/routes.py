@@ -1042,6 +1042,23 @@ async def view_notifications_request(view_notifications_request: ViewNotificatio
         return {"status": "success", "notifications": notifications}
     else:
         raise HTTPException(status_code=404, detail="No notifications found for this user.")
+    
+
+class UserNotificationRequest(BaseModel):
+    user_id: str
+
+class NotificationResponse(BaseModel):
+    notification_message: str
+
+@router.post("/get_notifications", response_model=List[NotificationResponse], status_code=200)
+async def get_notifications(user_request: UserNotificationRequest):
+    notifications = await fetch_user_notifications(user_request.user_id)
+    
+    if notifications:
+        return notifications
+    else:
+        raise HTTPException(status_code=404, detail="No notifications found for the user")
+
 
 
 """

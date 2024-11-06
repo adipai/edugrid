@@ -2041,3 +2041,18 @@ async def fetch_textbook_hierarchy(tb_id: int):
         print("An error occurred:", e)
         print(traceback.format_exc())
         return "Error retrieving textbook hierarchy."
+
+async def fetch_user_notifications(user_id: str):
+    # Query to fetch notifications
+    notifications_query = """
+    SELECT notification_message, timestamp 
+    FROM notification 
+    WHERE user_id = :user_id
+    ORDER BY timestamp DESC
+    """
+    
+    # Execute query to fetch notifications
+    notifications = await database.fetch_all(query=notifications_query, values={"user_id": user_id})
+
+    # Format the result as a list of dictionaries
+    return [{"notification_message": notification["notification_message"], "timestamp": notification["timestamp"]} for notification in notifications]
