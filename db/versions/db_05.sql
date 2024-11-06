@@ -3,6 +3,8 @@
 ALTER TABLE notification
 ADD COLUMN timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
+-- Change course_id size to match cpourse table
+ALTER TABLE teaching_assistant MODIFY COLUMN course_id VARCHAR(30);
 
 -- Trigger for UPDATE operation on enrollment table : when faculty enrolls a student from waitlist
 DELIMITER //

@@ -16,8 +16,6 @@ DELETE FROM notification;
 DELETE FROM user;
 
 
--- ALTER TABLE teaching_assistant MODIFY COLUMN course_id VARCHAR(30);
-
 -- Start populating tables in order (parent tables first)
 
 -- Insert users (includes all types of users)
