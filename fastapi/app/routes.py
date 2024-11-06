@@ -1041,6 +1041,17 @@ async def view_notifications_request(view_notifications_request: ViewNotificatio
         return {"status": "success", "notifications": notifications}
     else:
         raise HTTPException(status_code=404, detail="No notifications found for this user.")
+    
+@router.post("/delete_notifications", status_code=200)
+async def delete_notifications_request(delete_notifications_request: ViewNotificationsRequest):
+    user_id = delete_notifications_request.user_id
+
+    try:
+        await delete_notifications(user_id)
+        return {"status": "success", "message": f"All notifications deleted for user ID '{user_id}'."}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete notifications: {e}")
 
 
 """
@@ -1205,3 +1216,14 @@ async def display_textbook_endpoint(tb_id: int):
     if (hierarchy == "Error retrieving textbook hierarchy."):
         raise HTTPException(status_code=500, detail = "Error retrieving textbook hierarchy")
     return hierarchy
+
+# class NotificationRequest(BaseModel):
+#     student_id: str
+
+# @router.post('/view_notifications')
+# async def _view_notifications(view_notification_request: NotificationRequest):
+#     student_id = view_notification_request.student_id
+#     result = await get_notifications(student_id)
+#     if not result:
+#         raise HTTPException(status_code=404, detail="No unread notifications")
+#     return {'notifications': result}

@@ -171,7 +171,12 @@ const StudentLandingPage = () => {
           </Link>
         </li>
         <li>
-          <Link to="/">3. Logout</Link>
+          <Link to="/student/view-notifications">
+          3. View Notifications
+          </Link>
+        </li>
+        <li>
+          <Link to="/">4. Logout</Link>
         </li>
       </ul>
     </div>

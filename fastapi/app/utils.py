@@ -1895,6 +1895,27 @@ async def fetch_notifications(user_id: str):
         await transaction.rollback()
         print(f"Error retrieving notifications for user ID '{user_id}': {e}")
         return []
+    
+async def delete_notifications(user_id: str):
+    query = """
+        DELETE FROM notification
+        WHERE user_id = :user_id
+    """
+    values = {"user_id": user_id}
+
+    # Start a transaction
+    transaction = await database.transaction()
+
+    try:
+        # Execute delete query
+        await database.execute(query=query, values=values)
+        await transaction.commit()
+        print(f"All notifications deleted for user ID '{user_id}'.")
+
+    except Exception as e:
+        # Rollback transaction in case of error
+        await transaction.rollback()
+        print(f"Error deleting notifications for user ID '{user_id}': {e}")
 
 
 async def fetch_textbook_hierarchy(tb_id: int):
@@ -1999,3 +2020,25 @@ async def fetch_textbook_hierarchy(tb_id: int):
         print("An error occurred:", e)
         print(traceback.format_exc())
         return "Error retrieving textbook hierarchy."
+
+# async def get_notifications(student_id):
+#     query = """
+#         SELECT * 
+#         FROM notification
+#         WHERE user_id = :student_id
+#     """
+#     values = {"student_id": student_id}
+#     try:
+#         notifs = await database.fetch_all(query=query, values=values)
+#         if not notifs:
+#             print("no_notifications_found")
+#             return []
+            
+#         notification_list = [dict(notification) for notification in notifs]
+#         print(f"Retrieved {len(notification_list)} notifications for student '{student_id}'.")
+#         return notification_list
+
+#     except Exception as e:
+#         # Rollback the transaction
+#         print(f"Error retrieving notifications for student '{student_id}': {e}")
+#         return []

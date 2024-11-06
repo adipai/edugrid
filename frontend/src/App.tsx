@@ -77,6 +77,7 @@ import QueryAct0Q2IncorrectAnswers from "./pages/AdditionalQueries/QueryAct0Q2In
 import QueryChap2Contents from "./pages/AdditionalQueries/QueryChap2Contents";
 import QueryBookStatus from "./pages/AdditionalQueries/QueryBookStatus";
 import SaveCancelPage from "./pages/SaveCancelPage";
+import StudentViewNotification from "./pages/Student/StudentViewNotifications";
 
 function App() {
   return (
@@ -160,6 +161,7 @@ function App() {
         <Route path="/student/participation" element={<StudentParticipationMarks />} />
         <Route path="/student/view-section" element={<StudentViewSection />} />
         <Route path="/student/view-block" element={<StudentViewBlock />} />
+        <Route path="/student/view-notifications" element={<StudentViewNotification />} />
 
         {/* Additional Queries */}
         <Route path="/queires" element={<QueryLanding />} />
