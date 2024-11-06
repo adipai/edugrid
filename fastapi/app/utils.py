@@ -2077,24 +2077,3 @@ async def fetch_user_notifications(user_id: str):
 
     # Format the result as a list of dictionaries
     return [{"notification_message": notification["notification_message"], "timestamp": notification["timestamp"]} for notification in notifications]
-# async def get_notifications(student_id):
-#     query = """
-#         SELECT * 
-#         FROM notification
-#         WHERE user_id = :student_id
-#     """
-#     values = {"student_id": student_id}
-#     try:
-#         notifs = await database.fetch_all(query=query, values=values)
-#         if not notifs:
-#             print("no_notifications_found")
-#             return []
-            
-#         notification_list = [dict(notification) for notification in notifs]
-#         print(f"Retrieved {len(notification_list)} notifications for student '{student_id}'.")
-#         return notification_list
-
-#     except Exception as e:
-#         # Rollback the transaction
-#         print(f"Error retrieving notifications for student '{student_id}': {e}")
-#         return []
