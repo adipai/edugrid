@@ -22,6 +22,7 @@ DELETE FROM user;
 
 -- Insert users (includes all types of users)
 INSERT INTO user (user_id, first_name, last_name, email, password, role) VALUES
+('admin000', 'Admin', 'Boss', 'bossman@gmail.com', 'test', 'admin'),
 ('ErPe1024', 'Eric', 'Perrig', 'ez356@example.mail', 'qwdmq', 'student'),
 ('AlAr1024', 'Alice', 'Artho', 'aa23@edu.mail', 'omdsws', 'student'),
 ('BoTe1024', 'Bob', 'Temple', 'bt163@template.mail', 'sak+=', 'student'),
@@ -74,9 +75,9 @@ INSERT INTO teaching_assistant (ta_id, first_name, last_name, email, password, c
 
 -- Insert textbooks
 INSERT INTO textbook (textbook_id, title, created_by) VALUES
-(101, 'Database Management Systems', 'KeOg1024'),
-(102, 'Fundamentals of Software Engineering', 'SaMi1024'),
-(103, 'Fundamentals of Machine Learning', 'JoDo1024');
+(101, 'Database Management Systems', 'admin000'),
+(102, 'Fundamentals of Software Engineering', 'admin000'),
+(103, 'Fundamentals of Machine Learning', 'admin000');
 
 -- Insert courses
 INSERT INTO course (course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity) VALUES
@@ -88,43 +89,43 @@ INSERT INTO course (course_id, course_name, textbook_id, course_type, faculty_id
 
 -- Insert chapters
 INSERT INTO chapter (textbook_id, chapter_id, title, hidden_status, created_by) VALUES
-(101, 'chap01', 'introduction to Database', 'no', 'KeOg1024'),
-(101, 'chap02', 'The Relational Model', 'no', 'KeOg1024'),
-(102, 'chap01', 'introduction to Software Engineering', 'no', 'SaMi1024'),
-(102, 'chap02', 'introduction to Software Development Life Cycle (SDLC)', 'no', 'SaMi1024'),
-(103, 'chap01', 'Introduction to Machine Learning', 'no', 'JoDo1024');
+(101, 'chap01', 'introduction to Database', 'no', 'admin000'),
+(101, 'chap02', 'The Relational Model', 'no', 'admin000'),
+(102, 'chap01', 'introduction to Software Engineering', 'no', 'admin000'),
+(102, 'chap02', 'introduction to Software Development Life Cycle (SDLC)', 'no', 'admin000'),
+(103, 'chap01', 'Introduction to Machine Learning', 'no', 'admin000');
 
 -- Insert sections
 INSERT INTO section (textbook_id, chapter_id, section_id, title, hidden_status, created_by) VALUES
-(101, 'chap01', 'Sec01', 'Database Management Systems (DBMS) Overview', 'no', 'KeOg1024'),
-(101, 'chap01', 'Sec02', 'Data Models and Schemas', 'no', 'KeOg1024'),
-(101, 'chap02', 'Sec01', 'Entities, Attributes, and Relationships', 'no', 'KeOg1024'),
-(101, 'chap02', 'Sec02', 'Normalization and Integrity Constraints', 'no', 'KeOg1024'),
-(102, 'chap01', 'Sec01', 'History and Evolution of Software Engineering', 'no', 'SaMi1024'),
-(102, 'chap01', 'Sec02', 'Key Principles of Software Engineering', 'no', 'SaMi1024'),
-(102, 'chap02', 'Sec01', 'Phases of the SDLC', 'yes', 'SaMi1024'),
-(102, 'chap02', 'Sec02', 'Agile vs. Waterfall Models', 'no', 'SaMi1024'),
-(103, 'chap01', 'Sec01', 'Overview of Machine Learning', 'yes', 'JoDo1024'),
-(103, 'chap01', 'Sec02', 'Supervised vs Unsupervised Learning', 'no', 'JoDo1024');
+(101, 'chap01', 'Sec01', 'Database Management Systems (DBMS) Overview', 'no', 'admin000'),
+(101, 'chap01', 'Sec02', 'Data Models and Schemas', 'no', 'admin000'),
+(101, 'chap02', 'Sec01', 'Entities, Attributes, and Relationships', 'no', 'admin000'),
+(101, 'chap02', 'Sec02', 'Normalization and Integrity Constraints', 'no', 'admin000'),
+(102, 'chap01', 'Sec01', 'History and Evolution of Software Engineering', 'no', 'admin000'),
+(102, 'chap01', 'Sec02', 'Key Principles of Software Engineering', 'no', 'admin000'),
+(102, 'chap02', 'Sec01', 'Phases of the SDLC', 'yes', 'admin000'),
+(102, 'chap02', 'Sec02', 'Agile vs. Waterfall Models', 'no', 'admin000'),
+(103, 'chap01', 'Sec01', 'Overview of Machine Learning', 'yes', 'admin000'),
+(103, 'chap01', 'Sec02', 'Supervised vs Unsupervised Learning', 'no', 'admin000');
 
 -- Insert blocks
 INSERT INTO block (textbook_id, chapter_id, section_id, block_id, block_type, content, hidden_status, created_by) VALUES
-(101, 'chap01', 'Sec01', 'Block01', 'text', 'A Database Management System (DBMS) is software that enables users to efficiently create, manage, and manipulate databases. It serves as an interface between the database and end users, ensuring data is stored securely, retrieved accurately, and maintained consistently. Key features of a DBMS include data organization, transaction management, and support for multiple users accessing data concurrently.', 'no', 'KeOg1024'),
-(101, 'chap01', 'Sec02', 'Block01', 'activity', 'ACT0', 'no', 'KeOg1024'),
-(101, 'chap02', 'Sec01', 'Block01', 'text', 'DBMS systems provide structured storage and ensure that data is accessible through queries using languages like SQL. They handle critical tasks such as maintaining data integrity, enforcing security protocols, and optimizing data retrieval, making them essential for both small-scale and enterprise-level applications. Examples of popular DBMS include MySQL, Oracle, and PostgreSQL.', 'no', 'KeOg1024'),
-(101, 'chap02', 'Sec02', 'Block01', 'picture', 'sample.png', 'no', 'KeOg1024'),
-(102, 'chap01', 'Sec01', 'Block01', 'text', 'The history of software engineering dates back to the 1960s, when the "software crisis" highlighted the need for structured approaches to software development due to rising complexity and project failures. Over time, methodologies such as Waterfall, Agile, and DevOps evolved, transforming software engineering into a disciplined, iterative process that emphasizes efficiency, collaboration, and adaptability.', 'no', 'SaMi1024'),
-(102, 'chap01', 'Sec02', 'Block01', 'activity', 'ACT0', 'no', 'SaMi1024'),
-(102, 'chap02', 'Sec01', 'Block01', 'text', 'The Software Development Life Cycle (SDLC) consists of key phases including requirements gathering, design, development, testing, deployment, and maintenance. Each phase plays a crucial role in ensuring that software is built systematically, with feedback and revisions incorporated at each step to deliver a high-quality product.', 'no', 'SaMi1024'),
-(102, 'chap02', 'Sec02', 'Block01', 'picture', 'sample2.png', 'no', 'SaMi1024'),
-(103, 'chap01', 'Sec01', 'Block01', 'text', 'Machine learning is a subset of artificial intelligence that enables systems to learn from data, identify patterns, and make decisions with minimal human intervention. By training algorithms on vast datasets, machine learning models can improve their accuracy over time, driving advancements in fields like healthcare, finance, and autonomous systems.', 'no', 'JoDo1024'),
-(103, 'chap01', 'Sec02', 'Block01', 'activity', 'ACT0', 'no', 'JoDo1024');
+(101, 'chap01', 'Sec01', 'Block01', 'text', 'A Database Management System (DBMS) is software that enables users to efficiently create, manage, and manipulate databases. It serves as an interface between the database and end users, ensuring data is stored securely, retrieved accurately, and maintained consistently. Key features of a DBMS include data organization, transaction management, and support for multiple users accessing data concurrently.', 'no', 'admin000'),
+(101, 'chap01', 'Sec02', 'Block01', 'activity', 'ACT0', 'no', 'admin000'),
+(101, 'chap02', 'Sec01', 'Block01', 'text', 'DBMS systems provide structured storage and ensure that data is accessible through queries using languages like SQL. They handle critical tasks such as maintaining data integrity, enforcing security protocols, and optimizing data retrieval, making them essential for both small-scale and enterprise-level applications. Examples of popular DBMS include MySQL, Oracle, and PostgreSQL.', 'no', 'admin000'),
+(101, 'chap02', 'Sec02', 'Block01', 'picture', 'sample.png', 'no', 'admin000'),
+(102, 'chap01', 'Sec01', 'Block01', 'text', 'The history of software engineering dates back to the 1960s, when the "software crisis" highlighted the need for structured approaches to software development due to rising complexity and project failures. Over time, methodologies such as Waterfall, Agile, and DevOps evolved, transforming software engineering into a disciplined, iterative process that emphasizes efficiency, collaboration, and adaptability.', 'no', 'admin000'),
+(102, 'chap01', 'Sec02', 'Block01', 'activity', 'ACT0', 'no', 'admin000'),
+(102, 'chap02', 'Sec01', 'Block01', 'text', 'The Software Development Life Cycle (SDLC) consists of key phases including requirements gathering, design, development, testing, deployment, and maintenance. Each phase plays a crucial role in ensuring that software is built systematically, with feedback and revisions incorporated at each step to deliver a high-quality product.', 'no', 'admin000'),
+(102, 'chap02', 'Sec02', 'Block01', 'picture', 'sample2.png', 'no', 'admin000'),
+(103, 'chap01', 'Sec01', 'Block01', 'text', 'Machine learning is a subset of artificial intelligence that enables systems to learn from data, identify patterns, and make decisions with minimal human intervention. By training algorithms on vast datasets, machine learning models can improve their accuracy over time, driving advancements in fields like healthcare, finance, and autonomous systems.', 'no', 'admin000'),
+(103, 'chap01', 'Sec02', 'Block01', 'activity', 'ACT0', 'no', 'admin000');
 
 -- Insert activities
 INSERT INTO activity (textbook_id, chapter_id, section_id, block_id, unique_activity_id, hidden_status, created_by) VALUES
-(101, 'chap01', 'Sec02', 'Block01', 'ACT0', 'no', 'KeOg1024'),
-(102, 'chap01', 'Sec02', 'Block01', 'ACT0', 'no', 'SaMi1024'),
-(103, 'chap01', 'Sec02', 'Block01', 'ACT0', 'no', 'JoDo1024');
+(101, 'chap01', 'Sec02', 'Block01', 'ACT0', 'no', 'admin000'),
+(102, 'chap01', 'Sec02', 'Block01', 'ACT0', 'no', 'admin000'),
+(103, 'chap01', 'Sec02', 'Block01', 'ACT0', 'no', 'admin000');
 
 -- Notifications
 INSERT INTO notification (user_id, notification_message) VALUES

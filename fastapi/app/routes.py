@@ -194,11 +194,11 @@ async def create_course_request(create_course_request: CreateCourseRequest):
     result = await create_course(course_id, course_name, textbook_id, course_type, faculty_id, start_date, end_date, unique_token, capacity)
     
     if result == 'course_exists':
-        return {'error': 'Course already exists'}, 400
+        raise HTTPException(status_code=400, detail="Course already exists")
     elif result == 'faculty_not_found':
-        return {'error': 'Facult not found'}, 400
+        raise HTTPException(status_code=400, detail="Faculty not found")
     elif result == 'error':
-        return {'error': 'Error creating course'}, 500
+        raise HTTPException(status_code=500, detail="Error creating course")
     return {'message': 'Course created successfully'}
 
 class ViewCoursesRequest(BaseModel):
@@ -285,7 +285,7 @@ async def _get_active_course(course_id: str):
     return {'course': result}
 
 @router.get('/api/v1/evaluation-course')
-async def _get_eval_course(course_id: int):
+async def _get_eval_course(course_id: str):
     
     result = await get_eval_course_details(course_id)
     
@@ -797,9 +797,10 @@ async def check_course_details_request(request: CourseDetailsRequest):
         request.current_date,
         request.user_modifying
     )
-
     if result == "You are not associated with this course":
         raise HTTPException(status_code=403, detail="You are not associated with this course")
+    elif result == "Course not found":
+        raise HTTPException(status_code=500, detail="Course not found")
     elif result == "Beyond the end date - can't change the course!":
         raise HTTPException(status_code=403, detail="Beyond the end date - can't change the course!")
     elif result == "Error":
@@ -1053,6 +1054,22 @@ async def delete_notifications_request(delete_notifications_request: ViewNotific
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete notifications: {e}")
 
+class UserNotificationRequest(BaseModel):
+    user_id: str
+
+class NotificationResponse(BaseModel):
+    notification_message: str
+
+@router.post("/get_notifications", response_model=List[NotificationResponse], status_code=200)
+async def get_notifications(user_request: UserNotificationRequest):
+    notifications = await fetch_user_notifications(user_request.user_id)
+    
+    if notifications:
+        return notifications
+    else:
+        raise HTTPException(status_code=404, detail="No notifications found for the user")
+
+
 
 """
 Endpoint for additional adhoc queries begin here
@@ -1216,14 +1233,3 @@ async def display_textbook_endpoint(tb_id: int):
     if (hierarchy == "Error retrieving textbook hierarchy."):
         raise HTTPException(status_code=500, detail = "Error retrieving textbook hierarchy")
     return hierarchy
-
-# class NotificationRequest(BaseModel):
-#     student_id: str
-
-# @router.post('/view_notifications')
-# async def _view_notifications(view_notification_request: NotificationRequest):
-#     student_id = view_notification_request.student_id
-#     result = await get_notifications(student_id)
-#     if not result:
-#         raise HTTPException(status_code=404, detail="No unread notifications")
-#     return {'notifications': result}

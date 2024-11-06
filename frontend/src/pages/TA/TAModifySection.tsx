@@ -119,14 +119,14 @@ const TAModifySection: React.FC = () => {
         <>
         <div>
         <Link
-              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=hide_section`}
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&endpoint=hide_section`}
             >
               1. Hide Section
             </Link>
         </div>
         <div>
         <Link
-              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=delete_section`}
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&endpoint=delete_section`}
             >
               2. Delete Section
             </Link>

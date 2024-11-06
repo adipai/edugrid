@@ -26,7 +26,8 @@ const FacultyApproveEnrollmentPage: React.FC = () => {
         navigate(`/faculty/active-courses?course_id=${courseId}`);
       } catch (error: any) {
         if (error.response) {
-          console.error('Error enrolling student:', error.response.data.message);
+          console.error('Error enrolling student:', error.response.data.detail);
+          window.alert(error.response.data.detail);
         } else {
           console.error('An error occurred:', error.message);
         }

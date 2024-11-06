@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -112,13 +113,45 @@ const TAModifyContentBlock = () => {
       });
   }, [tb_id, chap_id, sec_id, block_id]);
 
-  const handleAddContent = (type: string) => {
-    if (type === 'text') {
-      navigate(`/ta/content-add-text?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
-    }else if (type === 'picture') {
-      navigate(`/ta/content-add-pic?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
-    } else if (type === 'activity') {
-      navigate(`/ta/modify-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`)
+  const handleAddContent = async (type: string) => {
+    try {
+      const body = {
+        tb_id,
+        chap_id,
+        sec_id,
+        block_id,
+        user_modifying: localStorage.getItem("user_id"),
+      };
+      const response = await axios.post("http://localhost:8000/modify_block", body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: false,
+      });
+      // Handle success
+      if (type === "text") {
+        navigate(
+          `/ta/content-add-text?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`
+        );
+      } else if (type === "picture") {
+        navigate(
+          `/ta/content-add-pic?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`
+        );
+      } else if (type === "activity") {
+        navigate(
+          `/ta/modify-activity?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}`
+        );
+      }
+    } catch (error: any) {
+      if (error.response.status === 403) {
+        window.alert(
+          `You do not have permission to modify this course: ${error.response.data.detail}`
+        );
+      } else if (error.response.status === 500) {
+        console.error(JSON.stringify(error.response));
+        window.alert(error.response.data.detail);
+      }
+      console.error("Error fetching course data:", error);
     }
   };
 
@@ -155,14 +188,14 @@ const TAModifyContentBlock = () => {
         <>
         <div>
         <Link
-              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=hide_block`}
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&endpoint=hide_block`}
             >
               1. Hide Content Block
             </Link>
         </div>
         <div>
         <Link
-              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&endpoint=delete_block`}
+              to={`/save-cancel?tb_id=${tb_id}&chap_id=${chap_id}&sec_id=${sec_id}&block_id=${block_id}&endpoint=delete_block`}
             >
               2. Delete Content Block
             </Link>
