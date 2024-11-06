@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 
 type QueryResult = {
   textbook_id: string;
-  active_faculty: string;
-  evaluation_faculty: string;
+  textbook_title: string;
+  active_instructor: string;
+  evaluation_instructor: string;
 };
 
 const QueryBookStatus: React.FC = () => {
@@ -13,7 +14,7 @@ const QueryBookStatus: React.FC = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/books_with_different_status_instructors`
+        `http://localhost:8000/book_different_status_instructors`
       );
       setQueryResult(response.data.books_with_different_status_instructors);
     } catch (error) {
@@ -31,6 +32,7 @@ const QueryBookStatus: React.FC = () => {
         <thead>
             <tr>
                 <th style={{ border: "1px solid black", padding: "8px" }}>Textbook ID</th>
+                <th style={{ border: "1px solid black", padding: "8px" }}>Textbook Title</th>
                 <th style={{ border: "1px solid black", padding: "8px" }}>Active Faculty</th>
                 <th style={{ border: "1px solid black", padding: "8px" }}>Evaluation Faculty</th>
             </tr>
@@ -39,8 +41,9 @@ const QueryBookStatus: React.FC = () => {
             {queryResult.map((result, index) => (
                 <tr key={index}>
                     <td style={{ border: "1px solid black", padding: "8px" }}>{result.textbook_id}</td>
-                    <td style={{ border: "1px solid black", padding: "8px" }}>{result.active_faculty}</td>
-                    <td style={{ border: "1px solid black", padding: "8px" }}>{result.evaluation_faculty}</td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>{result.textbook_title}</td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>{result.active_instructor}</td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>{result.evaluation_instructor}</td>
                 </tr>
             ))}
         </tbody>

@@ -1084,7 +1084,7 @@ async def sections_in_first_chapter(request: TextbookSectionCountRequest):
     query = """
         SELECT COUNT(*) AS number_of_sections
         FROM section
-        WHERE chapter_id = '1' AND textbook_id = :textbook_id
+        WHERE chapter_id = 'chap01' AND textbook_id = :textbook_id
     """
     values = {"textbook_id": request.textbook_id}
     result = await database.fetch_one(query=query, values=values)
@@ -1121,7 +1121,7 @@ async def active_courses_with_students():
         FROM course c
         JOIN user u ON c.faculty_id = u.user_id
         JOIN enrollment e ON c.course_id = e.unique_course_id
-        WHERE c.course_type = 'Active'
+        WHERE c.course_type = 'Active' AND e.status = 'Enrolled'
         GROUP BY c.course_id, faculty_name
     """
     result = await database.fetch_all(query=query)
@@ -1171,35 +1171,64 @@ async def chapter_contents(request: ChapterContentRequest):
 
 
 # 6. Incorrect answers for question 2 of Activity0 and their explanations
-class IncorrectAnswersRequest(BaseModel):
-    textbook_id: int
-    chapter_id: str
-    section_id: str
-    block_id: str
-    correct_answer: str
+# class IncorrectAnswersRequest(BaseModel):
 
 @router.post("/incorrect_answers")
-async def incorrect_answers(request: IncorrectAnswersRequest):
+async def incorrect_answers():
     query = """
-        SELECT q.option_1, q.opt_1_explanation, q.option_2, q.opt_2_explanation, 
-               q.option_3, q.opt_3_explanation, q.option_4, q.opt_4_explanation
-        FROM question q
-        WHERE q.textbook_id = :textbook_id 
-            AND q.chapter_id = :chapter_id
-            AND q.section_id = :section_id
-            AND q.block_id = :block_id
-            AND q.unique_activity_id = 'Activity0'
-            AND q.question_id = 'Q2'
-            AND answer <> :correct_answer
+        SELECT 
+            CASE WHEN answer <> 1 THEN option_1 END AS Incorrect_Answer,
+            CASE WHEN answer <> 1 THEN opt_1_explanation END AS Explanation
+        FROM 
+            question
+        WHERE 
+            textbook_id = 101
+            AND chapter_id = 'chap01'
+            AND section_id = 'Sec02'
+            AND unique_activity_id = 'ACT0'
+            AND question_id = 'Q2'
+            AND answer <> 1
+        UNION ALL
+        SELECT 
+            CASE WHEN answer <> 2 THEN option_2 END,
+            CASE WHEN answer <> 2 THEN opt_2_explanation END
+        FROM 
+            question
+        WHERE 
+            textbook_id = 101
+            AND chapter_id = 'chap01'
+            AND section_id = 'Sec02'
+            AND unique_activity_id = 'ACT0'
+            AND question_id = 'Q2'
+            AND answer <> 2
+        UNION ALL
+        SELECT 
+            CASE WHEN answer <> 3 THEN option_3 END,
+            CASE WHEN answer <> 3 THEN opt_3_explanation END
+        FROM 
+            question
+        WHERE 
+            textbook_id = 101
+            AND chapter_id = 'chap01'
+            AND section_id = 'Sec02'
+            AND unique_activity_id = 'ACT0'
+            AND question_id = 'Q2'
+            AND answer <> 3
+        UNION ALL
+        SELECT 
+            CASE WHEN answer <> 4 THEN option_4 END,
+            CASE WHEN answer <> 4 THEN opt_4_explanation END
+        FROM 
+            question
+        WHERE 
+            textbook_id = 101
+            AND chapter_id = 'chap01'
+            AND section_id = 'Sec02'
+            AND unique_activity_id = 'ACT0'
+            AND question_id = 'Q2'
+            AND answer <> 4;
     """
-    values = {
-        "textbook_id": request.textbook_id,
-        "chapter_id": request.chapter_id,
-        "section_id": request.section_id,
-        "block_id": request.block_id,
-        "correct_answer": request.correct_answer
-    }
-    result = await database.fetch_all(query=query, values=values)
+    result = await database.fetch_all(query=query)
     if result:
         return {"incorrect_answers": [dict(row) for row in result]}
     else:
@@ -1210,10 +1239,21 @@ async def incorrect_answers(request: IncorrectAnswersRequest):
 @router.get("/book_different_status_instructors")
 async def book_different_status_instructors():
     query = """
-        SELECT c1.textbook_id, c1.faculty_id AS active_faculty, c2.faculty_id AS evaluation_faculty
-        FROM course c1
-        JOIN course c2 ON c1.textbook_id = c2.textbook_id AND c1.faculty_id <> c2.faculty_id
-        WHERE c1.course_type = 'Active' AND c2.course_type = 'Evaluation'
+        SELECT DISTINCT
+            c1.textbook_id,
+            t.title AS textbook_title,
+            c1.faculty_id AS active_instructor,
+            c2.faculty_id AS evaluation_instructor
+        FROM 
+            course c1
+        JOIN 
+            course c2 ON c1.textbook_id = c2.textbook_id
+        JOIN 
+            textbook t ON c1.textbook_id = t.textbook_id
+        WHERE 
+            c1.course_type = 'Active'
+            AND c2.course_type = 'Evaluation'
+            AND c1.faculty_id <> c2.faculty_id;
     """
     result = await database.fetch_all(query=query)
     if result:

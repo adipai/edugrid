@@ -22,19 +22,22 @@ const StudentParticipationMarks: React.FC = () => {
         `http://localhost:8000/api/v1/student-courses?student_id=${user_id}`
       );
       setCourseData(response.data.courses);
+      console.log("Course data:", response.data.courses);
+      const courseIds = response.data.courses.map((course: any) => course.course_id);
+      console.log("Course IDS:", courseIds);
+      fetchMarksDetails(response.data.courses.map((course: any) => course.course_id));
     } catch (error) {
       console.error("Error fetching course details:", error);
     }
   };
 
-  const fetchMarksDetails = async () => {
-    if (!courseData) return;
+  const fetchMarksDetails = async (courses: string[]) => {
     const user_id = localStorage.getItem("user_id");
     try {
       const response = await axios.post(
         `http://localhost:8000/student/activity_summary` , {
           student_id: user_id,
-          course_ids: courseData.map((course) => course.course_id),
+          course_ids: courses,
         }
       );
       setMarksData(response.data);
@@ -47,10 +50,6 @@ const StudentParticipationMarks: React.FC = () => {
     fetchCourcesDetails();
   }, []);
 
-  useEffect(() => {
-    if (!courseData) return;
-    fetchMarksDetails();
-  }, [courseData]);
 
   return (
     <div>
