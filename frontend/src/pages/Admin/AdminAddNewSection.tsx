@@ -63,6 +63,7 @@ const AdminAddNewSection: React.FC = () => {
       );
     } catch (error) {
       console.error("Error creating section:", error);
+      alert("Error creating section");
     }
   };
 

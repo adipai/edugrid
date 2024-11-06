@@ -48,6 +48,7 @@ const AdminAddNewChapter: React.FC = () => {
       navigate(`/admin/create-new-section?tb_id=${tb_id}&chap_id=${chapterId}`);
     } catch (error) {
       console.error("Error creating chapter:", error);
+      alert("Error creating chapter");
     }
   };
 

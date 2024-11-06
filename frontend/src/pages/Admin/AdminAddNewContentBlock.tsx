@@ -98,6 +98,7 @@ const AdminAddNewContentBlock: React.FC = () => {
       // navigate(`/admin/create-new-section?tb_id=${tb_id}&chap_id=${chapterId}`);
     } catch (error) {
       console.error("Error creating block:", error);
+      alert("Error creating block");
     }
   };
 

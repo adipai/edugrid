@@ -91,6 +91,7 @@ const AdminContentAddPic: React.FC = () => {
       navigate(-1);
     } catch (error) {
       console.error("Error creating block:", error);
+      alert("Error creating block");
     }
   };
 

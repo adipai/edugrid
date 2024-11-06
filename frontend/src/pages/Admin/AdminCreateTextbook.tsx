@@ -20,6 +20,7 @@ const AdminCreateTextbook: React.FC = () => {
             navigate('/admin/create-new-chapter?tb_id=' + textbookId);
         } catch (error) {
             console.error('Error creating textbook:', error);
+            alert('Error creating textbook');
         }
     };
 
