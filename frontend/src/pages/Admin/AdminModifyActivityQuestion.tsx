@@ -150,7 +150,7 @@ const AdminModifyActivityQuestion: React.FC = () => {
       </form>
       <div>
         <br />
-        <Link to="/admin">Cancel</Link>
+        <div onClick={() => navigate(-1)}>Cancel</div>
         <br />
         <Link to="/admin/landing">Landing Page</Link>
       </div>
