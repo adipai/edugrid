@@ -4,7 +4,7 @@ This is a comprehensive educational platform designed to enhance the management 
 
 ## Tech Stack
 - **Backend**: FastAPI (Python) for API management, MariaDB (MySQL) for the database.
-- **Frontend**: TypeScript and modern web technologies.
+- **Frontend**: React + TypeScript + Vite
 - **Database**: MySQL with comprehensive schema including courses, students, participation, notifications, and more.
 
 ## Architecture Overview
