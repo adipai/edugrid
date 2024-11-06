@@ -800,7 +800,7 @@ async def check_course_details_request(request: CourseDetailsRequest):
 
     if result == "You are not associated with this course":
         raise HTTPException(status_code=403, detail="You are not associated with this course")
-    elif results == "Course not found":
+    elif result == "Course not found":
         raise HTTPException(status_code=403, detail="Course not found")
     elif result == "Beyond the end date - can't change the course!":
         raise HTTPException(status_code=403, detail="Beyond the end date - can't change the course!")
