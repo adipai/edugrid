@@ -15,7 +15,7 @@ This is a comprehensive educational platform designed to enhance the management 
 
 ## Key Features
 
-For problem statement definition description of application functionality, see ![description.md](https://github.com/adipai/edugrid/blob/main/description.md)
+For problem statement definition description of application functionality, see [description.md](https://github.com/adipai/edugrid/blob/main/description.md)
 
 ### Admin
 - **User Management**: Create, update, and manage users across the platform.
