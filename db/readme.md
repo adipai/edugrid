@@ -1,14 +1,10 @@
-# Database setup
-* To create tables, run the ddl.sql script
-* Next, to insert sample data into the tables, run sample_data.sql
-* versions/ contains incremental scripts that were used to build the DB from initial tate to final state
+# Database description
 
-## Steps to access the DB on NCSU VCL server
+## Database design 
+![ER diagram](https://github.com/adipai/edugrid/blob/main/db/ER_diagram.png)
 
-1. ssh unityid@remote.eos.ncsu.edu (put password as unity-id password)
-2. /mnt/apps/public/CSC/Mysql-Shell/bin/mysql -u your_mysql_acct -p -h classdb2.csc.ncsu.edu (replace your_mysql_acct with your assigned mysql acct which would match your unity ID)
-3. Put Student-ID as password here
-4. Shift to sql mode by typing '\sql'
-5. List available databases using SHOW DATABASES;
-6. USE unityid; database
-7. run SQL script using command - SOURCE edugrid/db/<script_name>.sql
+## Setup 
+* Spin up a MySQL database server - we used [MariaDB](https://mariadb.org/)
+* Connect to the database server using {hostname, username, password} OR {connection string} through an SQL client/ VS code extension of your choice
+* Create the tables and triggers by executing [ddl.sql](https://github.com/adipai/edugrid/blob/main/db/ddl.sql)
+* Insert sample data into the tables by executing [sample_data.sql](https://github.com/adipai/edugrid/blob/main/db/sample_data.sql)
