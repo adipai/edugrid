@@ -1,6 +1,6 @@
 # Edugrid
 
-This is a comprehensive educational platform designed to enhance the management and participation in academic courses at an institution. It supports various roles, including Admin, Faculty, Student, and Teaching Assistant, each with tailored functionalities (built from scratch and maintained as a part of the CSC 540 - DBMS course at NC State University). 
+This is a comprehensive educational platform designed to enhance the management and participation in academic courses at an institution. It supports various roles, including admin, faculty, student and teaching assistant, each with tailored functionalities (built from scratch and maintained as a part of the CSC 540 - DBMS course at NC State University). 
 
 ## Tech Stack
 - **Backend**: FastAPI (Python) for API management, MariaDB (MySQL) for the database.
